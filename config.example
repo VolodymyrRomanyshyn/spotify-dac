@@ -3,11 +3,12 @@
 
 DEVICE_NAME="Living Room"
 
-# Sound card: usb = USB DAC (Topping E30 ...), hat = I2S HAT (set the overlay)
+# Sound card: usb = USB DAC (Topping E30 ...), hat = I2S/S-PDIF HAT (set the overlay)
 AUDIO_OUTPUT="usb"
-AUDIO_HAT_OVERLAY=""                # iqaudio-dacplus | hifiberry-dacplus | hifiberry-dac
+AUDIO_HAT_OVERLAY=""                # iqaudio-dacplus | hifiberry-dacplus (also PiFi DAC+) | hifiberry-dac | hifiberry-digi (PiFi Digi+)
 
-# Case: nespi = RetroFlag NESPi Case+ (not possible together with a HAT), none
+# Case: nespi = RetroFlag NESPi Case+, none. Only with a USB card - a HAT takes
+# the GPIO pins, so CASE and FAN_ENABLED are forced off for any HAT.
 CASE="nespi"
 FAN_ENABLED="yes"
 POWEROFF_MODE="hardcut"             # hardcut (proven) | graceful (experimental)

@@ -89,15 +89,19 @@ ask_questions() {
   [ "$AUDIO_OUTPUT" = hat ] && cur="$AUDIO_HAT_OVERLAY"
   hw="$(ask_menu "Sound card. Onboard jack and HDMI audio will be disabled." "$cur" \
         usb                "USB DAC (Topping E30 etc.)${usb:+ - detected: $usb}" \
-        iqaudio-dacplus    "IQaudIO DAC+ / Raspberry Pi DAC+ (HAT)" \
-        hifiberry-dacplus  "HiFiBerry DAC+ / DAC2 Pro (HAT)" \
-        hifiberry-dac      "HiFiBerry DAC / MiniAmp (HAT)")"
+        iqaudio-dacplus    "IQaudIO DAC+ / Raspberry Pi DAC+ (I2S HAT)" \
+        hifiberry-dacplus  "HiFiBerry DAC+ / DAC2 Pro, PiFi DAC+ (I2S HAT)" \
+        hifiberry-dac      "HiFiBerry DAC / MiniAmp (I2S HAT)" \
+        hifiberry-digi     "HiFiBerry Digi+ / PiFi Digi+ (S/PDIF HAT)")"
   if [ "$hw" = usb ]; then AUDIO_OUTPUT=usb; AUDIO_HAT_OVERLAY=""
   else AUDIO_OUTPUT=hat; AUDIO_HAT_OVERLAY="$hw"; fi
 
+  # GPIO control (case buttons, LED, fan) is only possible with a USB card:
+  # a HAT occupies the I2C/I2S pins the NESPi Case+ wiring uses.
   if [ "$AUDIO_OUTPUT" = hat ]; then
-    msg "A DAC HAT uses I2C/I2S on GPIO 2, 3 and 18-21.\n\nThese are the same pins as the NESPi Case+ power button, reset button and fan, so case control is disabled on this box."
+    msg "A HAT uses I2C/I2S on GPIO 2, 3 and 18-21.\n\nThese are the same pins as the NESPi Case+ power button, reset button and fan, so case and fan control are disabled on this box."
     CASE=none
+    FAN_ENABLED=no
   else
     CASE="$(ask_menu "Case / GPIO control:" "$CASE" \
           nespi "RetroFlag NESPi Case+ (power/reset buttons, LED, GPIO fan)" \
@@ -146,7 +150,10 @@ validate() {
   [ -n "$DEVICE_NAME" ] || die "Device name is empty"
   case "$AUDIO_OUTPUT" in usb|hat) ;; *) die "AUDIO_OUTPUT must be usb or hat" ;; esac
   [ "$AUDIO_OUTPUT" = hat ] && [ -z "$AUDIO_HAT_OVERLAY" ] && die "AUDIO_HAT_OVERLAY is required for a HAT"
-  [ "$AUDIO_OUTPUT" = hat ] && [ "$CASE" = nespi ] && die "CASE=nespi conflicts with a DAC HAT (shared GPIO pins)"
+  if [ "$AUDIO_OUTPUT" = hat ] && { [ "$CASE" = nespi ] || [ "$FAN_ENABLED" = yes ]; }; then
+    warn "A HAT occupies the GPIO pins used by the NESPi Case+ and fan; disabling case and fan control"
+    CASE=none; FAN_ENABLED=no
+  fi
   case "$CASE" in nespi|none) ;; *) die "CASE must be nespi or none" ;; esac
   case "$POWEROFF_MODE" in hardcut|graceful) ;; *) die "POWEROFF_MODE must be hardcut or graceful" ;; esac
   [ -n "$UPDATE_TRIGGER" ] || { [ "$CASE" = nespi ] && UPDATE_TRIGGER=poweroff || UPDATE_TRIGGER=boot; }

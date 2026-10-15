@@ -3,8 +3,8 @@
 Turns a Raspberry Pi into a zero-maintenance Spotify Connect streamer using
 Spotify's official headless client, [Spotify Soloist](https://developer.spotify.com/documentation/soloist).
 
-- USB DAC (Topping E30, ...) or an I2S HAT (IQaudIO DAC+, HiFiBerry)
-- Optional RetroFlag NESPi Case+ support: power switch, reset button, LED, GPIO fan
+- USB DAC (Topping E30, ...) or a HAT: IQaudIO DAC+, HiFiBerry DAC/DAC+/Digi+, PiFi DAC+/Digi+
+- Optional RetroFlag NESPi Case+ support (USB DAC only): power switch, reset button, LED, GPIO fan
 - Self-updating: Soloist builds expire after 90 days, so updates run when you
   switch the box off or on, once the build is old enough
 
@@ -79,8 +79,12 @@ Reset button: the LED blinks fast for 5 s, then the Pi reboots.
 | Power enable (case) | 4 |
 | Fan | 21 |
 
-DAC HATs use GPIO 2/3 (I2C) and 18-21 (I2S), so the installer disables case control
-when a HAT is selected.
+HATs use GPIO 2/3 (I2C) and 18-21 (I2S), so the installer only offers case and fan
+control with a USB card. Selecting any HAT, in the wizard or in an answers file,
+forces `CASE=none` and `FAN_ENABLED=no`.
+
+Supported HAT overlays: `iqaudio-dacplus`, `hifiberry-dacplus` (also PiFi DAC+),
+`hifiberry-dac`, `hifiberry-digi` (HiFiBerry Digi+ and PiFi Digi+, S/PDIF out).
 
 ## Everyday commands
 

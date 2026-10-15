@@ -1,0 +1,14 @@
+[Unit]
+Description=Spotify DAC: OS package upgrade at boot (in background, after Soloist is up)
+Wants=network-online.target
+After=network-online.target soloist.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/dac-update --trigger boot --only apt
+Nice=15
+IOSchedulingClass=idle
+TimeoutStartSec=60min
+
+[Install]
+WantedBy=multi-user.target

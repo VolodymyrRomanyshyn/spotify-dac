@@ -1,0 +1,13 @@
+[Unit]
+Description=NESPi Case+ GPIO fan controller
+After=local-fs.target
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/spotify-dac/config
+ExecStart=/usr/local/sbin/nespi-fan
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,13 @@
+[Unit]
+Description=Spotify DAC: update Soloist at boot when the build is old enough
+Wants=network-online.target
+After=network-online.target
+Before=soloist.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/dac-update --trigger boot --only soloist
+TimeoutStartSec=10min
+
+[Install]
+WantedBy=multi-user.target

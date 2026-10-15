@@ -1,0 +1,30 @@
+# Answers file for unattended installs:  sudo ./install.sh --config my.conf
+# Copy to my.conf (gitignored), fill in, keep it private - it holds your API key.
+
+DEVICE_NAME="Living Room"
+
+# Sound card: usb = USB DAC (Topping E30 ...), hat = I2S HAT (set the overlay)
+AUDIO_OUTPUT="usb"
+AUDIO_HAT_OVERLAY=""                # iqaudio-dacplus | hifiberry-dacplus | hifiberry-dac
+
+# Case: nespi = RetroFlag NESPi Case+ (not possible together with a HAT), none
+CASE="nespi"
+FAN_ENABLED="yes"
+POWEROFF_MODE="hardcut"             # hardcut (proven) | graceful (experimental)
+
+# Updates: poweroff (NESPi only) | boot | none (only when the build expired)
+UPDATE_TRIGGER="poweroff"
+SOLOIST_UPDATE_AFTER_DAYS="45"      # 1-89, builds expire after 90 days
+APT_UPGRADE="yes"
+APT_UPGRADE_AFTER_DAYS="0"          # 0 = every time the update runs
+
+# From https://developer.spotify.com (Soloist API key, needs Spotify Premium)
+SOLOIST_API_KEY=""
+
+# --- Example: second box with an IQaudIO DAC+ HAT ---
+# DEVICE_NAME="Kitchen"
+# AUDIO_OUTPUT="hat"
+# AUDIO_HAT_OVERLAY="iqaudio-dacplus"
+# CASE="none"
+# UPDATE_TRIGGER="boot"
+# APT_UPGRADE_AFTER_DAYS="7"

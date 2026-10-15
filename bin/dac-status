@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# dac-status - quick health check: services, Soloist build age, audio path.
+CONFIG=/etc/spotify-dac/config
+# shellcheck disable=SC1090
+[ -f "$CONFIG" ] && . "$CONFIG"
+
+section() { printf '\n\033[1m== %s ==\033[0m\n' "$1"; }
+
+section "Services"
+for u in soloist spotify-dac-boot-update spotify-dac-boot-apt nespi-power nespi-fan; do
+  systemctl list-unit-files "$u.service" >/dev/null 2>&1 || continue
+  printf '  %-26s %-10s %s\n' "$u" "$(systemctl is-enabled "$u" 2>/dev/null)" "$(systemctl is-active "$u" 2>/dev/null)"
+done
+
+section "Soloist"
+if [ -x /usr/local/bin/soloist ]; then
+  /usr/local/bin/soloist --version 2>&1 | sed 's/^/  /'
+  [ -f /var/lib/spotify-dac/soloist.installed ] && \
+    echo "  installed $(( ( $(date +%s) - $(cat /var/lib/spotify-dac/soloist.installed) ) / 86400 ))d ago, update after ${SOLOIST_UPDATE_AFTER_DAYS:-45}d (trigger: ${UPDATE_TRIGGER:-?})"
+  /usr/local/bin/soloist ctl -w "127.0.0.1:${SOLOIST_WS_PORT:-9090}" now 2>/dev/null | sed 's/^/  /'
+else
+  echo "  not installed"
+fi
+
+section "ALSA cards"
+aplay -l 2>/dev/null | grep '^card' | sed 's/^/  /'
+
+section "Hardware stream (while playing: rate/format sent to the DAC)"
+found=0
+for p in /proc/asound/card*/pcm*p/sub*/hw_params; do
+  if [ -r "$p" ] && ! grep -q closed "$p"; then echo "  $p"; sed 's/^/    /' "$p"; found=1; fi
+done
+[ "$found" -eq 1 ] || echo "  (no stream open)"
+
+section "CPU temperature"
+echo "  $(( $(cat /sys/class/thermal/thermal_zone0/temp) / 1000 ))C"

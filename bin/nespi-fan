@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+"""Temperature-based on/off fan controller (libgpiod v2 API).
+
+Spins the fan for FAN_STARTUP_SECONDS at boot as a visible "alive" check,
+then switches it with hysteresis between FAN_TEMP_ON and FAN_TEMP_OFF.
+"""
+import os
+import signal
+import sys
+import time
+
+import gpiod
+from gpiod.line import Direction, Value
+
+LOG_PREFIX = "[nespi-fan]"
+THERMAL_ZONE = "/sys/class/thermal/thermal_zone0/temp"
+
+
+def env_int(name: str, default: int) -> int:
+    try:
+        return int(os.environ.get(name, default))
+    except (TypeError, ValueError):
+        return default
+
+
+def log(message: str) -> None:
+    print(f"{LOG_PREFIX} {message}", flush=True)
+
+
+def read_temperature() -> int:
+    try:
+        with open(THERMAL_ZONE, "r", encoding="utf-8") as handle:
+            return int(handle.read().strip()) // 1000
+    except (OSError, ValueError) as exc:
+        log(f"Cannot read temperature ({exc}); assuming hot")
+        return 999
+
+
+def main() -> None:
+    chip = os.environ.get("GPIO_CHIP", "/dev/gpiochip0").strip('"')
+    fan_pin = env_int("FAN_PIN", 21)
+    temp_on = env_int("FAN_TEMP_ON", 75)
+    temp_off = env_int("FAN_TEMP_OFF", 55)
+    startup = env_int("FAN_STARTUP_SECONDS", 5)
+    poll = env_int("FAN_POLL_SECONDS", 5)
+
+    req = gpiod.request_lines(
+        chip,
+        consumer="nespi-fan",
+        config={fan_pin: gpiod.LineSettings(direction=Direction.OUTPUT, output_value=Value.ACTIVE)},
+    )
+
+    def stop(signum: int, _frame) -> None:  # noqa: ANN001
+        req.set_value(fan_pin, Value.INACTIVE)
+        req.release()
+        sys.exit(0)
+
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        signal.signal(sig, stop)
+
+    log(f"Startup spin {startup}s (pin={fan_pin}, on>={temp_on}C, off<={temp_off}C)")
+    time.sleep(startup)
+    running = False
+    req.set_value(fan_pin, Value.INACTIVE)
+
+    while True:
+        temp = read_temperature()
+        if not running and temp >= temp_on:
+            req.set_value(fan_pin, Value.ACTIVE)
+            running = True
+            log(f"{temp}C -> fan ON")
+        elif running and temp <= temp_off:
+            req.set_value(fan_pin, Value.INACTIVE)
+            running = False
+            log(f"{temp}C -> fan OFF")
+        time.sleep(poll)
+
+
+if __name__ == "__main__":
+    main()

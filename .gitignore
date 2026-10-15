@@ -1,0 +1,16 @@
+# old librespot solution (own git repo, kept as reference only)
+/rpi/
+
+# answers files / secrets
+*.conf
+!files/**/*.conf
+*.env
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+__pycache__/
+*.pyc
+*~

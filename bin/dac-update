@@ -1,0 +1,180 @@
+#!/usr/bin/env bash
+# dac-update - keep Spotify Soloist (and optionally the OS) up to date.
+#
+# Soloist builds expire 90 days after their build date, so the binary is
+# refreshed once it is SOLOIST_UPDATE_AFTER_DAYS old (default 45).
+#
+# Usage: dac-update [--trigger poweroff|boot|manual] [--only soloist|apt] [--force]
+#        dac-update --if-missing     (ExecStartPre: download only when no binary)
+#        dac-update --expired-hook   (ExecStopPost: react to exit code 10)
+set -uo pipefail
+
+CONFIG=/etc/spotify-dac/config
+STATE_DIR=/var/lib/spotify-dac
+BIN=/usr/local/bin/soloist
+LOG_FILE=/var/log/spotify-dac-update.log
+CDN="https://soloist-builds.spotifycdn.com"
+EXPIRY_DAYS=90
+
+TRIGGER=manual
+ONLY=all
+FORCE=0
+MODE=normal
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --trigger)      TRIGGER="$2"; shift ;;
+    --only)         ONLY="$2"; shift ;;
+    --force)        FORCE=1 ;;
+    --if-missing)   MODE=if-missing; ONLY=soloist ;;
+    --expired-hook) MODE=expired-hook; ONLY=soloist ;;
+    -h|--help)      sed -n '2,10p' "$0"; exit 0 ;;
+    *) echo "Unknown option: $1" >&2; exit 2 ;;
+  esac
+  shift
+done
+
+# shellcheck disable=SC1090
+[ -f "$CONFIG" ] && . "$CONFIG"
+SOLOIST_UPDATE_AFTER_DAYS="${SOLOIST_UPDATE_AFTER_DAYS:-45}"
+APT_UPGRADE="${APT_UPGRADE:-yes}"
+APT_UPGRADE_AFTER_DAYS="${APT_UPGRADE_AFTER_DAYS:-0}"
+
+mkdir -p "$STATE_DIR"
+log() { printf '%s [dac-update:%s] %s\n' "$(date -u +%FT%TZ)" "$TRIGGER" "$*" | tee -a "$LOG_FILE" >&2; }
+now() { date +%s; }
+
+# --- Soloist ------------------------------------------------------------------
+
+soloist_archive_url() {
+  case "$(uname -m)" in
+    aarch64) echo "$CDN/soloist_release_arm64.tar.gz" ;;
+    armv7l)  echo "$CDN/soloist_release_arm32.tar.gz" ;;
+    x86_64)  echo "$CDN/soloist_release_x86_64.tar.gz" ;;
+    *) return 1 ;;
+  esac
+}
+
+# Build date as epoch: parsed from `soloist --version`, else the time we installed it.
+build_epoch() {
+  local bin="$1" d
+  d="$("$bin" --version 2>&1 | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' | head -n1)"
+  if [ -n "$d" ] && date -ud "$d" +%s 2>/dev/null; then return 0; fi
+  if [ "$bin" = "$BIN" ] && [ -f "$STATE_DIR/soloist.installed" ]; then cat "$STATE_DIR/soloist.installed"; return 0; fi
+  now
+}
+
+age_days() { echo $(( ( $(now) - $(build_epoch "$1") ) / 86400 )); }
+
+restart_if_running() {
+  # boot: runs before soloist.service; poweroff: about to cut; expired-hook: systemd restarts it.
+  if [ "$TRIGGER" = manual ] && [ "$MODE" = normal ] && systemctl is-active --quiet soloist.service; then
+    log "Restarting soloist.service"
+    systemctl restart soloist.service
+  fi
+}
+
+update_soloist() {
+  local url tmp sha f age
+
+  case "$MODE" in
+    if-missing)
+      [ -x "$BIN" ] && return 0
+      log "Soloist binary missing -> downloading" ;;
+    expired-hook)
+      [ "${EXIT_STATUS:-}" = "10" ] || return 0
+      # rate-limit: Restart= would otherwise re-download every few seconds
+      if [ -f "$STATE_DIR/soloist.last-check" ] && [ $(( $(now) - $(cat "$STATE_DIR/soloist.last-check") )) -lt 3600 ]; then
+        log "Soloist build expired, but checked less than 1h ago; waiting"
+        return 0
+      fi
+      log "Soloist exited with code 10 (build expired) -> fetching a new build" ;;
+    *)
+      if [ -x "$BIN" ] && [ "$FORCE" -ne 1 ]; then
+        age="$(age_days "$BIN")"
+        if [ "$age" -lt "$SOLOIST_UPDATE_AFTER_DAYS" ]; then
+          log "Soloist build is ${age}d old (update after ${SOLOIST_UPDATE_AFTER_DAYS}d) -> skip"
+          return 0
+        fi
+        log "Soloist build is ${age}d old -> checking for a newer build"
+      fi ;;
+  esac
+
+  url="$(soloist_archive_url)" || { log "Unsupported architecture $(uname -m)"; return 1; }
+  now > "$STATE_DIR/soloist.last-check"
+  tmp="$(mktemp -d)"
+  # shellcheck disable=SC2064
+  trap "rm -rf '$tmp'" EXIT
+
+  if ! curl --fail --location --silent --show-error --connect-timeout 15 \
+        --retry 3 --retry-delay 5 -o "$tmp/soloist.tar.gz" "$url"; then
+    log "Download failed ($url); keeping current build"
+    return 1
+  fi
+
+  sha="$(sha256sum "$tmp/soloist.tar.gz" | cut -d' ' -f1)"
+  if [ -x "$BIN" ] && [ "$sha" = "$(cat "$STATE_DIR/soloist.sha256" 2>/dev/null)" ]; then
+    age="$(age_days "$BIN")"
+    log "No newer build published yet (installed build ${age}d old)"
+    [ "$age" -ge $(( EXPIRY_DAYS - 10 )) ] && log "WARNING: build expires in ~$(( EXPIRY_DAYS - age ))d"
+    return 0
+  fi
+
+  mkdir -p "$tmp/x"
+  tar -xzf "$tmp/soloist.tar.gz" -C "$tmp/x" || { log "Archive extract failed"; return 1; }
+  f="$(find "$tmp/x" -type f -name soloist | head -n1)"
+  [ -n "$f" ] || { log "No 'soloist' executable in archive"; return 1; }
+  chmod 755 "$f"
+  if ! "$f" --version >/dev/null 2>&1; then
+    log "New binary failed '--version' (missing libs? run: ldd $BIN); keeping current build"
+    return 1
+  fi
+
+  [ -x "$BIN" ] && cp -p "$BIN" "$BIN.prev"
+  install -m 755 "$f" "$BIN.new" && mv -f "$BIN.new" "$BIN"
+  echo "$sha" > "$STATE_DIR/soloist.sha256"
+  now > "$STATE_DIR/soloist.installed"
+  log "Installed: $("$BIN" --version 2>&1 | head -n1)"
+  restart_if_running
+}
+
+# --- OS packages --------------------------------------------------------------
+
+update_apt() {
+  local last days
+  [ "$APT_UPGRADE" = "yes" ] || { log "APT upgrade disabled"; return 0; }
+  last="$(cat "$STATE_DIR/apt.last" 2>/dev/null || echo 0)"
+  days=$(( ( $(now) - last ) / 86400 ))
+  if [ "$FORCE" -ne 1 ] && [ "$days" -lt "$APT_UPGRADE_AFTER_DAYS" ]; then
+    log "Last APT upgrade ${days}d ago (every ${APT_UPGRADE_AFTER_DAYS}d) -> skip"
+    return 0
+  fi
+  export DEBIAN_FRONTEND=noninteractive
+  log "APT upgrade starting"
+  dpkg --configure -a >/dev/null 2>&1 || true   # heal an upgrade interrupted earlier
+  if apt-get update -q && apt-get -y -q \
+       -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold full-upgrade; then
+    now > "$STATE_DIR/apt.last"
+    log "APT upgrade finished"
+  else
+    log "APT upgrade failed"
+    return 1
+  fi
+}
+
+# --- main ---------------------------------------------------------------------
+
+exec 9>/run/spotify-dac-update.lock
+flock -w 900 9 || { log "Another update is running; giving up"; exit 1; }
+
+rc=0
+case "$ONLY" in
+  soloist) update_soloist || rc=1 ;;
+  apt)     update_apt || rc=1 ;;
+  all)     update_soloist || rc=1; update_apt || rc=1 ;;
+  *) log "Unknown --only value: $ONLY"; exit 2 ;;
+esac
+
+# ExecStartPre/ExecStopPost must not fail the unit because of a network hiccup
+[ "$MODE" = normal ] || exit 0
+exit "$rc"

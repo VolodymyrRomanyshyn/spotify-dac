@@ -1,0 +1,2 @@
+# Scripts run on the Pi: always LF, even when committed from Windows
+* text=auto eol=lf

@@ -1,0 +1,204 @@
+#!/usr/bin/env python3
+"""RetroFlag NESPi Case+ power/reset/LED controller (libgpiod v2 API).
+
+Power switch OFF  -> LED blinks, run dac-update (when UPDATE_TRIGGER=poweroff), then:
+  POWEROFF_MODE=hardcut  (default, proven): stop soloist, sync, remount all
+                          filesystems read-only, then drive POWER_EN low -> case cuts power.
+  POWEROFF_MODE=graceful (experimental):    systemctl poweroff; the kernel gpio-poweroff
+                          overlay drives POWER_EN low at the very end of shutdown.
+Reset button      -> LED blinks fast for 5s, then reboot.
+"""
+import os
+import subprocess
+import sys
+import threading
+import time
+from datetime import timedelta
+
+import gpiod
+from gpiod.line import Bias, Direction, Edge, Value
+
+LOG_PREFIX = "[nespi-power]"
+UPDATER = "/usr/local/sbin/dac-update"
+
+
+def env_int(name: str, default: int) -> int:
+    try:
+        return int(os.environ.get(name, default))
+    except (TypeError, ValueError):
+        return default
+
+
+def env_str(name: str, default: str) -> str:
+    return os.environ.get(name, default).strip().strip('"')
+
+
+def log(message: str) -> None:
+    print(f"{LOG_PREFIX} {message}", flush=True)
+
+
+def run_cmd(cmd: list[str], timeout: int | None = None) -> None:
+    try:
+        subprocess.run(cmd, check=False, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        log(f"Command {' '.join(cmd)} timed out after {timeout}s")
+    except OSError as exc:
+        log(f"Command {' '.join(cmd)} failed: {exc}")
+
+
+def sysrq(key: str) -> None:
+    try:
+        with open("/proc/sysrq-trigger", "w", encoding="ascii") as handle:
+            handle.write(key)
+    except OSError as exc:
+        log(f"sysrq '{key}' failed: {exc}")
+
+
+class Led:
+    """LED driven from a background thread so long tasks can show progress."""
+
+    def __init__(self, request: gpiod.LineRequest, pin: int) -> None:
+        self._req = request
+        self._pin = pin
+        self._interval = 0.0  # 0 = steady
+        self._steady = Value.ACTIVE
+        self._wake = threading.Event()
+        threading.Thread(target=self._loop, daemon=True).start()
+
+    def on(self) -> None:
+        self._set(0.0, Value.ACTIVE)
+
+    def off(self) -> None:
+        self._set(0.0, Value.INACTIVE)
+
+    def blink(self, interval: float) -> None:
+        self._set(interval, Value.ACTIVE)
+
+    def _set(self, interval: float, steady: Value) -> None:
+        self._interval, self._steady = interval, steady
+        self._wake.set()
+
+    def _loop(self) -> None:
+        state = Value.ACTIVE
+        while True:
+            if self._interval <= 0:
+                self._req.set_value(self._pin, self._steady)
+                self._wake.wait()
+                self._wake.clear()
+                continue
+            state = Value.INACTIVE if state == Value.ACTIVE else Value.ACTIVE
+            self._req.set_value(self._pin, state)
+            if self._wake.wait(self._interval):
+                self._wake.clear()
+
+
+class Controller:
+    def __init__(self) -> None:
+        self.chip = env_str("GPIO_CHIP", "/dev/gpiochip0")
+        self.power_pin = env_int("POWER_PIN", 3)
+        self.reset_pin = env_int("RESET_PIN", 2)
+        self.led_pin = env_int("LED_PIN", 14)
+        self.enable_pin = env_int("POWER_EN_PIN", 4)
+        self.hold_seconds = env_int("HOLD_SECONDS", 1)
+        self.sync_seconds = env_int("SYNC_SECONDS", 3)
+        self.update_timeout = env_int("UPDATE_TIMEOUT_MINUTES", 30) * 60
+        self.enable_reset = env_str("ENABLE_RESET", "yes") == "yes"
+        self.update_on_poweroff = env_str("UPDATE_TRIGGER", "poweroff") == "poweroff"
+        self.mode = env_str("POWEROFF_MODE", "hardcut")
+
+        self.buttons = gpiod.request_lines(
+            self.chip,
+            consumer="nespi-buttons",
+            config={
+                (self.power_pin, self.reset_pin): gpiod.LineSettings(
+                    direction=Direction.INPUT,
+                    bias=Bias.PULL_UP,
+                    edge_detection=Edge.BOTH,
+                    debounce_period=timedelta(milliseconds=20),
+                )
+            },
+        )
+        outputs = {self.led_pin: gpiod.LineSettings(direction=Direction.OUTPUT, output_value=Value.ACTIVE)}
+        if self.mode == "hardcut":
+            # in graceful mode the gpio-poweroff overlay owns this pin
+            outputs[self.enable_pin] = gpiod.LineSettings(direction=Direction.OUTPUT, output_value=Value.ACTIVE)
+        self.outputs = gpiod.request_lines(self.chip, consumer="nespi-outputs", config=outputs)
+        self.led = Led(self.outputs, self.led_pin)
+        log(f"Ready (mode={self.mode}, update_on_poweroff={self.update_on_poweroff}, reset={self.enable_reset})")
+
+    def pressed(self, pin: int) -> bool:
+        return self.buttons.get_value(pin) == Value.INACTIVE  # active low
+
+    def power_off(self) -> None:
+        self.led.blink(0.5)
+        if self.update_on_poweroff:
+            log("Running updates before power off")
+            run_cmd([UPDATER, "--trigger", "poweroff"], timeout=self.update_timeout)
+        else:
+            log("Updates on power off disabled")
+
+        if self.mode == "graceful":
+            log("Graceful poweroff (gpio-poweroff overlay cuts power at the end)")
+            self.led.blink(0.15)
+            run_cmd(["systemctl", "poweroff"])
+            time.sleep(120)
+            return
+
+        log("Stopping soloist and syncing")
+        self.led.blink(0.15)
+        run_cmd(["systemctl", "stop", "soloist.service"], timeout=20)
+        run_cmd(["sync"], timeout=60)
+        log("Remounting filesystems read-only, then cutting power")
+        sysrq("s")
+        sysrq("u")
+        time.sleep(self.sync_seconds)
+        self.led.off()
+        self.outputs.set_value(self.enable_pin, Value.INACTIVE)
+        time.sleep(10)
+        # Still alive: case did not cut power (switch flipped back?). Filesystems are
+        # read-only now, so the only sane way forward is a reboot.
+        sysrq("b")
+
+    def reboot(self) -> None:
+        log("Reset pressed -> blinking 5s then rebooting")
+        self.led.blink(0.2)
+        time.sleep(5)
+        self.led.on()
+        run_cmd(["systemctl", "reboot"])
+        time.sleep(30)
+
+    def run(self) -> None:
+        power_since: float | None = None
+        while True:
+            # sleep until a button changes; poll faster only while the switch is held
+            timeout = 0.1 if power_since is not None else 2.0
+            if self.buttons.wait_edge_events(timedelta(seconds=timeout)):
+                self.buttons.read_edge_events()
+
+            if self.enable_reset and self.pressed(self.reset_pin):
+                self.reboot()
+                continue
+
+            if self.pressed(self.power_pin):
+                if power_since is None:
+                    power_since = time.monotonic()
+                    log("Power switch OFF detected")
+                    self.led.blink(0.2)
+                elif time.monotonic() - power_since >= self.hold_seconds:
+                    self.power_off()
+                    power_since = None
+            elif power_since is not None:
+                log("Power switch back ON before hold time; ignoring")
+                power_since = None
+                self.led.on()
+
+
+def main() -> None:
+    try:
+        Controller().run()
+    except KeyboardInterrupt:
+        sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()

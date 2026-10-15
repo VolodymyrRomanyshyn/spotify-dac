@@ -1,0 +1,29 @@
+[Unit]
+Description=Spotify Soloist (Spotify Connect receiver)
+Documentation=https://developer.spotify.com/documentation/soloist
+Wants=network-online.target
+Requires=user@@UID@.service
+After=network-online.target sound.target user@@UID@.service spotify-dac-boot-update.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=soloist
+Group=soloist
+SupplementaryGroups=audio
+EnvironmentFile=/etc/spotify-dac/config
+EnvironmentFile=/etc/spotify-dac/soloist.env
+# PipeWire runs in the soloist user's (lingering) session
+Environment=XDG_RUNTIME_DIR=/run/user/@UID@
+# sets $STATE_DIRECTORY / $CACHE_DIRECTORY, which soloist uses for session + cache
+StateDirectory=soloist
+CacheDirectory=soloist
+ExecStartPre=+/usr/local/sbin/dac-update --if-missing
+ExecStart=/usr/local/bin/soloist --device-name ${DEVICE_NAME} --api-key ${SOLOIST_API_KEY} --ws 127.0.0.1:${SOLOIST_WS_PORT}
+# exit code 10 = build expired -> fetch a new build, then Restart= brings it back
+ExecStopPost=+/usr/local/sbin/dac-update --expired-hook
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target

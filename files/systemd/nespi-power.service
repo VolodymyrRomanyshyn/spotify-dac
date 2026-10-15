@@ -1,0 +1,13 @@
+[Unit]
+Description=NESPi Case+ power/reset button controller
+After=local-fs.target
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/spotify-dac/config
+ExecStart=/usr/local/sbin/nespi-power
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

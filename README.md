@@ -41,6 +41,10 @@ current settings as defaults.
 | NESPi Case+ + USB DAC | when the power switch is turned **off** | update, then hard cut via GPIO4 |
 | DAC HAT, no case control | at **power on**, before Soloist starts | - |
 
+Without the NESPi case there is no power switch to hook, so updates always run at
+boot. That keeps a bare Pi zero-maintenance too: the `none` trigger (update only
+when the build has expired) is available for the NESPi case only.
+
 - **Soloist** is updated only when the installed build is at least
   `SOLOIST_UPDATE_AFTER_DAYS` old (default 45). If Soloist ever exits with
   code 10 (build expired), it fetches a new build and restarts automatically.

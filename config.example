@@ -12,7 +12,8 @@ CASE="nespi"
 FAN_ENABLED="yes"
 POWEROFF_MODE="hardcut"             # hardcut (proven) | graceful (experimental)
 
-# Updates: poweroff (NESPi only) | boot | none (only when the build expired)
+# Updates (NESPi only): poweroff | boot | none (only when the build expired)
+# Without the case this is always "boot" - there is no power switch to hook.
 UPDATE_TRIGGER="poweroff"
 SOLOIST_UPDATE_AFTER_DAYS="45"      # 1-89, builds expire after 90 days
 APT_UPGRADE="yes"
@@ -25,6 +26,5 @@ SOLOIST_API_KEY=""
 # DEVICE_NAME="Kitchen"
 # AUDIO_OUTPUT="hat"
 # AUDIO_HAT_OVERLAY="iqaudio-dacplus"
-# CASE="none"
-# UPDATE_TRIGGER="boot"
+# CASE="none"                        # -> updates always at boot
 # APT_UPGRADE_AFTER_DAYS="7"

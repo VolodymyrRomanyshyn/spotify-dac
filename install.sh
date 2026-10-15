@@ -117,9 +117,9 @@ ask_questions() {
           boot     "At power on, before Soloist starts" \
           none     "Only when the Soloist build has expired")"
   else
-    UPDATE_TRIGGER="$(ask_menu "When should updates run?" "${UPDATE_TRIGGER:-boot}" \
-          boot "At power on, before Soloist starts" \
-          none "Only when the Soloist build has expired")"
+    # Without the case there is no power-switch hook, so boot is the only
+    # trigger that keeps the box zero-maintenance.
+    UPDATE_TRIGGER=boot
   fi
 
   if [ "$UPDATE_TRIGGER" != none ]; then
@@ -151,7 +151,10 @@ validate() {
   case "$POWEROFF_MODE" in hardcut|graceful) ;; *) die "POWEROFF_MODE must be hardcut or graceful" ;; esac
   [ -n "$UPDATE_TRIGGER" ] || { [ "$CASE" = nespi ] && UPDATE_TRIGGER=poweroff || UPDATE_TRIGGER=boot; }
   case "$UPDATE_TRIGGER" in poweroff|boot|none) ;; *) die "UPDATE_TRIGGER must be poweroff, boot or none" ;; esac
-  [ "$UPDATE_TRIGGER" = poweroff ] && [ "$CASE" != nespi ] && die "UPDATE_TRIGGER=poweroff needs CASE=nespi"
+  if [ "$CASE" != nespi ] && [ "$UPDATE_TRIGGER" != boot ]; then
+    warn "UPDATE_TRIGGER=$UPDATE_TRIGGER needs CASE=nespi; without the case updates run at boot"
+    UPDATE_TRIGGER=boot
+  fi
   [ -n "$APT_UPGRADE_AFTER_DAYS" ] || { [ "$UPDATE_TRIGGER" = poweroff ] && APT_UPGRADE_AFTER_DAYS=0 || APT_UPGRADE_AFTER_DAYS=7; }
   [[ "$SOLOIST_UPDATE_AFTER_DAYS" =~ ^[0-9]+$ ]] && [ "$SOLOIST_UPDATE_AFTER_DAYS" -ge 1 ] && [ "$SOLOIST_UPDATE_AFTER_DAYS" -le 89 ] \
     || die "SOLOIST_UPDATE_AFTER_DAYS must be 1-89"

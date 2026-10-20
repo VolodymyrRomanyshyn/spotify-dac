@@ -1,0 +1,24 @@
+#!/bin/sh
+# dac-sink-volume - set the USB DAC's PipeWire sink to 100% (no digital attenuation).
+#
+# PipeWire starts a sink at its default level (0.40) on every boot, so the
+# spotify-dac-volume service runs this after soloist.service. The DAC sink can
+# appear a few seconds after PipeWire starts, so wait for it.
+# Runs as the soloist user (needs that user's PipeWire session).
+set -u
+
+SINK_NAME="E30 Headphones"
+TRIES=30
+
+for _ in $(seq 1 "$TRIES"); do
+  id="$(wpctl status 2>/dev/null | grep "$SINK_NAME" | grep -o '[0-9]\+\.' | head -n1 | tr -d .)"
+  if [ -n "$id" ]; then
+    wpctl set-volume "$id" 1.0
+    echo "dac-sink-volume: $SINK_NAME (id $id) -> $(wpctl get-volume "$id")"
+    exit 0
+  fi
+  sleep 2
+done
+
+echo "dac-sink-volume: $SINK_NAME not found after $TRIES tries" >&2
+exit 1

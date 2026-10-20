@@ -1,0 +1,17 @@
+[Unit]
+Description=Spotify DAC: set the USB DAC sink to 100% volume
+After=soloist.service
+Wants=soloist.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+User=soloist
+Group=soloist
+SupplementaryGroups=audio
+# PipeWire runs in the soloist user's (lingering) session
+Environment=XDG_RUNTIME_DIR=/run/user/@UID@
+ExecStart=/usr/local/sbin/dac-sink-volume
+
+[Install]
+WantedBy=multi-user.target

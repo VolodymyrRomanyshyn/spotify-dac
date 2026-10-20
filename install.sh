@@ -63,10 +63,13 @@ SOLOIST_API_KEY=""
 [ -f "$CONFIG_FILE" ] && . "$CONFIG_FILE"
 # shellcheck disable=SC1090
 [ -f "$SECRET_FILE" ] && . "$SECRET_FILE"
+STORED_API_KEY="$SOLOIST_API_KEY"
 if [ -n "$ANSWERS_FILE" ]; then
   [ -f "$ANSWERS_FILE" ] || die "Answers file not found: $ANSWERS_FILE"
   # shellcheck disable=SC1090
   . "$ANSWERS_FILE"
+  # an empty key in the answers file means "keep the one already installed"
+  [ -n "$SOLOIST_API_KEY" ] || SOLOIST_API_KEY="$STORED_API_KEY"
 fi
 
 # --- questions ----------------------------------------------------------------
@@ -155,6 +158,8 @@ validate() {
     CASE=none; FAN_ENABLED=no
   fi
   case "$CASE" in nespi|none) ;; *) die "CASE must be nespi or none" ;; esac
+  case "$FAN_ENABLED" in yes|no) ;; *) die "FAN_ENABLED must be yes or no (got: $(printf '%q' "$FAN_ENABLED"))" ;; esac
+  case "$APT_UPGRADE" in yes|no) ;; *) die "APT_UPGRADE must be yes or no (got: $(printf '%q' "$APT_UPGRADE"))" ;; esac
   case "$POWEROFF_MODE" in hardcut|graceful) ;; *) die "POWEROFF_MODE must be hardcut or graceful" ;; esac
   [ -n "$UPDATE_TRIGGER" ] || { [ "$CASE" = nespi ] && UPDATE_TRIGGER=poweroff || UPDATE_TRIGGER=boot; }
   case "$UPDATE_TRIGGER" in poweroff|boot|none) ;; *) die "UPDATE_TRIGGER must be poweroff, boot or none" ;; esac
@@ -256,11 +261,12 @@ as_soloist() {
 install_files() {
   log "Installing scripts and units"
   install -d -m 755 "$STATE_DIR"
-  install -m 755 "$REPO_DIR/bin/dac-update" "$REPO_DIR/bin/dac-status" "$SBIN_DIR/"
+  install -m 755 "$REPO_DIR/bin/dac-update" "$REPO_DIR/bin/dac-status" "$REPO_DIR/bin/dac-sink-volume" "$SBIN_DIR/"
   if [ "$CASE" = nespi ]; then
     install -m 755 "$REPO_DIR/bin/nespi-power" "$REPO_DIR/bin/nespi-fan" "$SBIN_DIR/"
   fi
   sed "s/@UID@/$SOLOIST_UID/g" "$REPO_DIR/files/systemd/soloist.service" > "$UNIT_DIR/soloist.service"
+  sed "s/@UID@/$SOLOIST_UID/g" "$REPO_DIR/files/systemd/spotify-dac-volume.service" > "$UNIT_DIR/spotify-dac-volume.service"
   local u
   for u in spotify-dac-boot-update spotify-dac-boot-apt nespi-power nespi-fan; do
     install -m 644 "$REPO_DIR/files/systemd/$u.service" "$UNIT_DIR/"
@@ -328,6 +334,10 @@ configure_units() {
   else
     systemctl disable --now nespi-power.service nespi-fan.service 2>/dev/null || true
   fi
+
+  # PipeWire resets the DAC sink to 0.40 on every start; keep it at 100% (bit-perfect)
+  if [ "$AUDIO_OUTPUT" = usb ]; then systemctl enable spotify-dac-volume.service
+  else systemctl disable --now spotify-dac-volume.service 2>/dev/null || true; fi
 }
 
 install_soloist() {
@@ -361,6 +371,10 @@ if [ -n "$SOLOIST_API_KEY" ]; then
 else
   systemctl stop soloist.service 2>/dev/null || true
   warn "No Soloist API key set: soloist will not work until you re-run: sudo $0"
+fi
+
+if [ "$AUDIO_OUTPUT" = usb ] && [ "$REBOOT_NEEDED" = no ]; then
+  systemctl restart spotify-dac-volume.service || warn "DAC volume service did not set 100%: journalctl -u spotify-dac-volume"
 fi
 
 echo

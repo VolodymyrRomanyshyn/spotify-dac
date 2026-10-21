@@ -157,6 +157,9 @@ validate() {
     warn "A HAT occupies the GPIO pins used by the NESPi Case+ and fan; disabling case and fan control"
     CASE=none; FAN_ENABLED=no
   fi
+  # PipeWire sink name prefix of the DAC, used by dac-sink-volume to make it the default
+  if [ "$AUDIO_OUTPUT" = hat ]; then DAC_SINK_PATTERN="alsa_output.platform-soc_sound"
+  else DAC_SINK_PATTERN="alsa_output.usb-"; fi
   case "$CASE" in nespi|none) ;; *) die "CASE must be nespi or none" ;; esac
   case "$FAN_ENABLED" in yes|no) ;; *) die "FAN_ENABLED must be yes or no (got: $(printf '%q' "$FAN_ENABLED"))" ;; esac
   case "$APT_UPGRADE" in yes|no) ;; *) die "APT_UPGRADE must be yes or no (got: $(printf '%q' "$APT_UPGRADE"))" ;; esac
@@ -205,6 +208,7 @@ write_config() {
 DEVICE_NAME="$DEVICE_NAME"
 AUDIO_OUTPUT="$AUDIO_OUTPUT"
 AUDIO_HAT_OVERLAY="$AUDIO_HAT_OVERLAY"
+DAC_SINK_PATTERN="$DAC_SINK_PATTERN"
 CASE="$CASE"
 FAN_ENABLED="$FAN_ENABLED"
 POWEROFF_MODE="$POWEROFF_MODE"
@@ -335,9 +339,8 @@ configure_units() {
     systemctl disable --now nespi-power.service nespi-fan.service 2>/dev/null || true
   fi
 
-  # PipeWire resets the DAC sink to 0.40 on every start; keep it at 100% (bit-perfect)
-  if [ "$AUDIO_OUTPUT" = usb ]; then systemctl enable spotify-dac-volume.service
-  else systemctl disable --now spotify-dac-volume.service 2>/dev/null || true; fi
+  # PipeWire resets the DAC sink to 0.40 on every start; make it the default at 100% (bit-perfect)
+  systemctl enable spotify-dac-volume.service
 }
 
 install_soloist() {
@@ -373,7 +376,7 @@ else
   warn "No Soloist API key set: soloist will not work until you re-run: sudo $0"
 fi
 
-if [ "$AUDIO_OUTPUT" = usb ] && [ "$REBOOT_NEEDED" = no ]; then
+if [ "$REBOOT_NEEDED" = no ]; then
   systemctl restart spotify-dac-volume.service || warn "DAC volume service did not set 100%: journalctl -u spotify-dac-volume"
 fi
 

@@ -11,6 +11,7 @@ Group=soloist
 SupplementaryGroups=audio
 # PipeWire runs in the soloist user's (lingering) session
 Environment=XDG_RUNTIME_DIR=/run/user/@UID@
+EnvironmentFile=/etc/spotify-dac/config
 ExecStart=/usr/local/sbin/dac-sink-volume
 
 [Install]

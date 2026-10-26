@@ -8,6 +8,7 @@ Power switch OFF  -> LED blinks, run dac-update (when UPDATE_TRIGGER=poweroff), 
                           overlay drives POWER_EN low at the very end of shutdown.
 Reset button      -> LED blinks fast for 5s, then reboot.
 """
+import glob
 import os
 import subprocess
 import sys
@@ -92,6 +93,18 @@ class Led:
                 self._wake.clear()
 
 
+def dac_playing() -> bool:
+    """True while an ALSA playback stream is RUNNING, i.e. audio is flowing (paused or stopped is not)."""
+    for path in glob.glob("/proc/asound/card*/pcm*p/sub*/status"):
+        try:
+            with open(path, encoding="ascii") as handle:
+                if "state: RUNNING" in handle.read():
+                    return True
+        except OSError:
+            continue
+    return False
+
+
 class Controller:
     def __init__(self) -> None:
         self.chip = env_str("GPIO_CHIP", "/dev/gpiochip0")
@@ -105,6 +118,8 @@ class Controller:
         self.enable_reset = env_str("ENABLE_RESET", "yes") == "yes"
         self.update_on_poweroff = env_str("UPDATE_TRIGGER", "poweroff") == "poweroff"
         self.mode = env_str("POWEROFF_MODE", "hardcut")
+        self.idle_limit = env_int("IDLE_SHUTDOWN_MINUTES", 0) * 60  # 0 = never power off when idle
+        self.last_active = time.monotonic()
 
         self.buttons = gpiod.request_lines(
             self.chip,
@@ -174,6 +189,14 @@ class Controller:
             timeout = 0.1 if power_since is not None else 2.0
             if self.buttons.wait_edge_events(timedelta(seconds=timeout)):
                 self.buttons.read_edge_events()
+
+            # idle shutdown: any playing stream resets the timer; otherwise power off after the limit
+            if dac_playing():
+                self.last_active = time.monotonic()
+            elif self.idle_limit and time.monotonic() - self.last_active >= self.idle_limit:
+                log(f"No playback for {self.idle_limit // 60} min -> power off")
+                self.power_off()
+                self.last_active = time.monotonic()
 
             if self.enable_reset and self.pressed(self.reset_pin):
                 self.reboot()

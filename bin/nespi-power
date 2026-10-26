@@ -193,9 +193,26 @@ class Controller:
                 self.led.on()
 
 
+def hold_power_only() -> None:
+    """SAFE_SHUTDOWN=no: keep the case powered; the switch, reset button and LED are not used."""
+    chip = env_str("GPIO_CHIP", "/dev/gpiochip0")
+    enable_pin = env_int("POWER_EN_PIN", 4)
+    gpiod.request_lines(
+        chip,
+        consumer="nespi-hold",
+        config={enable_pin: gpiod.LineSettings(direction=Direction.OUTPUT, output_value=Value.ACTIVE)},
+    )
+    log(f"Safe shutdown off: GPIO {enable_pin} held high, switch and buttons ignored")
+    while True:
+        time.sleep(3600)
+
+
 def main() -> None:
     try:
-        Controller().run()
+        if env_str("SAFE_SHUTDOWN", "yes") == "no":
+            hold_power_only()
+        else:
+            Controller().run()
     except KeyboardInterrupt:
         sys.exit(0)
 

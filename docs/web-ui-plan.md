@@ -24,6 +24,52 @@ Status: draft for review. No code yet. Branch `feature/web-ui` (from `main`).
 - **Only one source plays at a time.** Spotify (Soloist) and internet radio both write to the same
   PipeWire DAC sink. Starting one pauses the other.
 
+## Backend
+
+The browser needs a backend for four things: reaching Soloist (which only listens on
+`127.0.0.1:9090`), reading system state, changing settings, and controlling radio playback.
+The backend is a small set of JSON endpoints, one per job.
+
+- **Runtime:** Python 3 standard library only, `http.server` with `ThreadingHTTPServer`, served over
+  HTTPS with the certificate from the installer. No framework, no pip packages.
+- **Run as:** root. The config and API key files are root-only. Soloist commands use the
+  `soloist ctl` tool, which talks to the local websocket, so the backend doesn't touch the
+  Soloist user or its session.
+- **Static files:** the same server serves `web/static/`, so there is one service and one port.
+- **Concurrency:** one lock around playback changes, so two clients can't start radio and Spotify
+  at the same time.
+- **Errors:** every endpoint returns JSON `{ok, data | error}` with an HTTP status code. A broken
+  Soloist or radio stream shows as an error on the page, not a crash.
+- **Logging:** requests and actions go to the journal (`journalctl -u spotify-dac-web`). Passwords
+  and the API key are never logged.
+
+### Endpoints
+
+| Method | Path | Purpose |
+|---|---|---|
+| POST | `/api/login`, `/api/logout` | Session login (only when `WEB_USE_PASSWORD=yes`) |
+| GET | `/api/status` | Services, Soloist, DAC rate and format, volume, temperature, throttling, update log |
+| GET | `/api/spotify/now` | Track, cover URL, progress, play state (from `soloist ctl now --json`) |
+| POST | `/api/spotify/control` | `play`, `pause`, `next`, `prev` (and volume, once checked) |
+| GET | `/api/spotify/queue` | Next tracks (`soloist ctl queue`) |
+| GET | `/api/radio/stations` | Station list from `radio.json` |
+| POST | `/api/radio/play` | Start a station with mpv on the DAC sink; pauses Spotify first |
+| POST | `/api/radio/stop` | Stop mpv |
+| GET | `/api/config` | Current settings. The API key is replaced with `set` or `not set` |
+| POST | `/api/config` | Change settings that need only a service restart |
+| POST | `/api/config/apply` | Restart the services that changed |
+
+Pin, case and sound-card changes are not in the API. They go through the installer, and the page
+shows the command to run.
+
+### Limits and checks
+
+- Request body size is limited (for example 16 KB), and only the listed methods and paths are
+  accepted.
+- Inputs are checked against the allowed values before they reach a command. Station URLs must be
+  `http` or `https`.
+- The backend never runs a shell with user text. Commands are built as argument lists.
+
 ## Pages
 
 ### 1. Home
@@ -102,7 +148,7 @@ Status: draft for review. No code yet. Branch `feature/web-ui` (from `main`).
 
 ```
 web/
-  server.py            HTTP server, routing, sessions
+  server.py            HTTPS server, routing, sessions, static files
   api/
     status.py          /api/status
     spotify.py         /api/spotify/...  (wraps soloist ctl)

@@ -56,7 +56,6 @@ WIFI_POWERSAVE_OFF="yes"
 GPIO_CHIP="/dev/gpiochip0"
 POWER_PIN="3"; RESET_PIN="2"; LED_PIN="14"; POWER_EN_PIN="4"
 SAFE_SHUTDOWN="yes"                # yes: power switch and buttons work | no: case stays powered, switch ignored
-IDLE_SHUTDOWN_MINUTES="30"         # power off after N minutes with no audio playing (0 = never)
 HOLD_SECONDS="1"; SYNC_SECONDS="3"; ENABLE_RESET="yes"
 FAN_PIN="21"; FAN_TEMP_ON="75"; FAN_TEMP_OFF="55"; FAN_STARTUP_SECONDS="5"; FAN_POLL_SECONDS="5"
 SOLOIST_API_KEY=""
@@ -175,8 +174,6 @@ ask_questions() {
     fi
   fi
 
-  IDLE_SHUTDOWN_MINUTES="$(ask_input "Power off after how many minutes with no audio playing?\n(0 = never). Playing means the DAC is streaming; paused or stopped music counts as idle." "$IDLE_SHUTDOWN_MINUTES")"
-
   local key
   if [ -n "$SOLOIST_API_KEY" ]; then
     key="$(ask_password "Soloist API key (from developer.spotify.com > Soloist).\n\nA key is already stored - leave empty to keep it.")"
@@ -201,12 +198,6 @@ validate() {
   case "$SAFE_SHUTDOWN" in yes|no) ;; *) die "SAFE_SHUTDOWN must be yes or no" ;; esac
   # no power switch to hook: updates can only run at boot
   [ "$SAFE_SHUTDOWN" = no ] && UPDATE_TRIGGER=boot
-  [[ "$IDLE_SHUTDOWN_MINUTES" =~ ^[0-9]+$ ]] && [ "$IDLE_SHUTDOWN_MINUTES" -le 1440 ] \
-    || die "IDLE_SHUTDOWN_MINUTES must be 0-1440"
-  if [ "$CASE" = nespi ] && [ "$SAFE_SHUTDOWN" = no ] && [ "$IDLE_SHUTDOWN_MINUTES" -gt 0 ]; then
-    warn "Idle power-off needs the case's power switch path; disabled with SAFE_SHUTDOWN=no"
-    IDLE_SHUTDOWN_MINUTES=0
-  fi
   if [ "$CASE" = nespi ]; then
     local used=("$POWER_EN_PIN") pin i j
     [ "$SAFE_SHUTDOWN" = yes ] && used+=("$POWER_PIN" "$RESET_PIN" "$LED_PIN")
@@ -278,7 +269,6 @@ SOLOIST_WS_PORT="$SOLOIST_WS_PORT"
 WIFI_POWERSAVE_OFF="$WIFI_POWERSAVE_OFF"
 GPIO_CHIP="$GPIO_CHIP"
 SAFE_SHUTDOWN="$SAFE_SHUTDOWN"
-IDLE_SHUTDOWN_MINUTES="$IDLE_SHUTDOWN_MINUTES"
 POWER_PIN="$POWER_PIN"
 RESET_PIN="$RESET_PIN"
 LED_PIN="$LED_PIN"
@@ -324,14 +314,14 @@ as_soloist() {
 install_files() {
   log "Installing scripts and units"
   install -d -m 755 "$STATE_DIR"
-  install -m 755 "$REPO_DIR/bin/dac-update" "$REPO_DIR/bin/dac-status" "$REPO_DIR/bin/dac-sink-volume" "$REPO_DIR/bin/dac-idle" "$SBIN_DIR/"
+  install -m 755 "$REPO_DIR/bin/dac-update" "$REPO_DIR/bin/dac-status" "$REPO_DIR/bin/dac-sink-volume" "$SBIN_DIR/"
   if [ "$CASE" = nespi ]; then
     install -m 755 "$REPO_DIR/bin/nespi-power" "$REPO_DIR/bin/nespi-fan" "$SBIN_DIR/"
   fi
   sed "s/@UID@/$SOLOIST_UID/g" "$REPO_DIR/files/systemd/soloist.service" > "$UNIT_DIR/soloist.service"
   sed "s/@UID@/$SOLOIST_UID/g" "$REPO_DIR/files/systemd/spotify-dac-volume.service" > "$UNIT_DIR/spotify-dac-volume.service"
   local u
-  for u in spotify-dac-boot-update spotify-dac-boot-apt spotify-dac-idle nespi-power nespi-fan; do
+  for u in spotify-dac-boot-update spotify-dac-boot-apt nespi-power nespi-fan; do
     install -m 644 "$REPO_DIR/files/systemd/$u.service" "$UNIT_DIR/"
   done
 
@@ -400,13 +390,6 @@ configure_units() {
 
   # PipeWire resets the DAC sink to 0.40 on every start; make it the default at 100% (bit-perfect)
   systemctl enable spotify-dac-volume.service
-
-  # idle power-off without the case (with the case, nespi-power does it)
-  if [ "$CASE" != nespi ] && [ "$IDLE_SHUTDOWN_MINUTES" -gt 0 ]; then
-    systemctl enable spotify-dac-idle.service && systemctl restart spotify-dac-idle.service
-  else
-    systemctl disable --now spotify-dac-idle.service 2>/dev/null || true
-  fi
 }
 
 install_soloist() {

@@ -78,15 +78,21 @@ Status: draft for review. No code yet. Branch `feature/web-ui` (from `main`).
 
 ## Installation
 
-- `install.sh` asks: install the web UI (yes/no), port (8080), and a password for the web UI.
-- The password is stored as a salted hash (`hashlib.scrypt`), not in plain text.
+- `install.sh` asks: install the web UI (yes/no), port (8443), hostname, and **use password (yes/no)**.
+- Answers file keys: `WEB_UI=yes|no`, `WEB_PORT`, `WEB_HOSTNAME`, `WEB_USE_PASSWORD=yes|no`.
+- `WEB_USE_PASSWORD=yes` (default): asks for a password. It is stored as a salted hash
+  (`hashlib.scrypt`), not in plain text.
+- `WEB_USE_PASSWORD=no`: no login page. Every page is open to anyone on the LAN, and the config page
+  can read and change settings. The installer shows a warning and asks for a confirmation.
 - The service listens on the LAN address only (configurable). `uninstall.sh` removes it.
 - `--web` in an answers file for unattended installs.
 
 ## Security
 
-- Authentication: a login page with the password from the installer. Sessions use a random token in an
-  HTTP-only cookie. Config and power actions need a login.
+- Authentication (when `WEB_USE_PASSWORD=yes`): a login page with the password from the installer.
+  Sessions use a random token in a `Secure`, `HttpOnly` cookie. Config and power actions need a login.
+- Without a password, the API key is still never returned, but the config page can change settings.
+  Use this only on a home network you trust.
 - The API key is never returned by any endpoint.
 - No endpoint runs a shell command from user input. Actions are a fixed list (play, pause, next, set
   volume, start or stop radio, restart a service).

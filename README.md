@@ -71,17 +71,20 @@ Reset button: the LED blinks fast for 5 s, then the Pi reboots.
 
 ### GPIO pins (BCM)
 
-| Function | Pin |
-|---|---|
-| Power switch | 3 |
-| Reset button | 2 |
-| LED | 14 |
-| Power enable (case) | 4 |
-| Fan | 21 |
+| Function | USB DAC default | HAT default (IQaudIO DAC+) |
+|---|---|---|
+| Power switch | 3 | 17 (header pin 11) |
+| Reset button | 2 | 27 (header pin 13) |
+| LED | 14 | 14 |
+| Power enable (case) | 4 | 4 |
+| Fan | 21 | 22 (if the fan is wired to GPIO 22) |
 
-HATs use GPIO 2/3 (I2C) and 18-21 (I2S), so the installer only offers case and fan
-control with a USB card. Selecting any HAT, in the wizard or in an answers file,
-forces `CASE=none` and `FAN_ENABLED=no`.
+A HAT takes GPIO 2, 3 and 18-21 (I2C and I2S), so with a HAT the installer
+asks for each case and fan pin, offers the free defaults above, and rejects
+any HAT pin. Without a case, `CASE=none` and the fan is off.
+
+The wiring for the NESPi with a HAT, and which cables to move, is in
+[docs/nespi-wiring.md](docs/nespi-wiring.md).
 
 Supported HAT overlays: `iqaudio-dacplus`, `hifiberry-dacplus` (also PiFi DAC+),
 `hifiberry-dac`, `hifiberry-digi` (HiFiBerry Digi+ and PiFi Digi+, S/PDIF out).

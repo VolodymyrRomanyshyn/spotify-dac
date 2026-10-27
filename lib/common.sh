@@ -71,7 +71,9 @@ ask_menu() {   # ask_menu "question" default tag1 "desc1" tag2 "desc2" ...
 ask_yesno() {   # ask_yesno "question" yes|no  -> prints yes/no
   local def_flag=()
   [ "$2" = "no" ] && def_flag=(--defaultno)
-  if whiptail --title "$WT_TITLE" "${def_flag[@]}" --yesno "$1" 12 70; then echo yes; else echo no; fi
+  # same stream swap as the other helpers: the dialog draws on the terminal, and
+  # only the answer reaches the caller's $(...) - without it the escape codes end up in the value
+  if whiptail --title "$WT_TITLE" "${def_flag[@]}" --yesno "$1" 12 70 3>&1 1>&2 2>&3; then echo yes; else echo no; fi
 }
 
 msg() { whiptail --title "$WT_TITLE" --msgbox "$1" 14 72; }

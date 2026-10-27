@@ -55,6 +55,7 @@ SOLOIST_WS_PORT="9090"
 WIFI_POWERSAVE_OFF="yes"
 GPIO_CHIP="/dev/gpiochip0"
 POWER_PIN="3"; RESET_PIN="2"; LED_PIN="14"; POWER_EN_PIN="4"
+SAFE_SHUTDOWN="yes"                # yes: power switch and buttons work | no: case stays powered, switch ignored
 HOLD_SECONDS="1"; SYNC_SECONDS="3"; ENABLE_RESET="yes"
 FAN_PIN="21"; FAN_TEMP_ON="75"; FAN_TEMP_OFF="55"; FAN_STARTUP_SECONDS="5"; FAN_POLL_SECONDS="5"
 SOLOIST_API_KEY=""
@@ -63,10 +64,13 @@ SOLOIST_API_KEY=""
 [ -f "$CONFIG_FILE" ] && . "$CONFIG_FILE"
 # shellcheck disable=SC1090
 [ -f "$SECRET_FILE" ] && . "$SECRET_FILE"
+STORED_API_KEY="$SOLOIST_API_KEY"
 if [ -n "$ANSWERS_FILE" ]; then
   [ -f "$ANSWERS_FILE" ] || die "Answers file not found: $ANSWERS_FILE"
   # shellcheck disable=SC1090
   . "$ANSWERS_FILE"
+  # an empty key in the answers file means "keep the one already installed"
+  [ -n "$SOLOIST_API_KEY" ] || SOLOIST_API_KEY="$STORED_API_KEY"
 fi
 
 # --- questions ----------------------------------------------------------------
@@ -77,6 +81,33 @@ usb_cards_desc() {   # "Topping E30, ..." for USB cards ALSA sees right now
     [ -f "$c/usbid" ] && names+=("$(cat "$c/id")")
   done
   local IFS=', '; echo "${names[*]:-}"
+}
+
+# GPIO used by the HAT (I2C 2 and 3, I2S 18-21). Only a HAT takes these pins.
+is_hat_pin() {
+  [ "$AUDIO_OUTPUT" = hat ] || return 1
+  case "$1" in 2|3|18|19|20|21) return 0 ;; *) return 1 ;; esac
+}
+
+# Move the USB defaults that a HAT takes to free pins
+hat_pin_defaults() {
+  [ "$AUDIO_OUTPUT" = hat ] || return 0
+  [ "$POWER_PIN" = 3 ] && POWER_PIN=17
+  [ "$RESET_PIN" = 2 ] && RESET_PIN=27
+  [ "$FAN_PIN" = 21 ] && FAN_PIN=22
+  return 0
+}
+
+# ask_pin "label" current -> a BCM number that is usable with this sound card
+ask_pin() {
+  local label="$1" val
+  while :; do
+    val="$(ask_input "$label\n\nBCM GPIO number (0-27).$( [ "$AUDIO_OUTPUT" = hat ] && echo ' With this HAT, GPIO 2, 3 and 18-21 are taken.')" "$2")" || die "Cancelled"
+    if [[ "$val" =~ ^[0-9]+$ ]] && [ "$val" -le 27 ] && ! is_hat_pin "$val"; then
+      echo "$val"; return 0
+    fi
+    msg "GPIO '$val' can't be used here."
+  done
 }
 
 ask_questions() {
@@ -96,26 +127,33 @@ ask_questions() {
   if [ "$hw" = usb ]; then AUDIO_OUTPUT=usb; AUDIO_HAT_OVERLAY=""
   else AUDIO_OUTPUT=hat; AUDIO_HAT_OVERLAY="$hw"; fi
 
-  # GPIO control (case buttons, LED, fan) is only possible with a USB card:
-  # a HAT occupies the I2C/I2S pins the NESPi Case+ wiring uses.
+  # a HAT takes GPIO 2, 3 and 18-21, so the case and fan must use other pins
   if [ "$AUDIO_OUTPUT" = hat ]; then
-    msg "A HAT uses I2C/I2S on GPIO 2, 3 and 18-21.\n\nThese are the same pins as the NESPi Case+ power button, reset button and fan, so case and fan control are disabled on this box."
-    CASE=none
-    FAN_ENABLED=no
-  else
-    CASE="$(ask_menu "Case / GPIO control:" "$CASE" \
-          nespi "RetroFlag NESPi Case+ (power/reset buttons, LED, GPIO fan)" \
-          none  "No GPIO control")"
+    msg "This HAT uses GPIO 2, 3 and 18-21.\n\nThe NESPi Case+ and fan can use other pins. The next screens offer free defaults; change them if your wiring is different."
   fi
+  CASE="$(ask_menu "Case / GPIO control:" "$CASE" \
+        nespi "RetroFlag NESPi Case+ (power/reset buttons, LED, GPIO fan)" \
+        none  "No GPIO control")"
 
   if [ "$CASE" = nespi ]; then
-    FAN_ENABLED="$(ask_yesno "Control a fan on GPIO $FAN_PIN?\n(on at ${FAN_TEMP_ON}C, off at ${FAN_TEMP_OFF}C, ${FAN_STARTUP_SECONDS}s spin at boot)" "$FAN_ENABLED")"
-    POWEROFF_MODE="$(ask_menu "What happens when the power switch is turned OFF (after updates):" "$POWEROFF_MODE" \
-          hardcut  "Stop, sync, read-only remount, cut power via GPIO $POWER_EN_PIN (proven)" \
-          graceful "Full systemctl poweroff, kernel cuts power (EXPERIMENTAL)")"
+    hat_pin_defaults
+    SAFE_SHUTDOWN="$(ask_yesno "Use the NESPi power switch and buttons for safe shutdown?\n(no: the case stays powered, switch and buttons are ignored, updates run at boot)" "$SAFE_SHUTDOWN")"
+    if [ "$SAFE_SHUTDOWN" = yes ]; then
+      POWEROFF_MODE="$(ask_menu "What happens when the power switch is turned OFF (after updates):" "$POWEROFF_MODE" \
+            hardcut  "Stop, sync, read-only remount, cut power via GPIO $POWER_EN_PIN (proven)" \
+            graceful "Full systemctl poweroff, kernel cuts power (EXPERIMENTAL)")"
+      POWER_PIN="$(ask_pin "GPIO for the power switch" "$POWER_PIN")"
+      RESET_PIN="$(ask_pin "GPIO for the reset button" "$RESET_PIN")"
+      LED_PIN="$(ask_pin "GPIO for the case LED" "$LED_PIN")"
+    fi
+    POWER_EN_PIN="$(ask_pin "GPIO that keeps the case powered (power enable)" "$POWER_EN_PIN")"
+    FAN_ENABLED="$(ask_yesno "Control a fan with the case?\n(on at ${FAN_TEMP_ON}C, off at ${FAN_TEMP_OFF}C, ${FAN_STARTUP_SECONDS}s spin at boot)" "$FAN_ENABLED")"
+    if [ "$FAN_ENABLED" = yes ]; then
+      FAN_PIN="$(ask_pin "GPIO for the fan" "$FAN_PIN")"
+    fi
   fi
 
-  if [ "$CASE" = nespi ]; then
+  if [ "$CASE" = nespi ] && [ "$SAFE_SHUTDOWN" = yes ]; then
     UPDATE_TRIGGER="$(ask_menu "When should updates run?" "${UPDATE_TRIGGER:-poweroff}" \
           poweroff "When the power switch is turned off (zero maintenance)" \
           boot     "At power on, before Soloist starts" \
@@ -150,12 +188,30 @@ validate() {
   [ -n "$DEVICE_NAME" ] || die "Device name is empty"
   case "$AUDIO_OUTPUT" in usb|hat) ;; *) die "AUDIO_OUTPUT must be usb or hat" ;; esac
   [ "$AUDIO_OUTPUT" = hat ] && [ -z "$AUDIO_HAT_OVERLAY" ] && die "AUDIO_HAT_OVERLAY is required for a HAT"
-  if [ "$AUDIO_OUTPUT" = hat ] && { [ "$CASE" = nespi ] || [ "$FAN_ENABLED" = yes ]; }; then
-    warn "A HAT occupies the GPIO pins used by the NESPi Case+ and fan; disabling case and fan control"
-    CASE=none; FAN_ENABLED=no
-  fi
+  # PipeWire sink name prefix of the DAC, used by dac-sink-volume to make it the default
+  if [ "$AUDIO_OUTPUT" = hat ]; then DAC_SINK_PATTERN="alsa_output.platform-soc_sound"
+  else DAC_SINK_PATTERN="alsa_output.usb-"; fi
   case "$CASE" in nespi|none) ;; *) die "CASE must be nespi or none" ;; esac
+  case "$FAN_ENABLED" in yes|no) ;; *) die "FAN_ENABLED must be yes or no (got: $(printf '%q' "$FAN_ENABLED"))" ;; esac
+  case "$APT_UPGRADE" in yes|no) ;; *) die "APT_UPGRADE must be yes or no (got: $(printf '%q' "$APT_UPGRADE"))" ;; esac
   case "$POWEROFF_MODE" in hardcut|graceful) ;; *) die "POWEROFF_MODE must be hardcut or graceful" ;; esac
+  case "$SAFE_SHUTDOWN" in yes|no) ;; *) die "SAFE_SHUTDOWN must be yes or no" ;; esac
+  # no power switch to hook: updates can only run at boot
+  [ "$SAFE_SHUTDOWN" = no ] && UPDATE_TRIGGER=boot
+  if [ "$CASE" = nespi ]; then
+    local used=("$POWER_EN_PIN") pin i j
+    [ "$SAFE_SHUTDOWN" = yes ] && used+=("$POWER_PIN" "$RESET_PIN" "$LED_PIN")
+    [ "$FAN_ENABLED" = yes ] && used+=("$FAN_PIN")
+    for pin in "${used[@]}"; do
+      [[ "$pin" =~ ^[0-9]+$ ]] && [ "$pin" -le 27 ] || die "GPIO '$pin' is not a valid BCM number (0-27)"
+      is_hat_pin "$pin" && die "GPIO $pin is used by the HAT (I2C/I2S). Choose another pin for the case or fan."
+    done
+    for ((i = 0; i < ${#used[@]}; i++)); do
+      for ((j = i + 1; j < ${#used[@]}; j++)); do
+        [ "${used[i]}" = "${used[j]}" ] && die "GPIO ${used[i]} is assigned twice"
+      done
+    done
+  fi
   [ -n "$UPDATE_TRIGGER" ] || { [ "$CASE" = nespi ] && UPDATE_TRIGGER=poweroff || UPDATE_TRIGGER=boot; }
   case "$UPDATE_TRIGGER" in poweroff|boot|none) ;; *) die "UPDATE_TRIGGER must be poweroff, boot or none" ;; esac
   if [ "$CASE" != nespi ] && [ "$UPDATE_TRIGGER" != boot ]; then
@@ -200,6 +256,7 @@ write_config() {
 DEVICE_NAME="$DEVICE_NAME"
 AUDIO_OUTPUT="$AUDIO_OUTPUT"
 AUDIO_HAT_OVERLAY="$AUDIO_HAT_OVERLAY"
+DAC_SINK_PATTERN="$DAC_SINK_PATTERN"
 CASE="$CASE"
 FAN_ENABLED="$FAN_ENABLED"
 POWEROFF_MODE="$POWEROFF_MODE"
@@ -211,6 +268,7 @@ UPDATE_TIMEOUT_MINUTES="$UPDATE_TIMEOUT_MINUTES"
 SOLOIST_WS_PORT="$SOLOIST_WS_PORT"
 WIFI_POWERSAVE_OFF="$WIFI_POWERSAVE_OFF"
 GPIO_CHIP="$GPIO_CHIP"
+SAFE_SHUTDOWN="$SAFE_SHUTDOWN"
 POWER_PIN="$POWER_PIN"
 RESET_PIN="$RESET_PIN"
 LED_PIN="$LED_PIN"
@@ -256,11 +314,12 @@ as_soloist() {
 install_files() {
   log "Installing scripts and units"
   install -d -m 755 "$STATE_DIR"
-  install -m 755 "$REPO_DIR/bin/dac-update" "$REPO_DIR/bin/dac-status" "$SBIN_DIR/"
+  install -m 755 "$REPO_DIR/bin/dac-update" "$REPO_DIR/bin/dac-status" "$REPO_DIR/bin/dac-sink-volume" "$SBIN_DIR/"
   if [ "$CASE" = nespi ]; then
     install -m 755 "$REPO_DIR/bin/nespi-power" "$REPO_DIR/bin/nespi-fan" "$SBIN_DIR/"
   fi
   sed "s/@UID@/$SOLOIST_UID/g" "$REPO_DIR/files/systemd/soloist.service" > "$UNIT_DIR/soloist.service"
+  sed "s/@UID@/$SOLOIST_UID/g" "$REPO_DIR/files/systemd/spotify-dac-volume.service" > "$UNIT_DIR/spotify-dac-volume.service"
   local u
   for u in spotify-dac-boot-update spotify-dac-boot-apt nespi-power nespi-fan; do
     install -m 644 "$REPO_DIR/files/systemd/$u.service" "$UNIT_DIR/"
@@ -328,6 +387,9 @@ configure_units() {
   else
     systemctl disable --now nespi-power.service nespi-fan.service 2>/dev/null || true
   fi
+
+  # PipeWire resets the DAC sink to 0.40 on every start; make it the default at 100% (bit-perfect)
+  systemctl enable spotify-dac-volume.service
 }
 
 install_soloist() {
@@ -361,6 +423,10 @@ if [ -n "$SOLOIST_API_KEY" ]; then
 else
   systemctl stop soloist.service 2>/dev/null || true
   warn "No Soloist API key set: soloist will not work until you re-run: sudo $0"
+fi
+
+if [ "$REBOOT_NEEDED" = no ]; then
+  systemctl restart spotify-dac-volume.service || warn "DAC volume service did not set 100%: journalctl -u spotify-dac-volume"
 fi
 
 echo

@@ -1,0 +1,26 @@
+#!/bin/sh
+# dac-sink-volume - make the DAC the default output and set it to 100% (no digital attenuation).
+#
+# PipeWire starts a sink at its default level (0.40) on every boot, so the
+# spotify-dac-volume service runs this after soloist.service. The DAC sink can
+# appear a few seconds after PipeWire starts, so wait for it.
+# Runs as the soloist user (needs that user's PipeWire session).
+# DAC_SINK_PATTERN (from /etc/spotify-dac/config) is the start of the DAC's PipeWire sink name.
+set -u
+
+PATTERN="${DAC_SINK_PATTERN:-alsa_output.usb-}"
+TRIES=30
+
+for _ in $(seq 1 "$TRIES"); do
+  name="$(pactl list short sinks 2>/dev/null | awk -v p="$PATTERN" 'index($2, p) == 1 { print $2; exit }')"
+  if [ -n "$name" ]; then
+    pactl set-default-sink "$name"
+    pactl set-sink-volume "$name" 100%
+    echo "dac-sink-volume: $name -> $(pactl get-sink-volume "$name" | head -n1)"
+    exit 0
+  fi
+  sleep 2
+done
+
+echo "dac-sink-volume: no sink starting with $PATTERN after $TRIES tries" >&2
+exit 1

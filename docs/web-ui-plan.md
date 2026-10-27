@@ -64,6 +64,18 @@ Status: draft for review. No code yet. Branch `feature/web-ui` (from `main`).
 - Recent update log lines from `/var/log/spotify-dac-update.log`.
 - System: uptime, disk use, IP address.
 
+## Address
+
+- The main page is `https://<hostname>.local:8443`, for example `https://rpi-2.local:8443`.
+- `.local` names come from mDNS. The installer makes sure `avahi-daemon` is installed and running.
+- The Pi's hostname is set by the installer question "Hostname (used for the web address)". The
+  default is the current hostname. Setting it to `rpi-2` changes `/etc/hostname` and `/etc/hosts`.
+- The self-signed certificate is generated for `<hostname>.local` and the Pi's IP address, so it
+  is regenerated if the hostname changes.
+- Side effect to note: `ssh rpi-2` in `~/.ssh/config` points at `<pi-hostname>.local` today. After a
+  rename the SSH alias must use the new name, or the alias must keep the old one.
+- The Spotify device name (`DEVICE_NAME`) is separate from the hostname, so it stays as configured.
+
 ## Installation
 
 - `install.sh` asks: install the web UI (yes/no), port (8080), and a password for the web UI.

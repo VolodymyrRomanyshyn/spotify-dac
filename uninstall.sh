@@ -13,13 +13,14 @@ PURGE=no
 [ "${1:-}" = "--purge" ] && PURGE=yes
 require_root "$@"
 
-UNITS=(soloist spotify-dac-volume spotify-dac-boot-update spotify-dac-boot-apt nespi-power nespi-fan)
+UNITS=(soloist spotify-dac-web spotify-dac-volume spotify-dac-boot-update spotify-dac-boot-apt nespi-power nespi-fan)
 for u in "${UNITS[@]}"; do
   systemctl disable --now "$u.service" 2>/dev/null || true
   rm -f "$UNIT_DIR/$u.service"
 done
 systemctl daemon-reload
 
+rm -rf "$WEB_DIR"
 rm -f "$SOLOIST_BIN" "$SOLOIST_BIN.prev" \
       "$SBIN_DIR/dac-update" "$SBIN_DIR/dac-status" "$SBIN_DIR/dac-sink-volume" "$SBIN_DIR/nespi-power" "$SBIN_DIR/nespi-fan" \
       /etc/pipewire/pipewire.conf.d/50-spotify-dac.conf \

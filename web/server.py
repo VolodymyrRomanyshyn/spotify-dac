@@ -13,6 +13,7 @@ import json
 import mimetypes
 import ssl
 import sys
+import threading
 import traceback
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -21,7 +22,7 @@ from urllib.parse import urlsplit
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
-from api import auth, config, radio, spotify, status  # noqa: E402
+from api import auth, config, radio, spotify, status, volume  # noqa: E402
 from api.common import MAX_BODY, ApiError, Request  # noqa: E402
 
 STATIC = HERE / "static"
@@ -36,8 +37,11 @@ ROUTES = {
     ("GET", "/api/spotify/update"): spotify.get_update,
     ("POST", "/api/spotify/update"): spotify.post_update,
     ("GET", "/api/radio/stations"): radio.get_stations,
+    ("GET", "/api/radio/now"): radio.get_now,
     ("POST", "/api/radio/play"): radio.post_play,
     ("POST", "/api/radio/stop"): radio.post_stop,
+    ("GET", "/api/volume"): volume.get_volume,
+    ("POST", "/api/volume"): volume.post_volume,
     ("GET", "/api/config"): config.get_config,
     ("POST", "/api/config"): config.post_config,
     ("POST", "/api/config/apply"): config.post_apply,
@@ -136,6 +140,7 @@ def main():
     parser.add_argument("--http", action="store_true", help="development only: serve plain HTTP")
     args = parser.parse_args()
 
+    threading.Thread(target=radio.watch_sources, daemon=True).start()
     httpd = ThreadingHTTPServer((args.host, args.port), Handler)
     if not args.http:
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)

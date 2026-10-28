@@ -8,6 +8,7 @@ SOLOIST_USER="soloist"
 SOLOIST_BIN="/usr/local/bin/soloist"
 SBIN_DIR="/usr/local/sbin"
 UNIT_DIR="/etc/systemd/system"
+WEB_DIR="/opt/spotify-dac/web"
 
 BOOTCFG_BEGIN="# >>> spotify-dac (managed block, edit via install.sh) >>>"
 BOOTCFG_END="# <<< spotify-dac <<<"

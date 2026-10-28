@@ -56,6 +56,11 @@ WIFI_POWERSAVE_OFF="yes"
 GPIO_CHIP="/dev/gpiochip0"
 POWER_PIN="3"; RESET_PIN="2"; LED_PIN="14"; POWER_EN_PIN="4"
 SAFE_SHUTDOWN="yes"                # yes: power switch and buttons work | no: case stays powered, switch ignored
+DEFAULT_VOLUME="25"               # 0-100: shared volume until a level is set from Spotify or the radio
+WEB_UI="yes"                      # web interface (HTTPS) on WEB_PORT
+WEB_PORT="8443"
+WEB_USE_PASSWORD="yes"            # no: anyone on the LAN can open the config page
+WEB_PASSWORD=""                   # only read from an answers file; the web UI stores a hash
 HOLD_SECONDS="1"; SYNC_SECONDS="3"; ENABLE_RESET="yes"
 FAN_PIN="21"; FAN_TEMP_ON="75"; FAN_TEMP_OFF="55"; FAN_STARTUP_SECONDS="5"; FAN_POLL_SECONDS="5"
 SOLOIST_API_KEY=""
@@ -174,6 +179,19 @@ ask_questions() {
     fi
   fi
 
+  DEFAULT_VOLUME="$(ask_input "Default volume (0-100) until a level is set from Spotify or the radio:" "$DEFAULT_VOLUME")"
+
+  WEB_UI="$(ask_yesno "Install the web interface (control, radio, config and status in a browser)?" "$WEB_UI")"
+  if [ "$WEB_UI" = yes ]; then
+    WEB_PORT="$(ask_input "Web interface port (HTTPS):" "$WEB_PORT")"
+    WEB_USE_PASSWORD="$(ask_yesno "Require a password to open the web interface?\n(no: anyone on your network can change the settings)" "$WEB_USE_PASSWORD")"
+    if [ "$WEB_USE_PASSWORD" = yes ]; then
+      local webpw
+      webpw="$(ask_password "Password for the web interface.\n\nLeave empty to keep the stored password.")"
+      if [ -n "$webpw" ]; then WEB_PASSWORD="$webpw"; fi
+    fi
+  fi
+
   local key
   if [ -n "$SOLOIST_API_KEY" ]; then
     key="$(ask_password "Soloist API key (from developer.spotify.com > Soloist).\n\nA key is already stored - leave empty to keep it.")"
@@ -196,6 +214,10 @@ validate() {
   case "$APT_UPGRADE" in yes|no) ;; *) die "APT_UPGRADE must be yes or no (got: $(printf '%q' "$APT_UPGRADE"))" ;; esac
   case "$POWEROFF_MODE" in hardcut|graceful) ;; *) die "POWEROFF_MODE must be hardcut or graceful" ;; esac
   case "$SAFE_SHUTDOWN" in yes|no) ;; *) die "SAFE_SHUTDOWN must be yes or no" ;; esac
+  [[ "$DEFAULT_VOLUME" =~ ^[0-9]+$ ]] && [ "$DEFAULT_VOLUME" -le 100 ] || die "DEFAULT_VOLUME must be 0-100"
+  case "$WEB_UI" in yes|no) ;; *) die "WEB_UI must be yes or no" ;; esac
+  case "$WEB_USE_PASSWORD" in yes|no) ;; *) die "WEB_USE_PASSWORD must be yes or no" ;; esac
+  [[ "$WEB_PORT" =~ ^[0-9]+$ ]] && [ "$WEB_PORT" -ge 1024 ] && [ "$WEB_PORT" -le 65535 ] || die "WEB_PORT must be 1024-65535"
   # no power switch to hook: updates can only run at boot
   [ "$SAFE_SHUTDOWN" = no ] && UPDATE_TRIGGER=boot
   if [ "$CASE" = nespi ]; then
@@ -241,7 +263,7 @@ confirm() {
 
 install_packages() {
   log "Installing packages"
-  local pkgs=(curl ca-certificates alsa-utils pipewire pipewire-pulse wireplumber dbus-user-session pulseaudio-utils libpulse0)
+  local pkgs=(curl ca-certificates alsa-utils openssl pipewire pipewire-pulse wireplumber dbus-user-session pulseaudio-utils libpulse0 mpv)
   [ "$CASE" = nespi ] && pkgs+=(python3 python3-libgpiod)
   apt-get update -q
   DEBIAN_FRONTEND=noninteractive apt-get install -y -q "${pkgs[@]}"
@@ -269,6 +291,9 @@ SOLOIST_WS_PORT="$SOLOIST_WS_PORT"
 WIFI_POWERSAVE_OFF="$WIFI_POWERSAVE_OFF"
 GPIO_CHIP="$GPIO_CHIP"
 SAFE_SHUTDOWN="$SAFE_SHUTDOWN"
+DEFAULT_VOLUME="$DEFAULT_VOLUME"
+WEB_UI="$WEB_UI"
+WEB_PORT="$WEB_PORT"
 POWER_PIN="$POWER_PIN"
 RESET_PIN="$RESET_PIN"
 LED_PIN="$LED_PIN"
@@ -330,6 +355,73 @@ install_files() {
   if [ "$WIFI_POWERSAVE_OFF" = yes ] && [ -d /etc/NetworkManager/conf.d ]; then
     install -m 644 "$REPO_DIR/files/networkmanager/99-spotify-dac-wifi.conf" /etc/NetworkManager/conf.d/
   fi
+}
+
+install_web() {
+  if [ "$WEB_UI" != yes ]; then
+    log "Web interface not selected"
+    systemctl disable --now spotify-dac-web.service 2>/dev/null || true
+    rm -f "$UNIT_DIR/spotify-dac-web.service"
+    return 0
+  fi
+  log "Installing the web interface on port $WEB_PORT"
+  install -d -m 755 "$WEB_DIR" "$CONF_DIR/web"
+  cp -r "$REPO_DIR/web/." "$WEB_DIR/"
+  find "$WEB_DIR" -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+
+  # HTTPS certificate for this Pi's name and address (kept if it exists)
+  if [ ! -f "$CONF_DIR/web/cert.pem" ]; then
+    local host
+    host="$(hostname)"
+    openssl req -x509 -newkey rsa:2048 -nodes -days 3650 -subj "/CN=$host" \
+      -addext "subjectAltName=DNS:$host,DNS:$host.local,DNS:localhost,IP:127.0.0.1" \
+      -keyout "$CONF_DIR/web/key.pem" -out "$CONF_DIR/web/cert.pem" >/dev/null 2>&1 \
+      || die "could not create the web certificate (openssl)"
+    chmod 600 "$CONF_DIR/web/key.pem"; chmod 644 "$CONF_DIR/web/cert.pem"
+  fi
+
+  # station list: copied once, then edited on the Radio page
+  [ -f "$CONF_DIR/radio.json" ] || install -m 644 "$REPO_DIR/radio/stations.default.json" "$CONF_DIR/radio.json"
+
+  # password: stored as a salted hash in web.json, never in plain text
+  if [ "$WEB_USE_PASSWORD" = yes ]; then
+    if [ -n "$WEB_PASSWORD" ] || [ ! -f "$CONF_DIR/web.json" ]; then
+      [ -n "$WEB_PASSWORD" ] || die "a password is needed: answer the question or set WEB_PASSWORD"
+      local hash
+      hash="$(printf '%s' "$WEB_PASSWORD" | python3 -c 'import sys
+sys.path.insert(0, sys.argv[1])
+from api.auth import hash_password
+print(hash_password(sys.stdin.read()))' "$WEB_DIR")"
+      umask 077
+      printf '{"use_password": true, "password": "%s"}\n' "$hash" > "$CONF_DIR/web.json"
+      umask 022
+    fi
+  else
+    umask 077
+    printf '{"use_password": false}\n' > "$CONF_DIR/web.json"
+    umask 022
+  fi
+  WEB_PASSWORD=""
+
+  # systemd unit: runs the web server as root (the config and the radio need it)
+  cat > "$UNIT_DIR/spotify-dac-web.service" <<EOF
+[Unit]
+Description=Spotify DAC web interface
+After=network-online.target soloist.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 $WEB_DIR/server.py --host 0.0.0.0 --port $WEB_PORT --cert $CONF_DIR/web/cert.pem --key $CONF_DIR/web/key.pem
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+  systemctl daemon-reload
+  systemctl enable spotify-dac-web.service
+  systemctl restart spotify-dac-web.service
 }
 
 configure_boot() {
@@ -413,6 +505,7 @@ install_packages
 write_config
 setup_user
 install_files
+install_web
 disable_legacy
 configure_boot
 configure_units

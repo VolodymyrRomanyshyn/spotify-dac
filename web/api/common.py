@@ -8,6 +8,7 @@ from pathlib import Path
 
 CONFIG_FILE = Path(os.environ.get("SPOTIFY_DAC_CONFIG", "/etc/spotify-dac/config"))
 SOLOIST_CTL = ["soloist", "ctl", "-w", "127.0.0.1:9090"]
+SOLOIST_USER = "soloist"
 MAX_BODY = 16 * 1024
 
 _CONFIG_LINE = re.compile(r'^([A-Z_][A-Z0-9_]*)="(.*)"$')

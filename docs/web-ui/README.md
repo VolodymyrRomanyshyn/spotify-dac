@@ -9,6 +9,7 @@ Draft layouts for the web UI. Plan: [../web-ui-plan.md](../web-ui-plan.md).
 | Spotify | [spotify.md](spotify.md) | `GET /api/spotify/now`, `POST /api/spotify/control`, `GET /api/spotify/queue` |
 | Internet radio | [radio.md](radio.md) | `GET /api/radio/stations`, `POST /api/radio/play`, `POST /api/radio/stop` |
 | Config | [config.md](config.md) | `GET /api/config`, `POST /api/config`, `POST /api/config/apply` |
+| Plugins (inside Config) | [plugins.md](plugins.md) | `GET /api/plugins`, `POST /api/plugins`, `PUT /api/plugins/{name}`, `DELETE /api/plugins/{name}`, `POST /api/plugins/{name}/enable` |
 | Status | [status.md](status.md) | `GET /api/status` |
 
 ## Shared rules

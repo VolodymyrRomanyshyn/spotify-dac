@@ -58,6 +58,15 @@ The backend is a small set of JSON endpoints, one per job.
 | GET | `/api/config` | Current settings. The API key is replaced with `set` or `not set` |
 | POST | `/api/config` | Change settings that need only a service restart |
 | POST | `/api/config/apply` | Restart the services that changed |
+| GET | `/api/plugins` | Installed plugin types, and each plugin's enabled state and settings (JSON) |
+| POST | `/api/plugins` | Add a plugin (starts disabled) |
+| PUT | `/api/plugins/{name}` | Change a plugin's settings; validated before saving |
+| DELETE | `/api/plugins/{name}` | Disable and remove a plugin |
+| POST | `/api/plugins/{name}/enable` | Enable or disable a plugin (`{"enabled": true}`) |
+| PUT | `/api/case` | Choose the case from the selector (`none`, `nespi`, ...) |
+| GET | `/api/radio/stations` | Station list |
+| PUT | `/api/radio/stations` | Add, edit, delete and reorder stations (whole list, validated) |
+| PUT | `/api/source` | Switch the active source (`spotify` or `radio`) |
 
 Pin, case and sound-card changes are not in the API. They go through the installer, and the page
 shows the command to run.
@@ -73,8 +82,9 @@ shows the command to run.
 ## Pages
 
 ### 1. Home
-- Two large tiles: **Spotify** and **Internet radio**.
-- Shows which source is active and the DAC status line.
+- A **source switch** (Spotify / Internet radio) at the top. Only enabled sources are shown.
+- Switching pauses the other source. The chosen source is kept on the Pi.
+- Shows the active source's now-playing card, a short control row, and the DAC status line.
 
 ### 2. Spotify
 - Now playing: cover art, track, artist, album, progress bar.
@@ -93,8 +103,11 @@ shows the command to run.
 - **Open:** mpv is not installed by the installer yet. It would be added as a package.
 
 ### 4. Config
-- A form for every setting in `/etc/spotify-dac/config`: device name, sound card, case, safe shutdown,
-  pins, fan, update trigger and days, APT upgrade.
+- Sections: **Spotify** (enable, device name, API key), **Internet radio** (enable, link to stations),
+  **Plugins** (add, delete, enable, disable, edit JSON), **Case** (one selector: none, nespi, ...),
+  **Sound card** (read only), **Updates**, **Web interface**.
+- Plugins and the case use the JSON model in [web-ui/plugins.md](web-ui/plugins.md).
+- Radio stations are managed on the Radio page, not in Config.
 - The API key: a write-only field ("set" / "replace"). It is never shown or sent back.
 - Saving:
   - settings that only change a service (device name, volume, update days) are applied and the

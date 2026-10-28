@@ -47,6 +47,28 @@ Desktop: station list on the left, the "Now playing" card and the add form on th
 | + Add | Opens the add form (below). Saves to the station list. |
 | Edit / delete a station | Long-press or ⋮ menu. Not in v1 if time is short. |
 
+## Managing stations
+
+Stations are added and changed on this page. The Config page only turns the radio on or off.
+
+- **Manage stations** opens the station editor: a list with **Edit** and **Delete** for each row.
+- **Edit** opens the same form as **Add**, filled in. Changes are saved to `radio.json` at once.
+- **Delete** asks to confirm. Deleting the station that is playing stops playback first.
+- **Reorder:** drag a row (desktop) or use the ↑ ↓ buttons (phone). The order shows on Home.
+- **Import / export:** the station list as a JSON file, so it can be backed up.
+
+Station record:
+
+```json
+{
+  "id": "jazz-fm",
+  "name": "Jazz FM",
+  "url": "https://example.com/jazz.mp3",
+  "genre": "Jazz",
+  "logo": ""
+}
+```
+
 ## Add-station form
 
 - Fields: name (required), stream URL (required, must start with `http://` or `https://`),

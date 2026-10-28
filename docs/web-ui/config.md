@@ -36,6 +36,11 @@ Desktop: section list on the left, the open section on the right.
 - Enabled: on or off. When off, Spotify is hidden from Home and Soloist is stopped.
 - Device name (`DEVICE_NAME`).
 - API key: shows `set` or `not set`. Write-only; typing a new key replaces it.
+- **Update after (days)** (`SOLOIST_UPDATE_AFTER_DAYS`, 1–89): automatic Soloist updates happen only when
+  the installed build is at least this old. Builds expire after 90 days.
+- **Soloist version:** shows the installed version and a **Check for update** button. The check compares
+  the latest archive on Spotify's server with the installed one. If a newer build exists, **Update now**
+  appears (asks to confirm, then installs and restarts Soloist).
 
 ### Internet radio
 - Enabled: on or off. When off, the radio is hidden from Home.

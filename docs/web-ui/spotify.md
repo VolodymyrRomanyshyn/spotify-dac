@@ -68,6 +68,19 @@ below the controls.
 | Soloist not running | Banner with the status from `GET /api/status`, controls disabled |
 | Radio playing | Banner "Radio is playing. Play Spotify to switch." |
 
+## Soloist settings (Spotify settings page)
+
+The Spotify page has a settings area below the player:
+
+- **Installed version:** from `soloist --version`.
+- **Check for update:** `GET /api/spotify/update`. Downloads the latest archive and compares its SHA-256
+  with the installed one. Shows "Up to date" or "Newer version available". The check downloads about the
+  size of the archive, so it runs only when the button is pressed.
+- **Update now:** `POST /api/spotify/update` with `{"confirm": true}`, after a confirm dialog. Runs the
+  same updater as the timer (`dac-update --only soloist --force`), which restarts Soloist.
+- **Update after (days):** the `SOLOIST_UPDATE_AFTER_DAYS` setting from the Config page, shown here too.
+  Changing it saves through `POST /api/config`.
+
 ## Notes
 
 - The cover image is loaded from Spotify's image host through the browser, so the Pi doesn't need

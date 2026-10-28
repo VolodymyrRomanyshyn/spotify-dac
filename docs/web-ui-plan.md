@@ -51,6 +51,8 @@ The backend is a small set of JSON endpoints, one per job.
 | GET | `/api/status` | Services, Soloist, DAC rate and format, volume, temperature, throttling, update log |
 | GET | `/api/spotify/now` | Track, cover URL, progress, play state (from `soloist ctl now --json`) |
 | POST | `/api/spotify/control` | `play`, `pause`, `next`, `prev` (and volume, once checked) |
+| GET | `/api/spotify/update` | Check for a newer Soloist build (SHA-256 of the latest archive vs installed) |
+| POST | `/api/spotify/update` | Install the newest Soloist build now (`{"confirm": true}`) |
 | GET | `/api/spotify/queue` | Next tracks (`soloist ctl queue`) |
 | GET | `/api/radio/stations` | Station list from `radio.json` |
 | POST | `/api/radio/play` | Start a station with mpv on the DAC sink; pauses Spotify first |

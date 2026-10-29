@@ -34,14 +34,14 @@
       </div>
     </section>
 
-    <section class="card" id="progress-card">
-      <label for="progress"><strong>Track</strong> <span class="muted" id="time">-</span></label>
-      <input id="progress" type="range" min="0" max="1000" step="1" value="0" disabled>
+    <section class="card" id="volume-card">
+      <div class="times"><strong>Volume</strong><span id="volume-value">-</span></div>
+      <input id="volume" type="range" min="0" max="100" step="1" value="0" aria-label="Volume">
     </section>
 
-    <section class="card" id="volume-card">
-      <label for="volume"><strong>Volume</strong> <span id="volume-value">-</span></label>
-      <input id="volume" type="range" min="0" max="100" step="1" value="0">
+    <section class="card" id="progress-card">
+      <div class="times"><span id="elapsed">-</span><span id="remaining">-</span></div>
+      <input id="progress" type="range" min="0" max="1000" step="1" value="0" disabled aria-label="Track position">
     </section>
 
     <section class="card" id="stations-card" hidden>

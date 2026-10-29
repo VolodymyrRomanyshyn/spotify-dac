@@ -5,7 +5,8 @@
   const $ = (id) => document.getElementById(id);
   const srcSpotify = $("src-spotify"), srcRadio = $("src-radio");
   const title = $("title"), subtitle = $("subtitle"), cover = $("cover"), controls = $("controls");
-  const progress = $("progress"), timeText = $("time"), progressCard = $("progress-card");
+  const progress = $("progress"), elapsedText = $("elapsed"), remainingText = $("remaining");
+  const progressCard = $("progress-card");
   const volume = $("volume"), volumeValue = $("volume-value");
   const banner = $("banner"), statusLine = $("status-line");
   const stationsCard = $("stations-card"), stationsBox = $("stations");
@@ -92,7 +93,9 @@
       row.setAttribute("aria-pressed", String(playing));
       const badge = el("span", "badge", "Playing");
       badge.classList.toggle("off", !playing);  // always present, so the row does not move
-      row.append(el("span", "name", s.name), el("span", "muted small", s.genre || ""), badge);
+      const info = el("div", "info");
+      info.append(el("span", "name", s.name), el("span", "muted small genre", s.genre || ""));
+      row.append(info, badge);
       row.addEventListener("click", function () { playStation(s.id).catch(fail); });
       return row;
     }));
@@ -106,7 +109,7 @@
                             now.status ? "Spotify " + now.status : null].filter(Boolean).join(" - ");
     cover.style.backgroundImage = now.cover ? 'url("' + now.cover + '")' : "";
     cover.classList.toggle("empty", !now.cover);
-    cover.classList.remove("initials");
+    cover.classList.remove("initials", "radio-icon");
     cover.textContent = "";
     controls.replaceChildren(
       iconButton("prev", "Previous", function () { return api("/api/spotify/control", { body: { action: "prev" } }); }),
@@ -123,9 +126,9 @@
       progress.disabled = !duration;
       if (duration) {
         progress.value = Math.round(1000 * Math.min(position, duration) / duration);
-        timeText.textContent = formatTime(position) + " / " + formatTime(duration);
+        showTimes(position, duration);
       } else {
-        timeText.textContent = "-";
+        showTimes(null, null);
       }
     }
     if (typeof now.volume === "number" && !volumeDirty) drawVolume(now.volume);
@@ -135,11 +138,16 @@
     if (now.status !== "playing") return now.position_ms;
     return now.position_ms + (Date.now() - spotifyAt);  // move the bar between answers
   }
+  function showTimes(position, duration) {
+    if (!duration) { elapsedText.textContent = "-"; remainingText.textContent = "-"; return; }
+    elapsedText.textContent = formatTime(position);
+    remainingText.textContent = "-" + formatTime(Math.max(0, duration - position));
+  }
   progress.addEventListener("pointerdown", function () { seeking = true; });
   progress.addEventListener("input", function () {
     seeking = true;
     const duration = spotify && spotify.duration_ms;
-    if (duration) timeText.textContent = formatTime(duration * progress.value / 1000) + " / " + formatTime(duration);
+    if (duration) showTimes(duration * progress.value / 1000, duration);
   });
   progress.addEventListener("change", function () {
     const duration = spotify && spotify.duration_ms;
@@ -173,11 +181,17 @@
       cover.style.backgroundImage = 'url("' + station.logo + '")';
       cover.classList.remove("empty", "initials");
       cover.textContent = "";
-    } else {
+    } else if (station) {
       cover.style.backgroundImage = "";
       cover.classList.add("initials");
       cover.classList.remove("empty");
-      cover.textContent = initials(station ? station.name : "Radio");
+      cover.textContent = initials(station.name);
+    } else {
+      // no station chosen yet: a radio icon instead of a letter
+      cover.style.backgroundImage = "";
+      cover.classList.remove("initials", "empty");
+      cover.innerHTML = '<svg viewBox="0 0 24 24" width="72" height="72" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M7 8l10-4"/><circle cx="16" cy="14" r="2.5"/><path d="M6 12h4"/></svg>';
+      cover.classList.add("radio-icon");
     }
     controls.replaceChildren(
       radio.playing

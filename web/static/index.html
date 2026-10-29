@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Spotify DAC - Status</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <span class="device" id="device">Spotify DAC</span>
+    <nav>
+      <a href="/" class="active">Status</a>
+    </nav>
+    <button id="theme" class="theme" type="button" aria-label="Switch dark or light mode">Theme</button>
+  </header>
+
+  <main>
+    <div id="banner" class="banner" hidden></div>
+
+    <section class="overall" id="overall">
+      <span class="dot" aria-hidden="true"></span>
+      <div>
+        <h1 id="overall-text">Checking...</h1>
+        <p id="overall-detail" class="muted"></p>
+      </div>
+      <button id="refresh" type="button">Refresh</button>
+    </section>
+
+    <div class="grid" id="cards"></div>
+    <p class="muted small" id="updated"></p>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

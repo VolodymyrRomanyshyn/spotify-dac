@@ -8,7 +8,7 @@ from pathlib import Path
 
 from .common import SOLOIST_CTL, ApiError, run
 
-CONTROLS = {"play", "pause", "next", "prev"}
+CONTROLS = {"play", "pause", "next", "prev", "seek"}
 _URI = re.compile(r"^spotify:(track|album|playlist|episode):[A-Za-z0-9]{1,64}$")
 
 
@@ -27,10 +27,23 @@ def get_now(req):
     item = data.get("item") or {}
     decorations = item.get("decorations") or {}
     name = (decorations.get("identity") or {}).get("name")
+    artists = [c.get("name") for c in (decorations.get("creators") or []) if c.get("name")]
     covers = (decorations.get("visual_identity") or {}).get("cover") or []
-    small = next((c.get("url") for c in covers if c.get("size") == "small"), None)
-    cover = small or (covers[0].get("url") if covers else None)
-    return 200, {"status": data.get("status"), "name": name, "uri": item.get("uri"), "cover": cover}
+    by_size = {c.get("size"): c.get("url") for c in covers}
+    cover = by_size.get("xlarge") or by_size.get("large") or by_size.get("default") or by_size.get("small")
+    duration = (decorations.get("playback") or {}).get("duration_ms")
+    position = (data.get("position") or {}).get("position_ms")
+    volume = data.get("volume")
+    return 200, {
+        "status": data.get("status"),
+        "name": name,
+        "artists": artists,
+        "uri": item.get("uri"),
+        "cover": cover,
+        "position_ms": position,
+        "duration_ms": duration,
+        "volume": int(round(volume)) if isinstance(volume, (int, float)) else None,
+    }
 
 
 def get_queue(req):
@@ -46,6 +59,11 @@ def post_control(req):
     if action not in CONTROLS:
         raise ApiError(400, "action must be one of: " + ", ".join(sorted(CONTROLS)))
     args = SOLOIST_CTL + [action]
+    if action == "seek":
+        ms = body.get("position_ms")
+        if isinstance(ms, bool) or not isinstance(ms, int) or ms < 0:
+            raise ApiError(400, "position_ms must be a whole number of milliseconds")
+        args.append(str(ms))
     if action == "play" and body.get("uri"):
         uri = body["uri"]
         if not isinstance(uri, str) or not _URI.match(uri):

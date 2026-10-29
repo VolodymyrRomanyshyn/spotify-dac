@@ -4,14 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <title>Spotify DAC - Status</title>
+  <title>Spotify DAC</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="topbar">
-    <span class="device" id="device">Spotify DAC</span>
+    <span class="device">Spotify DAC</span>
     <nav>
-      <a href="/" class="active">Status</a>
+      <a href="/" class="active">Home</a>
+      <a href="/status.html">Status</a>
     </nav>
     <button id="theme" class="theme" type="button" aria-label="Switch dark or light mode">Theme</button>
   </header>
@@ -19,19 +20,39 @@
   <main>
     <div id="banner" class="banner" hidden></div>
 
-    <section class="overall" id="overall">
-      <span class="dot" aria-hidden="true"></span>
-      <div>
-        <h1 id="overall-text">Checking...</h1>
-        <p id="overall-detail" class="muted"></p>
+    <div class="switch" role="group" aria-label="Source">
+      <button type="button" id="src-spotify">Spotify</button>
+      <button type="button" id="src-radio">Internet radio</button>
+    </div>
+
+    <section class="card now">
+      <div class="cover" id="cover" aria-hidden="true"></div>
+      <div class="meta">
+        <h1 id="title">Loading...</h1>
+        <p class="muted" id="subtitle"></p>
+        <div class="controls" id="controls"></div>
       </div>
-      <button id="refresh" type="button">Refresh</button>
     </section>
 
-    <div class="grid" id="cards"></div>
-    <p class="muted small" id="updated"></p>
+    <section class="card" id="progress-card">
+      <label for="progress"><strong>Track</strong> <span class="muted" id="time">-</span></label>
+      <input id="progress" type="range" min="0" max="1000" step="1" value="0" disabled>
+    </section>
+
+    <section class="card" id="volume-card">
+      <label for="volume"><strong>Volume</strong> <span id="volume-value">-</span></label>
+      <input id="volume" type="range" min="0" max="100" step="1" value="0">
+    </section>
+
+    <section class="card" id="stations-card" hidden>
+      <h2>Stations</h2>
+      <div id="stations" class="stations"></div>
+    </section>
+
+    <p class="status-line" id="status-line"><a href="/status.html">Status</a></p>
   </main>
 
-  <script src="app.js"></script>
+  <script src="common.js"></script>
+  <script src="home.js"></script>
 </body>
 </html>

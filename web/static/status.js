@@ -2,32 +2,12 @@
 (function () {
   const REFRESH_MS = 10000;
   const root = document.documentElement;
-  const themeButton = document.getElementById("theme");
   const cards = document.getElementById("cards");
   const banner = document.getElementById("banner");
   const overall = document.getElementById("overall");
   const overallText = document.getElementById("overall-text");
   const overallDetail = document.getElementById("overall-detail");
   const updated = document.getElementById("updated");
-
-  // ---- theme: follows the system, the button overrides and is remembered ----
-  function applyTheme(choice) {
-    if (choice === "dark" || choice === "light") {
-      root.setAttribute("data-theme", choice);
-    } else {
-      root.removeAttribute("data-theme");
-    }
-  }
-  let saved = null;
-  try { saved = localStorage.getItem("theme"); } catch (e) { /* private mode: keep system */ }
-  applyTheme(saved);
-  themeButton.addEventListener("click", function () {
-    const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const current = root.getAttribute("data-theme") || (dark ? "dark" : "light");
-    const next = current === "dark" ? "light" : "dark";
-    applyTheme(next);
-    try { localStorage.setItem("theme", next); } catch (e) { /* ignore */ }
-  });
 
   // ---- helpers ----
   function el(tag, className, text) {

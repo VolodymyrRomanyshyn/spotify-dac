@@ -87,6 +87,13 @@
     list.splice(index, 1);
     return save(list);
   }
+  // logo thumbnail for a station or catalog entry; initials when it has no logo
+  function thumb(s) {
+    const box = el("span", "thumb");
+    if (s.logo) box.style.backgroundImage = 'url("' + s.logo + '")';
+    else box.textContent = s.name.split(/\s+/).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join("");
+    return box;
+  }
   function drawStations() {
     stationsBox.replaceChildren(...stations.map(function (s, i) {
       const isPlaying = s.id === playing;
@@ -94,12 +101,9 @@
       const info = el("button", "station-main");
       info.type = "button";
       info.setAttribute("aria-pressed", String(isPlaying));
-      const thumb = el("span", "thumb");
-      if (s.logo) thumb.style.backgroundImage = 'url("' + s.logo + '")';
-      else thumb.textContent = s.name.split(/\s+/).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join("");
       const info2 = el("div", "info");
       info2.append(el("span", "name", s.name), el("span", "muted small genre", s.genre || ""));
-      info.append(thumb, info2);
+      info.append(thumb(s), info2);
       if (isPlaying) info.append(el("span", "badge", "Playing"));
       info.addEventListener("click", function () { play(s).catch(fail); });
       const actions = el("div", "row-actions");
@@ -161,7 +165,7 @@
       const row = el("div", "station");
       const info = el("div", "info");
       info.append(el("span", "name", r.name), el("span", "muted small genre", r.description || r.source || ""));
-      row.append(info);
+      row.append(thumb(r), info);
       if (r.added) {
         row.append(el("span", "badge", "Added"));
       } else {

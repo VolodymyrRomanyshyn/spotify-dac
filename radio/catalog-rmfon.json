@@ -3,7 +3,7 @@
   "id": "rmfon-36lat-rmf-fm",
   "name": "36 lat RMF FM",
   "description": "muzyczna historia radia RMF FM",
-  "logo": "https://static.rmf.pl/portal/stations/covers/36lat-rmf-fm/20260115083202_36lat-rmf-fm_600.jpg",
+  "logo": "/logos/rmfon-36lat-rmf-fm.jpg",
   "url": "https://rs201-krk.rmfstream.pl/rmf_20lat",
   "fallback": [
    "https://rs203-krk.rmfstream.pl/rmf_20lat",
@@ -22,7 +22,7 @@
   "id": "rmfon-rmf-fmf",
   "name": "FMF CLASSIC",
   "description": "FMF Classic",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-fmf/20260513121511_rmf-fmf_600.jpg",
+  "logo": "/logos/rmfon-rmf-fmf.jpg",
   "url": "https://rs202-krk-cyfronet.rmfstream.pl/rmf_classic_fmf",
   "fallback": [
    "https://rs201-krk.rmfstream.pl/rmf_classic_fmf",
@@ -41,7 +41,7 @@
   "id": "rmfon-fresh-dance",
   "name": "FRESH Dance",
   "description": "taneczne nowości",
-  "logo": "https://static.rmf.pl/portal/stations/covers/fresh-dance/20250414134848_fresh-dance_600.jpg",
+  "logo": "/logos/rmfon-fresh-dance.jpg",
   "url": "https://rs101-krk.rmfstream.pl/rmf_top17",
   "fallback": [
    "https://rs202-krk-cyfronet.rmfstream.pl/rmf_top17",
@@ -60,7 +60,7 @@
   "id": "rmfon-fresh-hip-hop",
   "name": "FRESH Hip Hop",
   "description": "hip-hopowe świeżynki",
-  "logo": "https://static.rmf.pl/portal/stations/covers/fresh-hip-hop/20250416141552_fresh-hip-hop_600.jpg",
+  "logo": "/logos/rmfon-fresh-hip-hop.jpg",
   "url": "https://rs201-krk-cyfronet.rmfstream.pl/rmf_top19",
   "fallback": [
    "https://rs103-krk.rmfstream.pl/rmf_top19",
@@ -79,7 +79,7 @@
   "id": "rmfon-fresh-polski-hip-hop",
   "name": "FRESH Polski Hip Hop",
   "description": "nowy polski rap",
-  "logo": "https://static.rmf.pl/portal/stations/covers/fresh-polski-hip-hop/20250416141545_fresh-polski-hip-hop_600.jpg",
+  "logo": "/logos/rmfon-fresh-polski-hip-hop.jpg",
   "url": "https://rs202-krk.rmfstream.pl/rmf_top18",
   "fallback": [
    "https://rs203-krk.rmfstream.pl/rmf_top18",
@@ -98,7 +98,7 @@
   "id": "rmfon-fresh-polskie",
   "name": "FRESH Polskie",
   "description": "nowe numery polskich artystów",
-  "logo": "https://static.rmf.pl/portal/stations/covers/fresh-polskie/20250416141305_fresh-polskie_600.jpg",
+  "logo": "/logos/rmfon-fresh-polskie.jpg",
   "url": "https://rs102-krk-cyfronet.rmfstream.pl/rmf_top20",
   "fallback": [
    "https://rs203-krk.rmfstream.pl/rmf_top20",
@@ -117,7 +117,7 @@
   "id": "rmfon-fresh-pop",
   "name": "FRESH Pop",
   "description": "najnowsze popowe hity",
-  "logo": "https://static.rmf.pl/portal/stations/covers/fresh-pop/20250414134741_fresh-pop_600.jpg",
+  "logo": "/logos/rmfon-fresh-pop.jpg",
   "url": "https://rs202-krk.rmfstream.pl/rmf_top16",
   "fallback": [
    "https://rs202-krk-cyfronet.rmfstream.pl/rmf_top16",
@@ -136,7 +136,7 @@
   "id": "rmfon-lista-przebojow-muzyki-filmowej",
   "name": "Lista Przebojów Muzyki Filmowej RMF Classic",
   "description": "najnowsze filmowe przeboje",
-  "logo": "https://static.rmf.pl/portal/stations/covers/lista-przebojow-muzyki-filmowej/20260911162517_lista-przebojow-muzyki-filmowej_600.jpg",
+  "logo": "/logos/rmfon-lista-przebojow-muzyki-filmowej.jpg",
   "url": "https://rs203-krk-cyfronet.rmfstream.pl/rmf_top3",
   "fallback": [
    "https://rs203-krk.rmfstream.pl/rmf_top3",
@@ -155,7 +155,7 @@
   "id": "rmfon-radiogra",
   "name": "Radio Gra Toruń",
   "description": "Radio Gra Toruń - Moje Miasto Moje Radio",
-  "logo": "https://static.rmf.pl/portal/stations/covers/radiogra/20241112155706_radiogra_600.jpg",
+  "logo": "/logos/rmfon-radiogra.jpg",
   "url": "https://rs102-krk.rmfstream.pl/radio_gra",
   "fallback": [
    "https://rs103-krk.rmfstream.pl/radio_gra",
@@ -174,7 +174,7 @@
   "id": "rmfon-rmf-24",
   "name": "RADIO RMF24",
   "description": "Jeszcze więcej informacji",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-24/20240821114837_rmf-24_600.jpg",
+  "logo": "/logos/rmfon-rmf-24.jpg",
   "url": "https://rs201-krk-cyfronet.rmfstream.pl/rmf_24",
   "fallback": [
    "https://rs202-krk.rmfstream.pl/rmf_24",
@@ -193,7 +193,7 @@
   "id": "rmfon-rmf-10s",
   "name": "RMF 10s",
   "description": "druga dekada XXI wieku",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-10s/20240404114019_rmf-10s_600.jpg",
+  "logo": "/logos/rmfon-rmf-10s.jpg",
   "url": "https://rs101-krk-cyfronet.rmfstream.pl/rmf_2010",
   "fallback": [
    "https://rs201-krk.rmfstream.pl/rmf_2010",
@@ -212,7 +212,7 @@
   "id": "rmfon-rmf-2-pop",
   "name": "RMF 2 Pop",
   "description": "młodszy brat RMF FM",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-2-pop/20240625101632_rmf-2-pop_600.jpg",
+  "logo": "/logos/rmfon-rmf-2-pop.jpg",
   "url": "https://rs101-krk-cyfronet.rmfstream.pl/rmf_2",
   "fallback": [
    "https://rs203-krk-cyfronet.rmfstream.pl/rmf_2",
@@ -231,7 +231,7 @@
   "id": "rmfon-rmf-2000",
   "name": "RMF 2000",
   "description": "klimat pierwszej dekady XXI wieku",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-2000/20240404114651_rmf-2000_600.jpg",
+  "logo": "/logos/rmfon-rmf-2000.jpg",
   "url": "https://rs202-krk-cyfronet.rmfstream.pl/rmf_2000",
   "fallback": [
    "https://rs102-krk-cyfronet.rmfstream.pl/rmf_2000",
@@ -250,7 +250,7 @@
   "id": "rmfon-rmf-20s",
   "name": "RMF 20s",
   "description": "druga dekada XXI wieku",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-20s/20240404114055_rmf-20s_600.jpg",
+  "logo": "/logos/rmfon-rmf-20s.jpg",
   "url": "https://rs201-krk.rmfstream.pl/rmf_20s",
   "fallback": [
    "https://rs101-krk.rmfstream.pl/rmf_20s",
@@ -269,7 +269,7 @@
   "id": "rmfon-rmf-3-pop-rock",
   "name": "RMF 3 Pop-Rock",
   "description": "RMF FM w wersji rockowej",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-3-pop-rock/20240625101319_rmf-3-pop-rock_600.jpg",
+  "logo": "/logos/rmfon-rmf-3-pop-rock.jpg",
   "url": "https://rs103-krk.rmfstream.pl/rmf_3",
   "fallback": [
    "https://rs103-krk.rmfstream.pl/rmf_3",
@@ -288,7 +288,7 @@
   "id": "rmfon-rmf-4-dance-rnb",
   "name": "RMF 4 Dance & RNB",
   "description": "RMF FM w tanecznym rytmie",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-4-dance-rnb/20241029155220_rmf-4-dance-rnb_600.jpg",
+  "logo": "/logos/rmfon-rmf-4-dance-rnb.jpg",
   "url": "https://rs103-krk-cyfronet.rmfstream.pl/rmf_4",
   "fallback": [
    "https://rs201-krk-cyfronet.rmfstream.pl/rmf_4",
@@ -307,7 +307,7 @@
   "id": "rmfon-rmf-5-lagodne-przeboje",
   "name": "RMF 5 Łagodne przeboje",
   "description": "RMF FM dla dojrzałego słuchacza",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-5-lagodne-przeboje/20250721123837_rmf-5-lagodne-przeboje_600.jpg",
+  "logo": "/logos/rmfon-rmf-5-lagodne-przeboje.jpg",
   "url": "https://rs201-krk.rmfstream.pl/rmf_5",
   "fallback": [
    "https://rs101-krk.rmfstream.pl/rmf_5",
@@ -326,7 +326,7 @@
   "id": "rmfon-rmf-50s",
   "name": "RMF 50s",
   "description": "Muzyka lat 50",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-50s/20240404114217_rmf-50s_600.jpg",
+  "logo": "/logos/rmfon-rmf-50s.jpg",
   "url": "https://rs202-krk-cyfronet.rmfstream.pl/rmf_50s",
   "fallback": [
    "https://rs102-krk.rmfstream.pl/rmf_50s",
@@ -345,7 +345,7 @@
   "id": "rmfon-rmf-60s",
   "name": "RMF 60s",
   "description": "Muzyka lat 60",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-60s/20240404114450_rmf-60s_600.jpg",
+  "logo": "/logos/rmfon-rmf-60s.jpg",
   "url": "https://rs102-krk-cyfronet.rmfstream.pl/rmf_60s",
   "fallback": [
    "https://rs103-krk-cyfronet.rmfstream.pl/rmf_60s",
@@ -364,7 +364,7 @@
   "id": "rmfon-rmf-70s",
   "name": "RMF 70s",
   "description": "Muzyka lat 70",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-70s/20240404114515_rmf-70s_600.jpg",
+  "logo": "/logos/rmfon-rmf-70s.jpg",
   "url": "https://rs201-krk-cyfronet.rmfstream.pl/rmf_70s",
   "fallback": [
    "https://rs201-krk.rmfstream.pl/rmf_70s",
@@ -383,7 +383,7 @@
   "id": "rmfon-rmf-80s",
   "name": "RMF 80s",
   "description": "Muzyka lat 80",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-80s/20240404114537_rmf-80s_600.jpg",
+  "logo": "/logos/rmfon-rmf-80s.jpg",
   "url": "https://rs101-krk.rmfstream.pl/rmf_80s",
   "fallback": [
    "https://rs102-krk.rmfstream.pl/rmf_80s",
@@ -402,7 +402,7 @@
   "id": "rmfon-rmf-80s-disco",
   "name": "RMF 80s disco",
   "description": "taneczne hity lat 80",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-80s-disco/20240625101657_rmf-80s-disco_600.jpg",
+  "logo": "/logos/rmfon-rmf-80s-disco.jpg",
   "url": "https://rs101-krk-cyfronet.rmfstream.pl/rmf_80s_disco",
   "fallback": [
    "https://rs102-krk-cyfronet.rmfstream.pl/rmf_80s_disco",
@@ -421,7 +421,7 @@
   "id": "rmfon-rmf-90s",
   "name": "RMF 90s",
   "description": "Muzyka lat 90",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-90s/20240404114608_rmf-90s_600.jpg",
+  "logo": "/logos/rmfon-rmf-90s.jpg",
   "url": "https://rs101-krk.rmfstream.pl/rmf_90s",
   "fallback": [
    "https://rs202-krk.rmfstream.pl/rmf_90s",
@@ -440,7 +440,7 @@
   "id": "rmfon-rmf-90s-dance",
   "name": "RMF 90s dance",
   "description": "niezapomniane hity parkietów!",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-90s-dance/20240625100946_rmf-90s-dance_600.jpg",
+  "logo": "/logos/rmfon-rmf-90s-dance.jpg",
   "url": "https://rs203-krk-cyfronet.rmfstream.pl/rmf_90s_dance",
   "fallback": [
    "https://rs102-krk-cyfronet.rmfstream.pl/rmf_90s_dance",
@@ -459,7 +459,7 @@
   "id": "rmfon-rmf-alternatywa",
   "name": "RMF Alternatywa",
   "description": "sam wybierasz - masz alternatywę",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-alternatywa/20240625101940_rmf-alternatywa_600.jpg",
+  "logo": "/logos/rmfon-rmf-alternatywa.jpg",
   "url": "https://rs203-krk.rmfstream.pl/rmf_alternatywa",
   "fallback": [
    "https://rs101-krk-cyfronet.rmfstream.pl/rmf_alternatywa",
@@ -478,7 +478,7 @@
   "id": "rmfon-rmf-ballady",
   "name": "RMF Ballady",
   "description": "wytchnienie i refleksja",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-ballady/20240625102003_rmf-ballady_600.jpg",
+  "logo": "/logos/rmfon-rmf-ballady.jpg",
   "url": "https://rs202-krk.rmfstream.pl/rmf_nostalgia",
   "fallback": [
    "https://rs202-krk-cyfronet.rmfstream.pl/rmf_nostalgia",
@@ -497,7 +497,7 @@
   "id": "rmfon-rmf-blues",
   "name": "RMF Blues",
   "description": "blues w każdym kolorze i nastroju",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-blues/20240625101017_rmf-blues_600.jpg",
+  "logo": "/logos/rmfon-rmf-blues.jpg",
   "url": "https://rs202-krk.rmfstream.pl/rmf_blues",
   "fallback": [
    "https://rs103-krk-cyfronet.rmfstream.pl/rmf_blues",
@@ -516,7 +516,7 @@
   "id": "rmfon-cafe",
   "name": "RMF Cafe",
   "description": "dźwięki jazzu, soft popu i indie",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-studencka-impreza/20241112135515_rmf-studencka-impreza_600.jpg",
+  "logo": "/logos/rmfon-cafe.jpg",
   "url": "https://rs103-krk-cyfronet.rmfstream.pl/rmf_studencka_impreza",
   "fallback": [
    "https://rs103-krk.rmfstream.pl/rmf_studencka_impreza",
@@ -535,7 +535,7 @@
   "id": "rmfon-rmf-chillout",
   "name": "RMF Chillout",
   "description": "Muzyka chillout",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-chillout/20240308124418_rmf-chillout_600.jpg",
+  "logo": "/logos/rmfon-rmf-chillout.jpg",
   "url": "https://rs202-krk.rmfstream.pl/rmf_chillout",
   "fallback": [
    "https://rs102-krk.rmfstream.pl/rmf_chillout",
@@ -554,7 +554,7 @@
   "id": "rmfon-rmf-classic",
   "name": "RMF Classic",
   "description": "RMF Classic. Muzyka z klasą",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-classic/20260130151605_rmf-classic_600.jpg",
+  "logo": "/logos/rmfon-rmf-classic.jpg",
   "url": "https://rs102-krk-cyfronet.rmfstream.pl/rmf_classic",
   "fallback": [
    "https://rs201-krk-cyfronet.rmfstream.pl/rmf_classic",
@@ -573,7 +573,7 @@
   "id": "rmfon-rmf_classicplus_sku",
   "name": "RMF Classic Czas skupienia",
   "description": "RMF Classic Czas skupienia",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_classicplus_sku/20231129130550_rmf_classicplus_sku_600.jpg",
+  "logo": "/logos/rmfon-rmf-classicplus-sku.jpg",
   "url": "https://rs101-krk-cyfronet.rmfstream.pl/rmf_classicplus_sku",
   "fallback": [
    "https://rs202-krk-cyfronet.rmfstream.pl/rmf_classicplus_sku",
@@ -592,7 +592,7 @@
   "id": "rmfon-rmf_classicplus_zim",
   "name": "RMF Classic Hans Zimmer",
   "description": "RMF Classic Hans Zimmer",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_classicplus_zim/20231129130633_rmf_classicplus_zim_600.jpg",
+  "logo": "/logos/rmfon-rmf-classicplus-zim.jpg",
   "url": "https://rs203-krk-cyfronet.rmfstream.pl/rmf_classicplus_zim",
   "fallback": [
    "https://rs202-krk.rmfstream.pl/rmf_classicplus_zim",
@@ -611,7 +611,7 @@
   "id": "rmfon-rmf_classicplus_wil",
   "name": "RMF Classic John Williams",
   "description": "RMF Classic John Williams",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_classicplus_wil/20241112135136_rmf_classicplus_wil_600.jpg",
+  "logo": "/logos/rmfon-rmf-classicplus-wil.jpg",
   "url": "https://rs103-krk-cyfronet.rmfstream.pl/rmf_classicplus_wil",
   "fallback": [
    "https://rs202-krk-cyfronet.rmfstream.pl/rmf_classicplus_wil",
@@ -630,7 +630,7 @@
   "id": "rmfon-rmf_classicplus_wer",
   "name": "RMF Classic Klasyka z werwą",
   "description": "RMF Classic Klasyka z werwą",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_classicplus_wer/20231129130700_rmf_classicplus_wer_600.jpg",
+  "logo": "/logos/rmfon-rmf-classicplus-wer.jpg",
   "url": "https://rs201-krk.rmfstream.pl/rmf_classicplus_wer",
   "fallback": [
    "https://rs102-krk.rmfstream.pl/rmf_classicplus_wer",
@@ -649,7 +649,7 @@
   "id": "rmfon-rmf_classicplus_min",
   "name": "RMF Classic Mindfulness",
   "description": "RMF Classic Mindfulness",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_classicplus_min/20241112135207_rmf_classicplus_min_600.jpg",
+  "logo": "/logos/rmfon-rmf-classicplus-min.jpg",
   "url": "https://rs102-krk-cyfronet.rmfstream.pl/rmf_classicplus_min",
   "fallback": [
    "https://rs203-krk.rmfstream.pl/rmf_classicplus_min",
@@ -668,7 +668,7 @@
   "id": "rmfon-rmf_classicplus_wes",
   "name": "RMF Classic Morricone Westerny",
   "description": "RMF Classic Morricone Westerny",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_classicplus_wes/20241112134959_rmf_classicplus_wes_600.jpg",
+  "logo": "/logos/rmfon-rmf-classicplus-wes.jpg",
   "url": "https://rs202-krk.rmfstream.pl/rmf_classicplus_wes",
   "fallback": [
    "https://rs102-krk.rmfstream.pl/rmf_classicplus_wes",
@@ -687,7 +687,7 @@
   "id": "rmfon-rmf_classicplus_osc",
   "name": "RMF Classic Muzyka Oscarowa",
   "description": "RMF Classic Muzyka Oscarowa",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_classicplus_osc/20231129130722_rmf_classicplus_osc_600.jpg",
+  "logo": "/logos/rmfon-rmf-classicplus-osc.jpg",
   "url": "https://rs201-krk-cyfronet.rmfstream.pl/rmf_classicplus_osc",
   "fallback": [
    "https://rs102-krk.rmfstream.pl/rmf_classicplus_osc",
@@ -706,7 +706,7 @@
   "id": "rmfon-rmf_classicplus_pir",
   "name": "RMF Classic Na pirackich wodach",
   "description": "RMF Classic Na pirackich wodach",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_classicplus_pir/20241112135028_rmf_classicplus_pir_600.jpg",
+  "logo": "/logos/rmfon-rmf-classicplus-pir.jpg",
   "url": "https://rs101-krk-cyfronet.rmfstream.pl/rmf_classicplus_pir",
   "fallback": [
    "https://rs203-krk-cyfronet.rmfstream.pl/rmf_classicplus_pir",
@@ -725,7 +725,7 @@
   "id": "rmfon-oscary-2025",
   "name": "RMF Classic Oscary 2025",
   "description": "Muzyka oscarowa 2025",
-  "logo": "https://static.rmf.pl/portal/stations/covers/oscary-2025/20250226152240_oscary-2025_600.jpg",
+  "logo": "/logos/rmfon-oscary-2025.jpg",
   "url": "https://rs201-krk.rmfstream.pl/rmf_top13",
   "fallback": [
    "https://rs102-krk.rmfstream.pl/rmf_top13",
@@ -744,7 +744,7 @@
   "id": "rmfon-rmf-classic-rock",
   "name": "RMF Classic rock",
   "description": "absolutny kanon muzyki rockowej",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-classic-rock/20240404114731_rmf-classic-rock_600.jpg",
+  "logo": "/logos/rmfon-rmf-classic-rock.jpg",
   "url": "https://rs102-krk.rmfstream.pl/rmf_classic_rock",
   "fallback": [
    "https://rs103-krk.rmfstream.pl/rmf_classic_rock",
@@ -763,7 +763,7 @@
   "id": "rmfon-rmf_classicplus_tar",
   "name": "RMF Classic Tarantino",
   "description": "RMF Classic Tarantino",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_classicplus_tar/20241112135500_rmf_classicplus_tar_600.jpg",
+  "logo": "/logos/rmfon-rmf-classicplus-tar.jpg",
   "url": "https://rs103-krk-cyfronet.rmfstream.pl/rmf_classicplus_tar",
   "fallback": [
    "https://rs101-krk-cyfronet.rmfstream.pl/rmf_classicplus_tar",
@@ -782,7 +782,7 @@
   "id": "rmfon-rmf_classicplus_tho",
   "name": "RMF Classic Thor",
   "description": "RMF Classic Thor",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_classicplus_tho/20231129130807_rmf_classicplus_tho_600.jpg",
+  "logo": "/logos/rmfon-rmf-classicplus-tho.jpg",
   "url": "https://rs202-krk-cyfronet.rmfstream.pl/rmf_classicplus_tho",
   "fallback": [
    "https://rs203-krk-cyfronet.rmfstream.pl/rmf_classicplus_tho",
@@ -801,7 +801,7 @@
   "id": "rmfon-rmf_classicplus_srd",
   "name": "RMF Classic Śródziemie",
   "description": "RMF Classic Śródziemie",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_classicplus_srd/20241112155454_rmf_classicplus_srd_600.jpg",
+  "logo": "/logos/rmfon-rmf-classicplus-srd.jpg",
   "url": "https://rs202-krk-cyfronet.rmfstream.pl/rmf_classicplus_srd",
   "fallback": [
    "https://rs201-krk.rmfstream.pl/rmf_classicplus_srd",
@@ -820,7 +820,7 @@
   "id": "rmfon-rmf_classicplus_cza",
   "name": "RMF Classic Świat Czarodziejów",
   "description": "RMF Classic Świat Czarodziejów",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_classicplus_cza/20231129130743_rmf_classicplus_cza_600.jpg",
+  "logo": "/logos/rmfon-rmf-classicplus-cza.jpg",
   "url": "https://rs202-krk-cyfronet.rmfstream.pl/rmf_classicplus_cza",
   "fallback": [
    "https://rs201-krk.rmfstream.pl/rmf_classicplus_cza",
@@ -839,7 +839,7 @@
   "id": "rmfon-rmf-crush",
   "name": "RMF Crush",
   "description": "ładni chłopcy i ładne piosenki",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-crush/20250211151629_rmf-crush_600.jpg",
+  "logo": "/logos/rmfon-rmf-crush.jpg",
   "url": "https://rs103-krk.rmfstream.pl/rmf_top9",
   "fallback": [
    "https://rs102-krk-cyfronet.rmfstream.pl/rmf_top9",
@@ -858,7 +858,7 @@
   "id": "rmfon-rmf-dance",
   "name": "RMF Dance",
   "description": "dance bez ograniczeń",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-dance/20240404114851_rmf-dance_600.jpg",
+  "logo": "/logos/rmfon-rmf-dance.jpg",
   "url": "https://rs202-krk.rmfstream.pl/rmf_dance",
   "fallback": [
    "https://rs201-krk-cyfronet.rmfstream.pl/rmf_dance",
@@ -877,7 +877,7 @@
   "id": "rmfon-rmf-disco-polo",
   "name": "RMF Disco polo",
   "description": "Disco polo",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-disco-polo/20240404114929_rmf-disco-polo_600.jpg",
+  "logo": "/logos/rmfon-rmf-disco-polo.jpg",
   "url": "https://rs103-krk-cyfronet.rmfstream.pl/rmf_disco_polo",
   "fallback": [
    "https://rs203-krk.rmfstream.pl/rmf_disco_polo",
@@ -896,7 +896,7 @@
   "id": "rmfon-rmf-dla-dzieci",
   "name": "RMF Dla dzieci",
   "description": "Muzyka dla dzieci",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-dla-dzieci/20240625101101_rmf-dla-dzieci_600.jpg",
+  "logo": "/logos/rmfon-rmf-dla-dzieci.jpg",
   "url": "https://rs101-krk.rmfstream.pl/rmf_baby",
   "fallback": [
    "https://rs201-krk-cyfronet.rmfstream.pl/rmf_baby",
@@ -915,7 +915,7 @@
   "id": "rmfon-rmf-fitness",
   "name": "RMF Fitness",
   "description": "czas na rozgrzewkę",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-fitness/20240625102448_rmf-fitness_600.jpg",
+  "logo": "/logos/rmfon-rmf-fitness.jpg",
   "url": "https://rs102-krk-cyfronet.rmfstream.pl/rmf_fitness",
   "fallback": [
    "https://rs101-krk.rmfstream.pl/rmf_fitness",
@@ -934,7 +934,7 @@
   "id": "rmfon-rmf-fitness-rock",
   "name": "RMF Fitness rock",
   "description": "duża dawka energii",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-fitness-rock/20241015151740_rmf-fitness-rock_600.jpg",
+  "logo": "/logos/rmfon-rmf-fitness-rock.jpg",
   "url": "https://rs103-krk.rmfstream.pl/rmf_fitness_rock",
   "fallback": [
    "https://rs201-krk-cyfronet.rmfstream.pl/rmf_fitness_rock",
@@ -953,7 +953,7 @@
   "id": "rmfon-rmf-fm",
   "name": "RMF FM",
   "description": "Najlepsza muzyka",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-fm/20240404114958_rmf-fm_600.jpg",
+  "logo": "/logos/rmfon-rmf-fm.jpg",
   "url": "https://rs102-krk-cyfronet.rmfstream.pl/rmf_fm",
   "fallback": [
    "https://rs102-krk.rmfstream.pl/rmf_fm",
@@ -972,7 +972,7 @@
   "id": "rmfon-rmf-gold",
   "name": "RMF Gold",
   "description": "klasyka lat 60., 70., 80. i 90.",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-gold/20240404115035_rmf-gold_600.jpg",
+  "logo": "/logos/rmfon-rmf-gold.jpg",
   "url": "https://rs103-krk.rmfstream.pl/rmf_gold",
   "fallback": [
    "https://rs102-krk-cyfronet.rmfstream.pl/rmf_gold",
@@ -991,7 +991,7 @@
   "id": "rmfon-rmf-hard-and-heavy",
   "name": "RMF Hard & Heavy",
   "description": "30 lat historii muzyki hard & heavy",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-hard-and-heavy/20240625102517_rmf-hard-and-heavy_600.jpg",
+  "logo": "/logos/rmfon-rmf-hard-and-heavy.jpg",
   "url": "https://rs202-krk-cyfronet.rmfstream.pl/rmf_hard_heavy",
   "fallback": [
    "https://rs202-krk.rmfstream.pl/rmf_hard_heavy",
@@ -1010,7 +1010,7 @@
   "id": "rmfon-rmf-hip-hop",
   "name": "RMF Hip hop",
   "description": "przegląd Hip-Hopowych brzmień",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-hip-hop/20250626105229_rmf-hip-hop_600.jpg",
+  "logo": "/logos/rmfon-rmf-hip-hop.jpg",
   "url": "https://rs203-krk-cyfronet.rmfstream.pl/rmf_hip_hop",
   "fallback": [
    "https://rs101-krk.rmfstream.pl/rmf_hip_hop",
@@ -1029,7 +1029,7 @@
   "id": "rmfon-rmf-hot-new",
   "name": "RMF Hot new",
   "description": "muzyczne nowości",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-hot-new/20250416142016_rmf-hot-new_600.jpg",
+  "logo": "/logos/rmfon-rmf-hot-new.jpg",
   "url": "https://rs201-krk-cyfronet.rmfstream.pl/rmf_hot_new",
   "fallback": [
    "https://rs202-krk-cyfronet.rmfstream.pl/rmf_hot_new",
@@ -1048,7 +1048,7 @@
   "id": "rmfon-jesienny-vibe",
   "name": "RMF Jesienny vibe",
   "description": "piosenki idealne na jesień",
-  "logo": "https://static.rmf.pl/portal/stations/covers/jesienny-vibe/20250910123636_jesienny-vibe_600.jpg",
+  "logo": "/logos/rmfon-jesienny-vibe.jpg",
   "url": "https://rs203-krk-cyfronet.rmfstream.pl/rmf_top8",
   "fallback": [
    "https://rs201-krk-cyfronet.rmfstream.pl/rmf_top8",
@@ -1067,7 +1067,7 @@
   "id": "rmfon-k-pop",
   "name": "RMF K-pop",
   "description": "k-pop",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-gamemusic/20251008132246_rmf-gamemusic_600.jpg",
+  "logo": "/logos/rmfon-k-pop.jpg",
   "url": "https://rs102-krk.rmfstream.pl/rmf_gamemusic",
   "fallback": [
    "https://rs103-krk.rmfstream.pl/rmf_gamemusic",
@@ -1086,7 +1086,7 @@
   "id": "rmfon-rmf-klasyka-polskiego-hip-hop",
   "name": "RMF Klasyka polskiego hip hopu",
   "description": "sute bity dla ziomali z kwadratu",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-klasyka-polskiego-hip-hop/20240625103507_rmf-klasyka-polskiego-hip-hop_600.jpg",
+  "logo": "/logos/rmfon-rmf-klasyka-polskiego-hip-hop.jpg",
   "url": "https://rs201-krk-cyfronet.rmfstream.pl/rmf_ziom",
   "fallback": [
    "https://rs102-krk.rmfstream.pl/rmf_ziom",
@@ -1105,7 +1105,7 @@
   "id": "rmfon-rmf-koledy",
   "name": "RMF Kolędy",
   "description": "Najpiękniejsze polskie kolędy",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-koledy/20251003122833_rmf-koledy_600.jpg",
+  "logo": "/logos/rmfon-rmf-koledy.jpg",
   "url": "https://rs101-krk-cyfronet.rmfstream.pl/rmf_koledy",
   "fallback": [
    "https://rs203-krk.rmfstream.pl/rmf_koledy",
@@ -1124,7 +1124,7 @@
   "id": "rmfon-ladies",
   "name": "RMF Ladies",
   "description": "RMF Ladies",
-  "logo": "https://static.rmf.pl/portal/stations/covers/ladies/20241015151111_ladies_600.jpg",
+  "logo": "/logos/rmfon-ladies.jpg",
   "url": "https://rs103-krk-cyfronet.rmfstream.pl/rmf_ladies",
   "fallback": [
    "https://rs103-krk.rmfstream.pl/rmf_ladies",
@@ -1143,7 +1143,7 @@
   "id": "rmfon-rmf-latino",
   "name": "RMF Latino",
   "description": "gorące klimaty",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-latino/20250626105333_rmf-latino_600.jpg",
+  "logo": "/logos/rmfon-rmf-latino.jpg",
   "url": "https://rs102-krk-cyfronet.rmfstream.pl/rmf_latino",
   "fallback": [
    "https://rs203-krk.rmfstream.pl/rmf_latino",
@@ -1162,7 +1162,7 @@
   "id": "rmfon-leniwaniedziela",
   "name": "RMF Leniwa niedziela",
   "description": "RMF Leniwa niedziela",
-  "logo": "https://static.rmf.pl/portal/stations/covers/leniwaniedziela/20241015151056_leniwaniedziela_600.jpg",
+  "logo": "/logos/rmfon-leniwaniedziela.jpg",
   "url": "https://rs101-krk.rmfstream.pl/rmf_leniwa_niedziela",
   "fallback": [
    "https://rs103-krk.rmfstream.pl/rmf_leniwa_niedziela",
@@ -1181,7 +1181,7 @@
   "id": "rmfon-rmf-love",
   "name": "RMF Love",
   "description": "Piosenki miłosne",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-love/20240625103538_rmf-love_600.jpg",
+  "logo": "/logos/rmfon-rmf-love.jpg",
   "url": "https://rs203-krk.rmfstream.pl/rmf_love",
   "fallback": [
    "https://rs202-krk.rmfstream.pl/rmf_love",
@@ -1200,7 +1200,7 @@
   "id": "rmfon-rmf-mainstage",
   "name": "RMF Mainstage",
   "description": "mainstage",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-mainstage/20261022153516_rmf-mainstage_600.jpg",
+  "logo": "/logos/rmfon-rmf-mainstage.jpg",
   "url": "https://rs102-krk.rmfstream.pl/rmf_club",
   "fallback": [
    "https://rs202-krk.rmfstream.pl/rmf_club",
@@ -1219,7 +1219,7 @@
   "id": "rmfon-rmf-maxx",
   "name": "RMF MAXX",
   "description": "RMF MAXX. Hity #naMAXXa",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-maxx/20240404115440_rmf-maxx_600.jpg",
+  "logo": "/logos/rmfon-rmf-maxx.jpg",
   "url": "https://rs201-krk.rmfstream.pl/rmf_maxxx",
   "fallback": [
    "https://rs203-krk-cyfronet.rmfstream.pl/rmf_maxxx",
@@ -1238,7 +1238,7 @@
   "id": "rmfon-rmf_maxxx_byd",
   "name": "RMF MAXX Bydgoszcz",
   "description": "RMF MAXX Bydgoszcz",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_maxxx_byd/20241108095512_rmf_maxxx_byd_600.jpg",
+  "logo": "/logos/rmfon-rmf-maxxx-byd.jpg",
   "url": "https://rs202-krk.rmfstream.pl/rmf_maxxx_byd",
   "fallback": [
    "https://rs101-krk.rmfstream.pl/rmf_maxxx_byd",
@@ -1257,7 +1257,7 @@
   "id": "rmfon-rmf_maxxx_cze",
   "name": "RMF MAXX Częstochowa",
   "description": "RMF MAXX Częstochowa",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_maxxx_cze/20241108095556_rmf_maxxx_cze_600.jpg",
+  "logo": "/logos/rmfon-rmf-maxxx-cze.jpg",
   "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx_cze",
   "fallback": [
    "https://rs101-krk.rmfstream.pl/rmf_maxxx_cze",
@@ -1276,7 +1276,7 @@
   "id": "rmfon-rmf-maxx-dance",
   "name": "RMF MAXX Dance",
   "description": "Taneczne przeboje w RMF MAXX",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-maxx-dance/20250530120606_rmf-maxx-dance_600.jpg",
+  "logo": "/logos/rmfon-rmf-maxx-dance.jpg",
   "url": "https://rs102-krk.rmfstream.pl/rmf_maxx_dance",
   "fallback": [
    "https://rs102-krk-cyfronet.rmfstream.pl/rmf_maxx_dance",
@@ -1295,7 +1295,7 @@
   "id": "rmfon-rmf_maxxx_wal",
   "name": "RMF MAXX Dolny Śląsk",
   "description": "RMF MAXX Dolny Śląsk",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_maxxx_wal/20241108095620_rmf_maxxx_wal_600.jpg",
+  "logo": "/logos/rmfon-rmf-maxxx-wal.jpg",
   "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx_wal",
   "fallback": [
    "https://rs201-krk.rmfstream.pl/rmf_maxxx_wal",
@@ -1314,7 +1314,7 @@
   "id": "rmfon-rmf-hopbec",
   "name": "RMF MAXX Hop Bęc",
   "description": "lista przebojów RMF MAXX",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-hopbec/20241120115333_rmf-hopbec_600.jpg",
+  "logo": "/logos/rmfon-rmf-hopbec.jpg",
   "url": "https://rs101-krk.rmfstream.pl/rmf_hop_bec",
   "fallback": [
    "https://rs201-krk-cyfronet.rmfstream.pl/rmf_hop_bec",
@@ -1333,7 +1333,7 @@
   "id": "rmfon-rmf_maxxx_ino",
   "name": "RMF MAXX Inowrocław",
   "description": "RMF MAXX Inowrocław",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_maxxx_ino/20241108095651_rmf_maxxx_ino_600.jpg",
+  "logo": "/logos/rmfon-rmf-maxxx-ino.jpg",
   "url": "https://rs203-krk.rmfstream.pl/rmf_maxxx_ino",
   "fallback": [
    "https://rs203-krk-cyfronet.rmfstream.pl/rmf_maxxx_ino",
@@ -1352,7 +1352,7 @@
   "id": "rmfon-rmf_maxxx_knn",
   "name": "RMF MAXX Konin",
   "description": "RMF MAXX Konin",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_maxxx_knn/20241108095722_rmf_maxxx_knn_600.jpg",
+  "logo": "/logos/rmfon-rmf-maxxx-knn.jpg",
   "url": "https://rs203-krk.rmfstream.pl/rmf_maxxx_knn",
   "fallback": [
    "https://rs101-krk-cyfronet.rmfstream.pl/rmf_maxxx_knn",
@@ -1371,7 +1371,7 @@
   "id": "rmfon-rmf_maxxx_kra",
   "name": "RMF MAXX Kraków",
   "description": "RMF MAXX Kraków",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_maxxx_kra/20241108095740_rmf_maxxx_kra_600.jpg",
+  "logo": "/logos/rmfon-rmf-maxxx-kra.jpg",
   "url": "https://rs202-krk.rmfstream.pl/rmf_maxxx_kra",
   "fallback": [
    "https://rs202-krk-cyfronet.rmfstream.pl/rmf_maxxx_kra",
@@ -1390,7 +1390,7 @@
   "id": "rmfon-rmf_maxxx_ksn",
   "name": "RMF MAXX Krosno",
   "description": "RMF MAXX Krosno",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_maxxx_ksn/20241108095944_rmf_maxxx_ksn_600.jpg",
+  "logo": "/logos/rmfon-rmf-maxxx-ksn.jpg",
   "url": "https://rs203-krk.rmfstream.pl/rmf_maxxx_ksn",
   "fallback": [
    "https://rs101-krk-cyfronet.rmfstream.pl/rmf_maxxx_ksn",
@@ -1409,7 +1409,7 @@
   "id": "rmfon-rmf_maxxx_zgr",
   "name": "RMF MAXX Lubuskie",
   "description": "RMF MAXX Lubuskie",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_maxxx_zgr/20241108100008_rmf_maxxx_zgr_600.jpg",
+  "logo": "/logos/rmfon-rmf-maxxx-zgr.jpg",
   "url": "https://rs201-krk-cyfronet.rmfstream.pl/rmf_maxxx_zgr",
   "fallback": [
    "https://rs203-krk-cyfronet.rmfstream.pl/rmf_maxxx_zgr",
@@ -1428,7 +1428,7 @@
   "id": "rmfon-rmf_maxxx_cie",
   "name": "RMF MAXX Mazowsze",
   "description": "RMF MAXX Mazowsze",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_maxxx_cie/20241108100025_rmf_maxxx_cie_600.jpg",
+  "logo": "/logos/rmfon-rmf-maxxx-cie.jpg",
   "url": "https://rs201-krk-cyfronet.rmfstream.pl/rmf_maxxx_cie",
   "fallback": [
    "https://rs201-krk.rmfstream.pl/rmf_maxxx_cie",
@@ -1447,7 +1447,7 @@
   "id": "rmfon-rmf-maxx-new-hits",
   "name": "RMF MAXX New Hits",
   "description": "Najnowsze hity z RMF MAXX",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-maxx-new-hits/20250530120628_rmf-maxx-new-hits_600.jpg",
+  "logo": "/logos/rmfon-rmf-maxx-new-hits.jpg",
   "url": "https://rs203-krk.rmfstream.pl/rmf_maxx_new_hits",
   "fallback": [
    "https://rs203-krk-cyfronet.rmfstream.pl/rmf_maxx_new_hits",
@@ -1466,7 +1466,7 @@
   "id": "rmfon-rmf_maxxx_nsa",
   "name": "RMF MAXX Nowy Sącz",
   "description": "RMF MAXX Nowy Sącz",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_maxxx_nsa/20241108100049_rmf_maxxx_nsa_600.jpg",
+  "logo": "/logos/rmfon-rmf-maxxx-nsa.jpg",
   "url": "https://rs201-krk.rmfstream.pl/rmf_maxxx_nsa",
   "fallback": [
    "https://rs103-krk-cyfronet.rmfstream.pl/rmf_maxxx_nsa",
@@ -1485,7 +1485,7 @@
   "id": "rmfon-rmf_maxxx_ole",
   "name": "RMF MAXX Oleśnica",
   "description": "RMF MAXX Oleśnica",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_maxxx_ole/20241108100109_rmf_maxxx_ole_600.jpg",
+  "logo": "/logos/rmfon-rmf-maxxx-ole.jpg",
   "url": "https://rs201-krk.rmfstream.pl/rmf_maxxx_ole",
   "fallback": [
    "https://rs101-krk.rmfstream.pl/rmf_maxxx_ole",
@@ -1504,7 +1504,7 @@
   "id": "rmfon-rmf_maxxx_opo",
   "name": "RMF MAXX Opole",
   "description": "RMF MAXX Opole",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_maxxx_opo/20241108100126_rmf_maxxx_opo_600.jpg",
+  "logo": "/logos/rmfon-rmf-maxxx-opo.jpg",
   "url": "https://rs202-krk.rmfstream.pl/rmf_maxxx_opo",
   "fallback": [
    "https://rs203-krk-cyfronet.rmfstream.pl/rmf_maxxx_opo",
@@ -1523,7 +1523,7 @@
   "id": "rmfon-rmf_maxxx_pil",
   "name": "RMF MAXX Piła",
   "description": "RMF MAXX Piła",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_maxxx_pil/20241108100143_rmf_maxxx_pil_600.jpg",
+  "logo": "/logos/rmfon-rmf-maxxx-pil.jpg",
   "url": "https://rs202-krk-cyfronet.rmfstream.pl/rmf_maxxx_pil",
   "fallback": [
    "https://rs203-krk-cyfronet.rmfstream.pl/rmf_maxxx_pil",
@@ -1542,7 +1542,7 @@
   "id": "rmfon-rmf_maxxx_lom",
   "name": "RMF MAXX Podlasie",
   "description": "RMF MAXX Podlasie",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_maxxx_lom/20241108100203_rmf_maxxx_lom_600.jpg",
+  "logo": "/logos/rmfon-rmf-maxxx-lom.jpg",
   "url": "https://rs201-krk.rmfstream.pl/rmf_maxxx_lom",
   "fallback": [
    "https://rs202-krk.rmfstream.pl/rmf_maxxx_lom",
@@ -1561,7 +1561,7 @@
   "id": "rmfon-rmf_maxxx_slu",
   "name": "RMF MAXX Pomorze",
   "description": "RMF MAXX Pomorze",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_maxxx_slu/20241108100258_rmf_maxxx_slu_600.jpg",
+  "logo": "/logos/rmfon-rmf-maxxx-slu.jpg",
   "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx_slu",
   "fallback": [
    "https://rs101-krk.rmfstream.pl/rmf_maxxx_slu",
@@ -1580,7 +1580,7 @@
   "id": "rmfon-rmf_maxxx_poz",
   "name": "RMF MAXX Poznań",
   "description": "RMF MAXX Poznań",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_maxxx_poz/20241108100312_rmf_maxxx_poz_600.jpg",
+  "logo": "/logos/rmfon-rmf-maxxx-poz.jpg",
   "url": "https://rs101-krk-cyfronet.rmfstream.pl/rmf_maxxx_poz",
   "fallback": [
    "https://rs201-krk.rmfstream.pl/rmf_maxxx_poz",
@@ -1599,7 +1599,7 @@
   "id": "rmfon-rmf-maxx-rap",
   "name": "RMF MAXX Rap",
   "description": "Rapowe hity w RMF MAXX",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-maxx-rap/20250530120615_rmf-maxx-rap_600.jpg",
+  "logo": "/logos/rmfon-rmf-maxx-rap.jpg",
   "url": "https://rs102-krk.rmfstream.pl/rmf_maxx_rap",
   "fallback": [
    "https://rs201-krk.rmfstream.pl/rmf_maxx_rap",
@@ -1618,7 +1618,7 @@
   "id": "rmfon-rmf_maxxx_szc",
   "name": "RMF MAXX Szczecin",
   "description": "RMF MAXX Szczecin",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_maxxx_szc/20241108100651_rmf_maxxx_szc_600.jpg",
+  "logo": "/logos/rmfon-rmf-maxxx-szc.jpg",
   "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx_szc",
   "fallback": [
    "https://rs203-krk.rmfstream.pl/rmf_maxxx_szc",
@@ -1637,7 +1637,7 @@
   "id": "rmfon-rmf_maxxx_tmz",
   "name": "RMF MAXX Tomaszów Mazowiecki",
   "description": "RMF MAXX Tomaszów Mazowiecki",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_maxxx_tmz/20241118174415_rmf_maxxx_tmz_600.jpg",
+  "logo": "/logos/rmfon-rmf-maxxx-tmz.jpg",
   "url": "https://rs202-krk-cyfronet.rmfstream.pl/rmf_maxxx_tmz",
   "fallback": [
    "https://rs101-krk.rmfstream.pl/rmf_maxxx_tmz",
@@ -1656,7 +1656,7 @@
   "id": "rmfon-rmf_maxxx_gda",
   "name": "RMF MAXX Trójmiasto",
   "description": "RMF MAXX Trójmiasto",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_maxxx_gda/20241108100721_rmf_maxxx_gda_600.jpg",
+  "logo": "/logos/rmfon-rmf-maxxx-gda.jpg",
   "url": "https://rs201-krk.rmfstream.pl/rmf_maxxx_gda",
   "fallback": [
    "https://rs103-krk-cyfronet.rmfstream.pl/rmf_maxxx_gda",
@@ -1675,7 +1675,7 @@
   "id": "rmfon-rmf_maxxx_waw",
   "name": "RMF MAXX Warszawa",
   "description": "RMF MAXX Warszawa",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_maxxx_waw/20241108100734_rmf_maxxx_waw_600.jpg",
+  "logo": "/logos/rmfon-rmf-maxxx-waw.jpg",
   "url": "https://rs201-krk.rmfstream.pl/rmf_maxxx_waw",
   "fallback": [
    "https://rs102-krk-cyfronet.rmfstream.pl/rmf_maxxx_waw",
@@ -1694,7 +1694,7 @@
   "id": "rmfon-rmf_maxxx_wlc",
   "name": "RMF MAXX Włocławek",
   "description": "RMF MAXX Włocławek",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_maxxx_wlc/20241108100748_rmf_maxxx_wlc_600.jpg",
+  "logo": "/logos/rmfon-rmf-maxxx-wlc.jpg",
   "url": "https://rs103-krk.rmfstream.pl/rmf_maxxx_wlc",
   "fallback": [
    "https://rs103-krk-cyfronet.rmfstream.pl/rmf_maxxx_wlc",
@@ -1713,7 +1713,7 @@
   "id": "rmfon-rmf_maxxx_slk",
   "name": "RMF MAXX Śląsk",
   "description": "RMF MAXX Śląsk",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_maxxx_slk/20241108100335_rmf_maxxx_slk_600.jpg",
+  "logo": "/logos/rmfon-rmf-maxxx-slk.jpg",
   "url": "https://rs102-krk-cyfronet.rmfstream.pl/rmf_maxxx_slk",
   "fallback": [
    "https://rs103-krk-cyfronet.rmfstream.pl/rmf_maxxx_slk",
@@ -1732,7 +1732,7 @@
   "id": "rmfon-rmf_maxxx_kie",
   "name": "RMF MAXX Świętokrzyskie",
   "description": "RMF MAXX Świętokrzyskie",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf_maxxx_kie/20241108100608_rmf_maxxx_kie_600.jpg",
+  "logo": "/logos/rmfon-rmf-maxxx-kie.jpg",
   "url": "https://rs202-krk.rmfstream.pl/rmf_maxxx_kie",
   "fallback": [
    "https://rs201-krk.rmfstream.pl/rmf_maxxx_kie",
@@ -1751,7 +1751,7 @@
   "id": "rmfon-rmf-muzyka-filmowa",
   "name": "RMF Muzyka filmowa",
   "description": "najpiękniejsze tematy filmowe",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-muzyka-filmowa/20240625101142_rmf-muzyka-filmowa_600.jpg",
+  "logo": "/logos/rmfon-rmf-muzyka-filmowa.jpg",
   "url": "https://rs103-krk-cyfronet.rmfstream.pl/rmf_muzyka_filmowa",
   "fallback": [
    "https://rs201-krk-cyfronet.rmfstream.pl/rmf_muzyka_filmowa",
@@ -1770,7 +1770,7 @@
   "id": "rmfon-rmf-muzyka-klasyczna",
   "name": "RMF Muzyka klasyczna",
   "description": "Filharmonia RMFOn.pl",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-muzyka-klasyczna/20240625103602_rmf-muzyka-klasyczna_600.jpg",
+  "logo": "/logos/rmfon-rmf-muzyka-klasyczna.jpg",
   "url": "https://rs201-krk-cyfronet.rmfstream.pl/rmf_muzyka_klasyczna",
   "fallback": [
    "https://rs202-krk.rmfstream.pl/rmf_muzyka_klasyczna",
@@ -1789,7 +1789,7 @@
   "id": "rmfon-na-wiosne",
   "name": "RMF Na wiosnę",
   "description": "idzie wiosna",
-  "logo": "https://static.rmf.pl/portal/stations/covers/na-wiosne/20260311153458_na-wiosne_600.jpg",
+  "logo": "/logos/rmfon-na-wiosne.jpg",
   "url": "https://rs102-krk-cyfronet.rmfstream.pl/rmf_top14",
   "fallback": [
    "https://rs101-krk.rmfstream.pl/rmf_top14",
@@ -1808,7 +1808,7 @@
   "id": "rmfon-rmf-najwieksze-polskie-przeboje-rmf-on",
   "name": "RMF Największe polskie przeboje",
   "description": "polskie top wszech czasów",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-najwieksze-polskie-przeboje-rmf-on/20241113165629_rmf-najwieksze-polskie-przeboje-rmf-on_600.jpg",
+  "logo": "/logos/rmfon-rmf-najwieksze-polskie-przeboje-rmf-on.jpg",
   "url": "https://rs102-krk.rmfstream.pl/npp_rmf_on",
   "fallback": [
    "https://rs202-krk.rmfstream.pl/npp_rmf_on",
@@ -1827,7 +1827,7 @@
   "id": "rmfon-rmf-niezapomniane-melodie",
   "name": "RMF Niezapomniane melodie",
   "description": "niezapomniana zabawa",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-niezapomniane-melodie/20240625103814_rmf-niezapomniane-melodie_600.jpg",
+  "logo": "/logos/rmfon-rmf-niezapomniane-melodie.jpg",
   "url": "https://rs103-krk-cyfronet.rmfstream.pl/rmf_niezapomniane_melodie",
   "fallback": [
    "https://rs103-krk-cyfronet.rmfstream.pl/rmf_niezapomniane_melodie",
@@ -1846,7 +1846,7 @@
   "id": "rmfon-rmf-party",
   "name": "RMF Party",
   "description": "taneczne hity ostatnich 20 lat",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-party/20240404115529_rmf-party_600.jpg",
+  "logo": "/logos/rmfon-rmf-party.jpg",
   "url": "https://rs101-krk-cyfronet.rmfstream.pl/rmf_party",
   "fallback": [
    "https://rs103-krk.rmfstream.pl/rmf_party",
@@ -1865,7 +1865,7 @@
   "id": "rmfon-rmf-piosenka-filmowa",
   "name": "RMF Piosenka filmowa",
   "description": "przeboje znane z kina",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-piosenka-filmowa/20241015151355_rmf-piosenka-filmowa_600.jpg",
+  "logo": "/logos/rmfon-rmf-piosenka-filmowa.jpg",
   "url": "https://rs201-krk.rmfstream.pl/rmf_piosenka_filmowa",
   "fallback": [
    "https://rs202-krk-cyfronet.rmfstream.pl/rmf_piosenka_filmowa",
@@ -1884,7 +1884,7 @@
   "id": "rmfon-rmf-piosenka-literacka",
   "name": "RMF Piosenka literacka",
   "description": "daj sie zwieść na cudne manowce",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-piosenka-literacka/20241107152745_rmf-piosenka-literacka_600.jpg",
+  "logo": "/logos/rmfon-rmf-piosenka-literacka.jpg",
   "url": "https://rs102-krk-cyfronet.rmfstream.pl/rmf_piosenka_literacka",
   "fallback": [
    "https://rs203-krk-cyfronet.rmfstream.pl/rmf_piosenka_literacka",
@@ -1903,7 +1903,7 @@
   "id": "rmfon-rmf-pobudka",
   "name": "RMF Pobudka",
   "description": "budzimy muzyką",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-pobudka/20250710155811_rmf-pobudka_600.jpg",
+  "logo": "/logos/rmfon-rmf-pobudka.jpg",
   "url": "https://rs201-krk-cyfronet.rmfstream.pl/rmf_pobudka",
   "fallback": [
    "https://rs202-krk-cyfronet.rmfstream.pl/rmf_pobudka",
@@ -1922,7 +1922,7 @@
   "id": "rmfon-polskaalternartwa",
   "name": "RMF Polska alternatywa",
   "description": "RMF Polska alternatywa",
-  "logo": "https://static.rmf.pl/portal/stations/covers/polskaalternartwa/20241015151155_polskaalternartwa_600.jpg",
+  "logo": "/logos/rmfon-polskaalternartwa.jpg",
   "url": "https://rs203-krk-cyfronet.rmfstream.pl/rmf_polska_alternatywa",
   "fallback": [
    "https://rs201-krk-cyfronet.rmfstream.pl/rmf_polska_alternatywa",
@@ -1941,7 +1941,7 @@
   "id": "rmfon-rmf-polski-hip-hop",
   "name": "RMF Polski hip hop",
   "description": "to co najlepsze w polskim Hip Hopie",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-polski-hip-hop/20241015151255_rmf-polski-hip-hop_600.jpg",
+  "logo": "/logos/rmfon-rmf-polski-hip-hop.jpg",
   "url": "https://rs101-krk-cyfronet.rmfstream.pl/rmf_trend_sounds",
   "fallback": [
    "https://rs102-krk-cyfronet.rmfstream.pl/rmf_trend_sounds",
@@ -1960,7 +1960,7 @@
   "id": "rmfon-rmf-polski-rock",
   "name": "RMF Polski rock",
   "description": "rock znad Wisły w najlepszym wydaniu",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-polski-rock/20240625103850_rmf-polski-rock_600.jpg",
+  "logo": "/logos/rmfon-rmf-polski-rock.jpg",
   "url": "https://rs102-krk-cyfronet.rmfstream.pl/rmf_polski_rock",
   "fallback": [
    "https://rs101-krk-cyfronet.rmfstream.pl/rmf_polski_rock",
@@ -1979,7 +1979,7 @@
   "id": "rmfon-rmf-polskie-przeboje",
   "name": "RMF Polskie przeboje",
   "description": "gramy tylko po polsku",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-polskie-przeboje/20240404115940_rmf-polskie-przeboje_600.jpg",
+  "logo": "/logos/rmfon-rmf-polskie-przeboje.jpg",
   "url": "https://rs102-krk-cyfronet.rmfstream.pl/rmf_polskie_przeboje",
   "fallback": [
    "https://rs201-krk.rmfstream.pl/rmf_polskie_przeboje",
@@ -1998,7 +1998,7 @@
   "id": "rmfon-rmf-poplista",
   "name": "RMF Poplista",
   "description": "kultowa lista przebojów RMF FM",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-poplista/20240625101242_rmf-poplista_600.jpg",
+  "logo": "/logos/rmfon-rmf-poplista.jpg",
   "url": "https://rs203-krk.rmfstream.pl/rmf_poplista",
   "fallback": [
    "https://rs103-krk-cyfronet.rmfstream.pl/rmf_poplista",
@@ -2017,7 +2017,7 @@
   "id": "rmfon-rmf-prl",
   "name": "RMF PRL",
   "description": "gdzie się podziały tamte prywatki?",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-prl/20240625101344_rmf-prl_600.jpg",
+  "logo": "/logos/rmfon-rmf-prl.jpg",
   "url": "https://rs101-krk.rmfstream.pl/rmf_prl",
   "fallback": [
    "https://rs103-krk-cyfronet.rmfstream.pl/rmf_prl",
@@ -2036,7 +2036,7 @@
   "id": "rmfon-rmf-top4",
   "name": "RMF Przeboje lata 2026",
   "description": "lato 2026",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-top4/20260625145935_rmf-top4_600.jpg",
+  "logo": "/logos/rmfon-rmf-top4.jpg",
   "url": "https://rs101-krk-cyfronet.rmfstream.pl/rmf_top4",
   "fallback": [
    "https://rs101-krk-cyfronet.rmfstream.pl/rmf_top4",
@@ -2055,7 +2055,7 @@
   "id": "rmfon-rmf-przeboj-roku",
   "name": "RMF Przebój roku 2025",
   "description": "wybierz piosenkę 2025 roku",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-przeboj-roku/20251204082001_rmf-przeboj-roku_600.jpg",
+  "logo": "/logos/rmfon-rmf-przeboj-roku.jpg",
   "url": "https://rs101-krk.rmfstream.pl/rmf_przeboj_roku",
   "fallback": [
    "https://rs201-krk.rmfstream.pl/rmf_przeboj_roku",
@@ -2074,7 +2074,7 @@
   "id": "rmfon-rmf-relaks",
   "name": "RMF Relaks",
   "description": "Muzyka relaksacyjna",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-relaks/20240625103938_rmf-relaks_600.jpg",
+  "logo": "/logos/rmfon-rmf-relaks.jpg",
   "url": "https://rs202-krk.rmfstream.pl/rmf_relaks",
   "fallback": [
    "https://rs102-krk.rmfstream.pl/rmf_relaks",
@@ -2093,7 +2093,7 @@
   "id": "rmfon-rmf-rock",
   "name": "RMF Rock",
   "description": "rockowe trendy XXI wieku",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-rock/20240625103959_rmf-rock_600.jpg",
+  "logo": "/logos/rmfon-rmf-rock.jpg",
   "url": "https://rs102-krk-cyfronet.rmfstream.pl/rmf_rock",
   "fallback": [
    "https://rs203-krk-cyfronet.rmfstream.pl/rmf_rock",
@@ -2112,7 +2112,7 @@
   "id": "rmfon-rmf-rock-progresywny",
   "name": "RMF Rock progresywny",
   "description": "mistyczna kraina muzyki",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-rock-progresywny/20241107152810_rmf-rock-progresywny_600.jpg",
+  "logo": "/logos/rmfon-rmf-rock-progresywny.jpg",
   "url": "https://rs103-krk.rmfstream.pl/rmf_rock_progresywny",
   "fallback": [
    "https://rs103-krk-cyfronet.rmfstream.pl/rmf_rock_progresywny",
@@ -2131,7 +2131,7 @@
   "id": "rmfon-rmf-smooth-jazz",
   "name": "RMF Smooth jazz",
   "description": "wyjątkowy nastrój i dobry smak",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-smooth-jazz/20240625104053_rmf-smooth-jazz_600.jpg",
+  "logo": "/logos/rmfon-rmf-smooth-jazz.jpg",
   "url": "https://rs102-krk.rmfstream.pl/rmf_smooth_jazz",
   "fallback": [
    "https://rs202-krk.rmfstream.pl/rmf_smooth_jazz",
@@ -2150,7 +2150,7 @@
   "id": "rmfon-rmf-styl",
   "name": "RMF Styl",
   "description": "przeboje ze stylem",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-styl/20240625101420_rmf-styl_600.jpg",
+  "logo": "/logos/rmfon-rmf-styl.jpg",
   "url": "https://rs203-krk-cyfronet.rmfstream.pl/rmf_styl",
   "fallback": [
    "https://rs102-krk-cyfronet.rmfstream.pl/rmf_styl",
@@ -2169,7 +2169,7 @@
   "id": "rmfon-rmf-szanty",
   "name": "RMF Szanty",
   "description": "ahoj żeglarze!",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-szanty/20241107152836_rmf-szanty_600.jpg",
+  "logo": "/logos/rmfon-rmf-szanty.jpg",
   "url": "https://rs201-krk.rmfstream.pl/rmf_szanty",
   "fallback": [
    "https://rs201-krk.rmfstream.pl/rmf_szanty",
@@ -2188,7 +2188,7 @@
   "id": "rmfon-rmf-sloneczne-przeboje",
   "name": "RMF Słoneczne przeboje",
   "description": "wakacyjne przeboje i aktualne hity",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-sloneczne-przeboje/20240625104028_rmf-sloneczne-przeboje_600.jpg",
+  "logo": "/logos/rmfon-rmf-sloneczne-przeboje.jpg",
   "url": "https://rs201-krk-cyfronet.rmfstream.pl/rmf_sloneczne_przeboje",
   "fallback": [
    "https://rs201-krk.rmfstream.pl/rmf_sloneczne_przeboje",
@@ -2207,7 +2207,7 @@
   "id": "rmfon-top-1000",
   "name": "RMF Top 1000",
   "description": "top10",
-  "logo": "https://static.rmf.pl/portal/stations/covers/top-1000/20260511140200_top-1000_600.jpg",
+  "logo": "/logos/rmfon-top-1000.jpg",
   "url": "https://rs202-krk.rmfstream.pl/rmf_top10",
   "fallback": [
    "https://rs102-krk.rmfstream.pl/rmf_top10",
@@ -2226,7 +2226,7 @@
   "id": "rmfon-rmf-top-2026-disco-polo",
   "name": "RMF Top 2026 disco polo",
   "description": "RMF Top 2026 disco polo",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-top-2023-disco-polo/20241112135738_rmf-top-2023-disco-polo_600.jpg",
+  "logo": "/logos/rmfon-rmf-top-2026-disco-polo.jpg",
   "url": "https://rs201-krk-cyfronet.rmfstream.pl/rmf_top2",
   "fallback": [
    "https://rs201-krk-cyfronet.rmfstream.pl/rmf_top2",
@@ -2245,7 +2245,7 @@
   "id": "rmfon-rmf-top-30-swieta",
   "name": "RMF Top 30 święta",
   "description": "przebojowe święta",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-top-30-swieta/20251003122918_rmf-top-30-swieta_600.jpg",
+  "logo": "/logos/rmfon-rmf-top-30-swieta.jpg",
   "url": "https://rs103-krk.rmfstream.pl/rmf_top_30_swieta",
   "fallback": [
    "https://rs201-krk.rmfstream.pl/rmf_top_30_swieta",
@@ -2264,7 +2264,7 @@
   "id": "rmfon-rmf-true-crime",
   "name": "RMF True Crime",
   "description": "Stacja z podcastami true crime",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-true-crime/20250626105253_rmf-true-crime_600.jpg",
+  "logo": "/logos/rmfon-rmf-true-crime.jpg",
   "url": "https://rs102-krk-cyfronet.rmfstream.pl/rmf_true_crime",
   "fallback": [
    "https://rs102-krk-cyfronet.rmfstream.pl/rmf_true_crime",
@@ -2283,7 +2283,7 @@
   "id": "rmfon-vibe",
   "name": "RMF Vibe",
   "description": "RMF Vibe",
-  "logo": "https://static.rmf.pl/portal/stations/covers/vibe/20250423175337_vibe_600.jpg",
+  "logo": "/logos/rmfon-vibe.jpg",
   "url": "https://rs101-krk.rmfstream.pl/rmf_vibe",
   "fallback": [
    "https://rs201-krk-cyfronet.rmfstream.pl/rmf_vibe",
@@ -2302,7 +2302,7 @@
   "id": "rmfon-rmf-viral",
   "name": "RMF Viral",
   "description": "młodzi artyści, nowe głosy, potężne zasięgi",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-viral/20241107153013_rmf-viral_600.jpg",
+  "logo": "/logos/rmfon-rmf-viral.jpg",
   "url": "https://rs202-krk-cyfronet.rmfstream.pl/rmf_bravo",
   "fallback": [
    "https://rs201-krk-cyfronet.rmfstream.pl/rmf_bravo",
@@ -2321,7 +2321,7 @@
   "id": "rmfon-w-kuchni",
   "name": "RMF W kuchni",
   "description": "gotowanie jak w reklamie",
-  "logo": "https://static.rmf.pl/portal/stations/covers/w-kuchni/20250710155753_w-kuchni_600.jpg",
+  "logo": "/logos/rmfon-w-kuchni.jpg",
   "url": "https://rs102-krk-cyfronet.rmfstream.pl/rmf_w_kuchni",
   "fallback": [
    "https://rs103-krk.rmfstream.pl/rmf_w_kuchni",
@@ -2340,7 +2340,7 @@
   "id": "rmfon-rmf-w-pracy",
   "name": "RMF W pracy",
   "description": "dzień jak z nut",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-w-pracy/20240404120015_rmf-w-pracy_600.jpg",
+  "logo": "/logos/rmfon-rmf-w-pracy.jpg",
   "url": "https://rs102-krk.rmfstream.pl/rmf_w_pracy",
   "fallback": [
    "https://rs103-krk-cyfronet.rmfstream.pl/rmf_w_pracy",
@@ -2359,7 +2359,7 @@
   "id": "rmfon-rmf-top",
   "name": "RMF Świąteczne nowości 2025",
   "description": "najnowsze świąteczne piosenki",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-top/20251121124535_rmf-top_600.jpg",
+  "logo": "/logos/rmfon-rmf-top.jpg",
   "url": "https://rs101-krk.rmfstream.pl/rmf_top",
   "fallback": [
    "https://rs202-krk-cyfronet.rmfstream.pl/rmf_top",
@@ -2378,7 +2378,7 @@
   "id": "rmfon-rmf-swieta",
   "name": "RMF Święta",
   "description": "Muzyka świąteczna",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-swieta/20251003122902_rmf-swieta_600.jpg",
+  "logo": "/logos/rmfon-rmf-swieta.jpg",
   "url": "https://rs102-krk-cyfronet.rmfstream.pl/rmf_swieta",
   "fallback": [
    "https://rs101-krk.rmfstream.pl/rmf_swieta",
@@ -2397,7 +2397,7 @@
   "id": "rmfon-rmf-24-wro",
   "name": "RMF24 WROCŁAW",
   "description": "Jeszcze więcej informacji z Wrocławia",
-  "logo": "https://static.rmf.pl/portal/stations/covers/rmf-24-wro/20260803003334_rmf-24-wro_600.jpg",
+  "logo": "/logos/rmfon-rmf-24-wro.jpg",
   "url": "https://rs103-krk.rmfstream.pl/rmf_24_wroc",
   "fallback": [
    "https://rs103-krk-cyfronet.rmfstream.pl/rmf_24_wroc",
@@ -2416,7 +2416,7 @@
   "id": "rmfon-sizeer-fm",
   "name": "Sizeer FM",
   "description": "oficjalna stacja radiowa Sizeer",
-  "logo": "https://static.rmf.pl/portal/stations/covers/sizeer-fm/20241114114825_sizeer-fm_600.jpg",
+  "logo": "/logos/rmfon-sizeer-fm.jpg",
   "url": "https://rs202-krk-cyfronet.rmfstream.pl/sizeer_fm",
   "fallback": [
    "https://rs202-krk.rmfstream.pl/sizeer_fm",
@@ -2435,7 +2435,7 @@
   "id": "rmfon-top-100-muzyki-filmowej",
   "name": "TOP 100 Muzyki Filmowej",
   "description": "top-100-muzyki-filmowej",
-  "logo": "https://static.rmf.pl/portal/stations/covers/top-100-muzyki-filmowej/20261002094150_top-100-muzyki-filmowej_600.jpg",
+  "logo": "/logos/rmfon-top-100-muzyki-filmowej.jpg",
   "url": "https://rs202-krk.rmfstream.pl/rmf_top11",
   "fallback": [
    "https://rs201-krk-cyfronet.rmfstream.pl/rmf_top11",

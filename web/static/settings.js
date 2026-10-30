@@ -42,6 +42,7 @@
     $("power_enable_pin").textContent = hardware.power_enable_pin;
     $("fan_enabled").checked = hardware.fan.enabled;
     $("fan_pin").value = hardware.fan.pin;
+    $("fan-pin-field").hidden = !hardware.fan.enabled;
     $("hat-note").textContent = hardware.hat
       ? "The IQaudIO HAT uses GPIO " + hardware.hat_pins.join(", ") + ", so those pins can't be used here."
       : "";
@@ -175,6 +176,7 @@
   $("check").addEventListener("click", checkCode);
   $("update").addEventListener("click", updateCode);
   $("case").addEventListener("change", function () { $("nespi-only").hidden = $("case").value !== "nespi"; });
+  $("fan_enabled").addEventListener("change", function () { $("fan-pin-field").hidden = !$("fan_enabled").checked; });
 
   loadConfig().catch(function (err) { showError($("general-status"), err); });
   loadHardware().catch(function (err) { showError($("general-status"), err); });

@@ -58,6 +58,7 @@ nav a.active { color: var(--text); background: var(--bg); }
 .menu-list[hidden] { display: none; }
 .menu-list a { display: block; }
 
+[hidden] { display: none !important; }
 button:disabled { opacity: 0.45; cursor: not-allowed; }
 
 /* settings page */

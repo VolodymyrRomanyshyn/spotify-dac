@@ -296,7 +296,8 @@ install_packages() {
   log "Installing packages"
   local pkgs=(curl ca-certificates alsa-utils openssl pipewire pipewire-pulse wireplumber dbus-user-session pulseaudio-utils libpulse0)
   [ "$RADIO_ENABLED" = yes ] && pkgs+=(mpv)
-  [ "$CASE" = nespi ] && pkgs+=(python3 python3-libgpiod)
+  [ "$WEB_UI" = yes ] && pkgs+=(python3)
+  [ "$CASE" = nespi ] && pkgs+=(python3-libgpiod)
   apt-get update -q
   DEBIAN_FRONTEND=noninteractive apt-get install -y -q "${pkgs[@]}"
 }

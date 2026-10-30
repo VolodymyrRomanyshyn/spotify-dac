@@ -35,7 +35,6 @@
   async function loadHardware() {
     hardware = await api("/api/hardware");
     $("case").value = hardware.case;
-    $("poweroff").value = hardware.poweroff;
     $("power_pin").value = hardware.pins.POWER_PIN;
     $("reset_pin").value = hardware.pins.RESET_PIN;
     $("led_pin").value = hardware.pins.LED_PIN;
@@ -83,7 +82,6 @@
     const status = $("gpio-status");
     const body = {
       case: $("case").value,
-      poweroff: $("poweroff").value,
       fan_enabled: $("fan_enabled").checked,
       fan_pin: pinValue("fan_pin"),
     };

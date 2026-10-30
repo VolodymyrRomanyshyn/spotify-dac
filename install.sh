@@ -47,7 +47,7 @@ AUDIO_OUTPUT="usb"                 # usb | hat
 AUDIO_HAT_OVERLAY=""               # e.g. iqaudio-dacplus (only for AUDIO_OUTPUT=hat)
 CASE="none"                        # nespi | none
 FAN_ENABLED="yes"
-POWEROFF_MODE="hardcut"            # hardcut | graceful
+POWEROFF_MODE="hardcut"            # hardcut (the only mode)
 UPDATE_TRIGGER=""                  # poweroff | boot | none   (default depends on CASE)
 SOLOIST_UPDATE_AFTER_DAYS="45"
 APT_UPGRADE="yes"
@@ -161,9 +161,7 @@ ask_questions() {
     hat_pin_defaults
     SAFE_SHUTDOWN="$(ask_yesno "Use the NESPi power switch and buttons for safe shutdown?\n(no: the case stays powered, switch and buttons are ignored, updates run at boot)" "$SAFE_SHUTDOWN")"
     if [ "$SAFE_SHUTDOWN" = yes ]; then
-      POWEROFF_MODE="$(ask_menu "What happens when the power switch is turned OFF (after updates):" "$POWEROFF_MODE" \
-            hardcut  "Stop, sync, read-only remount, cut power via GPIO $POWER_EN_PIN (proven)" \
-            graceful "Full systemctl poweroff, kernel cuts power (EXPERIMENTAL)")"
+      POWEROFF_MODE=hardcut  # the only mode: stop, sync, read-only remount, cut power via GPIO $POWER_EN_PIN
       POWER_PIN="$(ask_pin "GPIO for the power switch\n$(pin_hint 3 17)" "$POWER_PIN")"
       RESET_PIN="$(ask_pin "GPIO for the reset button\n$(pin_hint 2 27)" "$RESET_PIN")"
       LED_PIN="$(ask_pin "GPIO for the case LED\n(default 14)" "$LED_PIN")"
@@ -236,7 +234,7 @@ validate() {
   case "$CASE" in nespi|none) ;; *) die "CASE must be nespi or none" ;; esac
   case "$FAN_ENABLED" in yes|no) ;; *) die "FAN_ENABLED must be yes or no (got: $(printf '%q' "$FAN_ENABLED"))" ;; esac
   case "$APT_UPGRADE" in yes|no) ;; *) die "APT_UPGRADE must be yes or no (got: $(printf '%q' "$APT_UPGRADE"))" ;; esac
-  case "$POWEROFF_MODE" in hardcut|graceful) ;; *) die "POWEROFF_MODE must be hardcut or graceful" ;; esac
+  POWEROFF_MODE=hardcut  # graceful power-off was experimental and is no longer offered
   case "$SAFE_SHUTDOWN" in yes|no) ;; *) die "SAFE_SHUTDOWN must be yes or no" ;; esac
   [[ "$DEFAULT_VOLUME" =~ ^[0-9]+$ ]] && [ "$DEFAULT_VOLUME" -le 100 ] || die "DEFAULT_VOLUME must be 0-100"
   case "$WEB_UI" in yes|no) ;; *) die "WEB_UI must be yes or no" ;; esac
@@ -476,10 +474,6 @@ configure_boot() {
   block+="dtparam=audio=off"
   if [ "$AUDIO_OUTPUT" = hat ]; then
     block+=$'\n'"dtoverlay=$AUDIO_HAT_OVERLAY"
-  fi
-  if [ "$CASE" = nespi ] && [ "$POWEROFF_MODE" = graceful ]; then
-    block+=$'\n'"# NESPi Case+: hold GPIO$POWER_EN_PIN high while running, pull it low at the end of poweroff"
-    block+=$'\n'"dtoverlay=gpio-poweroff,gpiopin=$POWER_EN_PIN,active_low=1"
   fi
   changed="$(bootcfg_set_block "$block")"
   if [ "$changed" = changed ]; then

@@ -8,7 +8,7 @@ from .common import ApiError, read_config, run, write_config
 HAT_PINS = {2, 3, 18, 19, 20, 21}
 DEFAULT_PINS = {"POWER_PIN": 3, "RESET_PIN": 2, "LED_PIN": 14, "FAN_PIN": 21}
 CASES = ("nespi", "none")
-POWEROFF = ("hardcut", "graceful")
+POWEROFF = ("hardcut",)
 
 
 def _pin(cfg, key):
@@ -57,7 +57,7 @@ def post_hardware(req):
         updates["CASE"] = body["case"]
     if "poweroff" in body:
         if body["poweroff"] not in POWEROFF:
-            raise ApiError(400, "power-off mode must be hardcut or graceful")
+            raise ApiError(400, "power-off mode must be hardcut")
         updates["POWEROFF_MODE"] = body["poweroff"]
     if "fan_enabled" in body:
         if not isinstance(body["fan_enabled"], bool):

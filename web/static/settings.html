@@ -71,16 +71,6 @@
             <span>Case LED GPIO</span>
             <input id="led_pin" type="number" min="0" max="27" step="1">
           </label>
-          <label class="field">
-            <span>When the power switch is turned off</span>
-            <span class="select">
-              <select id="poweroff">
-                <option value="hardcut">Hard cut (proven)</option>
-                <option value="graceful">Graceful (experimental)</option>
-              </select>
-              <svg class="chevron" viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.5l5 5 5-5"/></svg>
-            </span>
-          </label>
           <p class="muted">Power enable GPIO: <span id="power_enable_pin"></span>. Set by the installer, not here.</p>
         </div>
         <div class="toggle">

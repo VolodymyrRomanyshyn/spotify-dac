@@ -65,6 +65,17 @@
   });
 })();
 
+// Features (Spotify, radio) from the installer's choices: hide what is off, leave pages that are off.
+window.features = { spotify: true, radio: true };
+window.featuresReady = (async function () {
+  try { window.features = await api("/api/features"); } catch (err) { /* keep everything shown */ }
+  document.querySelectorAll("[data-feature]").forEach(function (el) {
+    el.hidden = !window.features[el.getAttribute("data-feature")];
+  });
+  const needs = document.body.getAttribute("data-needs");
+  if (needs && !window.features[needs]) window.location.replace("/");
+})();
+
 // Calls the JSON API. Resolves with the "data" part, rejects with a readable message.
 async function api(path, options) {
   const opts = Object.assign({ cache: "no-store", credentials: "same-origin" }, options || {});

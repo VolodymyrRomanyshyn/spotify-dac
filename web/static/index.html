@@ -16,7 +16,7 @@
       </button>
       <nav id="menu" class="menu-list" hidden>
         <a href="/" class="active">Home</a>
-        <a href="/radio.html">Radio</a>
+        <a data-feature="radio" href="/radio.html">Radio</a>
         <a href="/status.html">Status</a>
         <a href="/settings.html">Settings</a>
       </nav>
@@ -28,8 +28,8 @@
     <div id="banner" class="banner" hidden></div>
 
     <div class="switch" role="group" aria-label="Source">
-      <button type="button" id="src-spotify">Spotify</button>
-      <button type="button" id="src-radio">Internet radio</button>
+      <button type="button" id="src-spotify" data-feature="spotify">Spotify</button>
+      <button type="button" id="src-radio" data-feature="radio">Internet radio</button>
     </div>
 
     <section class="card now">

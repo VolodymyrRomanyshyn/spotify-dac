@@ -4,6 +4,8 @@
   const SLOW_MS = 30000;    // DAC status line (it runs several commands on the Pi)
   const $ = (id) => document.getElementById(id);
   const srcSpotify = $("src-spotify"), srcRadio = $("src-radio");
+  const switchGroup = document.querySelector(".switch");
+  let features = { spotify: true, radio: true };  // from /api/features (see common.js)
   const title = $("title"), subtitle = $("subtitle"), cover = $("cover"), controls = $("controls");
   const progress = $("progress"), elapsedText = $("elapsed"), remainingText = $("remaining");
   const progressCard = $("progress-card");
@@ -55,6 +57,19 @@
     b.type = "button";
     b.addEventListener("click", function () { onClick().catch(fail); });
     return b;
+  }
+
+  // ---- features: with only one of Spotify and radio, that one is the only source ----
+  function applyFeatures() {
+    features = window.features;
+    switchGroup.hidden = !(features.spotify && features.radio);
+    if (!features.spotify) setSource("radio");
+    else if (!features.radio) setSource("spotify");
+  }
+  function defaultSource(radioPlaying) {
+    if (!features.spotify) return "radio";
+    if (!features.radio) return "spotify";
+    return radioPlaying ? "radio" : "spotify";
   }
 
   // ---- source switch: the user decides; nothing else changes it ----
@@ -244,13 +259,13 @@
   async function refreshFast() {
     try {
       const [radio, now, volumeNow] = await Promise.all([
-        api("/api/radio/now"),
-        api("/api/spotify/now").catch(function () { return null; }),
+        features.radio ? api("/api/radio/now") : Promise.resolve({ playing: null }),
+        features.spotify ? api("/api/spotify/now").catch(function () { return null; }) : Promise.resolve(null),
         api("/api/volume"),
       ]);
       spotify = now;
       if (now) { spotifyPosition = now.position_ms; spotifyAt = Date.now(); }
-      if (source === null) setSource(radio.playing ? "radio" : "spotify");  // first load only
+      if (source === null) setSource(defaultSource(radio.playing));  // first load only
       if (source === "radio") {
         drawRadio(radio, stations.find(function (x) { return x.id === (radio.playing || lastStation); }) || null);
       } else if (now) {
@@ -270,6 +285,7 @@
 
   // stations load once and again after a change
   async function loadStations() {
+    if (!features.radio) return;
     try {
       const data = await api("/api/radio/stations");
       stations = data.stations || [];
@@ -277,7 +293,7 @@
   }
 
   themeInit();
-  loadStations().then(refreshFast);
+  window.featuresReady.then(applyFeatures).then(loadStations).then(refreshFast);
   refreshStatus();
   setInterval(refreshFast, FAST_MS);
   setInterval(refreshStatus, SLOW_MS);

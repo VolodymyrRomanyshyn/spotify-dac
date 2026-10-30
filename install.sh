@@ -41,6 +41,8 @@ fi
 # --- defaults: built-in < existing install < answers file ---------------------
 
 DEVICE_NAME="$(hostname)"
+SPOTIFY_ENABLED="yes"              # yes: Soloist (Spotify Connect) | no: radio only
+RADIO_ENABLED="yes"                # yes: internet radio on the web page | no: Spotify only
 AUDIO_OUTPUT="usb"                 # usb | hat
 AUDIO_HAT_OVERLAY=""               # e.g. iqaudio-dacplus (only for AUDIO_OUTPUT=hat)
 CASE="none"                        # nespi | none
@@ -127,7 +129,13 @@ ask_pin() {
 ask_questions() {
   local usb hw
 
-  DEVICE_NAME="$(ask_input "Name shown in the Spotify app (Spotify Connect device):" "$DEVICE_NAME")"
+  SPOTIFY_ENABLED="$(ask_yesno "Play from the Spotify app (Spotify Connect, needs a Soloist API key)?" "$SPOTIFY_ENABLED")"
+  RADIO_ENABLED="$(ask_yesno "Play internet radio (station list in the web interface)?" "$RADIO_ENABLED")"
+  if [ "$SPOTIFY_ENABLED" = yes ]; then
+    DEVICE_NAME="$(ask_input "Name shown in the Spotify app (Spotify Connect device):" "$DEVICE_NAME")"
+  else
+    DEVICE_NAME="$(ask_input "Name of this device (shown in the web interface):" "$DEVICE_NAME")"
+  fi
 
   usb="$(usb_cards_desc)"
   local cur="usb"
@@ -182,7 +190,9 @@ ask_questions() {
   fi
 
   if [ "$UPDATE_TRIGGER" != none ]; then
-    SOLOIST_UPDATE_AFTER_DAYS="$(ask_input "Update Soloist once its build is at least N days old.\nBuilds expire after 90 days. Allowed: 1-89." "$SOLOIST_UPDATE_AFTER_DAYS")"
+    if [ "$SPOTIFY_ENABLED" = yes ]; then
+      SOLOIST_UPDATE_AFTER_DAYS="$(ask_input "Update Soloist once its build is at least N days old.\nBuilds expire after 90 days. Allowed: 1-89." "$SOLOIST_UPDATE_AFTER_DAYS")"
+    fi
     APT_UPGRADE="$(ask_yesno "Also run 'apt full-upgrade' for the OS during updates?" "$APT_UPGRADE")"
     if [ "$APT_UPGRADE" = yes ]; then
       local def_apt="${APT_UPGRADE_AFTER_DAYS:-}"
@@ -204,13 +214,15 @@ ask_questions() {
     fi
   fi
 
-  local key
-  if [ -n "$SOLOIST_API_KEY" ]; then
-    key="$(ask_password "Soloist API key (from developer.spotify.com > Soloist).\n\nA key is already stored - leave empty to keep it.")"
-  else
-    key="$(ask_password "Soloist API key (from developer.spotify.com > Soloist).\n\nLeave empty to add it later (re-run the installer).")"
+  if [ "$SPOTIFY_ENABLED" = yes ]; then
+    local key
+    if [ -n "$SOLOIST_API_KEY" ]; then
+      key="$(ask_password "Soloist API key (from developer.spotify.com > Soloist).\n\nA key is already stored - leave empty to keep it.")"
+    else
+      key="$(ask_password "Soloist API key (from developer.spotify.com > Soloist).\n\nLeave empty to add it later (re-run the installer).")"
+    fi
+    if [ -n "$key" ]; then SOLOIST_API_KEY="$key"; fi
   fi
-  if [ -n "$key" ]; then SOLOIST_API_KEY="$key"; fi
 }
 
 validate() {
@@ -229,6 +241,10 @@ validate() {
   [[ "$DEFAULT_VOLUME" =~ ^[0-9]+$ ]] && [ "$DEFAULT_VOLUME" -le 100 ] || die "DEFAULT_VOLUME must be 0-100"
   case "$WEB_UI" in yes|no) ;; *) die "WEB_UI must be yes or no" ;; esac
   case "$WEB_USE_PASSWORD" in yes|no) ;; *) die "WEB_USE_PASSWORD must be yes or no" ;; esac
+  case "$SPOTIFY_ENABLED" in yes|no) ;; *) die "SPOTIFY_ENABLED must be yes or no" ;; esac
+  case "$RADIO_ENABLED" in yes|no) ;; *) die "RADIO_ENABLED must be yes or no" ;; esac
+  [ "$SPOTIFY_ENABLED" = yes ] || [ "$RADIO_ENABLED" = yes ] || die "Turn on Spotify, radio or both"
+  [ "$RADIO_ENABLED" = yes ] && [ "$WEB_UI" != yes ] && die "Internet radio needs the web interface (WEB_UI=yes)"
   [[ "$WEB_PORT" =~ ^[0-9]+$ ]] && [ "$WEB_PORT" -ge 1024 ] && [ "$WEB_PORT" -le 65535 ] || die "WEB_PORT must be 1024-65535"
   # no power switch to hook: updates can only run at boot
   [ "$SAFE_SHUTDOWN" = no ] && UPDATE_TRIGGER=boot
@@ -263,20 +279,23 @@ confirm() {
   local hw="USB DAC"; [ "$AUDIO_OUTPUT" = hat ] && hw="HAT ($AUDIO_HAT_OVERLAY)"
   local cs="none"; [ "$CASE" = nespi ] && cs="NESPi Case+ (power-off: $POWEROFF_MODE)"
   [ "$FAN_ENABLED" = yes ] && cs="$cs, fan on GPIO $FAN_PIN"
+  local features="Spotify $([ "$SPOTIFY_ENABLED" = yes ] && echo on || echo off), radio $([ "$RADIO_ENABLED" = yes ] && echo on || echo off)"
   whiptail --title "$WT_TITLE" --yesno "Install with these settings?
 
   Device name : $DEVICE_NAME
+  Features    : $features
   Sound card  : $hw
   Case        : $cs
   Updates     : $UPDATE_TRIGGER (Soloist after ${SOLOIST_UPDATE_AFTER_DAYS}d, apt: $APT_UPGRADE every ${APT_UPGRADE_AFTER_DAYS}d)
-  API key     : $([ -n "$SOLOIST_API_KEY" ] && echo set || echo 'NOT SET')" 16 78 || die "Cancelled"
+  API key     : $([ -n "$SOLOIST_API_KEY" ] && echo set || echo 'NOT SET')" 17 78 || die "Cancelled"
 }
 
 # --- install steps ------------------------------------------------------------
 
 install_packages() {
   log "Installing packages"
-  local pkgs=(curl ca-certificates alsa-utils openssl pipewire pipewire-pulse wireplumber dbus-user-session pulseaudio-utils libpulse0 mpv)
+  local pkgs=(curl ca-certificates alsa-utils openssl pipewire pipewire-pulse wireplumber dbus-user-session pulseaudio-utils libpulse0)
+  [ "$RADIO_ENABLED" = yes ] && pkgs+=(mpv)
   [ "$CASE" = nespi ] && pkgs+=(python3 python3-libgpiod)
   apt-get update -q
   DEBIAN_FRONTEND=noninteractive apt-get install -y -q "${pkgs[@]}"
@@ -289,6 +308,8 @@ write_config() {
 # /etc/spotify-dac/config - written by install.sh, re-run the installer to change.
 # Read by bash scripts and by systemd (EnvironmentFile).
 DEVICE_NAME="$DEVICE_NAME"
+SPOTIFY_ENABLED="$SPOTIFY_ENABLED"
+RADIO_ENABLED="$RADIO_ENABLED"
 SOURCE_DIR="$REPO_DIR"
 AUDIO_OUTPUT="$AUDIO_OUTPUT"
 AUDIO_HAT_OVERLAY="$AUDIO_HAT_OVERLAY"
@@ -357,7 +378,12 @@ install_files() {
   if [ "$CASE" = nespi ]; then
     install -m 755 "$REPO_DIR/bin/nespi-power" "$REPO_DIR/bin/nespi-fan" "$SBIN_DIR/"
   fi
-  sed "s/@UID@/$SOLOIST_UID/g" "$REPO_DIR/files/systemd/soloist.service" > "$UNIT_DIR/soloist.service"
+  if [ "$SPOTIFY_ENABLED" = yes ]; then
+    sed "s/@UID@/$SOLOIST_UID/g" "$REPO_DIR/files/systemd/soloist.service" > "$UNIT_DIR/soloist.service"
+  else
+    systemctl disable --now soloist.service 2>/dev/null || true
+    rm -f "$UNIT_DIR/soloist.service"
+  fi
   sed "s/@UID@/$SOLOIST_UID/g" "$REPO_DIR/files/systemd/spotify-dac-volume.service" > "$UNIT_DIR/spotify-dac-volume.service"
   local u
   for u in spotify-dac-boot-update spotify-dac-boot-apt nespi-power nespi-fan; do
@@ -382,7 +408,8 @@ install_web() {
   install -d -m 755 "$WEB_DIR" "$CONF_DIR/web"
   cp -r "$REPO_DIR/web/." "$WEB_DIR/"
   # station catalogs (RMF ON, Eska) and the starter list sit next to the web folder
-  rm -rf "$(dirname "$WEB_DIR")/radio" && cp -r "$REPO_DIR/radio" "$(dirname "$WEB_DIR")/"
+  rm -rf "$(dirname "$WEB_DIR")/radio"
+  if [ "$RADIO_ENABLED" = yes ]; then cp -r "$REPO_DIR/radio" "$(dirname "$WEB_DIR")/"; fi
   find "$WEB_DIR" -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 
   # HTTPS certificate for this Pi's name and address (kept if it exists)
@@ -397,7 +424,9 @@ install_web() {
   fi
 
   # station list: copied once, then edited on the Radio page
-  [ -f "$CONF_DIR/radio.json" ] || install -m 644 "$REPO_DIR/radio/stations.default.json" "$CONF_DIR/radio.json"
+  if [ "$RADIO_ENABLED" = yes ] && [ ! -f "$CONF_DIR/radio.json" ]; then
+    install -m 644 "$REPO_DIR/radio/stations.default.json" "$CONF_DIR/radio.json"
+  fi
 
   # password: stored as a salted hash in web.json, never in plain text
   if [ "$WEB_USE_PASSWORD" = yes ]; then
@@ -478,9 +507,14 @@ configure_units() {
   as_soloist systemctl --user enable pipewire.socket pipewire-pulse.socket wireplumber.service >/dev/null 2>&1 || true
   as_soloist systemctl --user restart pipewire.service pipewire-pulse.service wireplumber.service >/dev/null 2>&1 || true
 
-  systemctl enable soloist.service
+  if [ "$SPOTIFY_ENABLED" = yes ]; then
+    systemctl enable soloist.service
+  else
+    systemctl disable --now soloist.service 2>/dev/null || true
+  fi
   if [ "$UPDATE_TRIGGER" = boot ]; then
-    systemctl enable spotify-dac-boot-update.service
+    if [ "$SPOTIFY_ENABLED" = yes ]; then systemctl enable spotify-dac-boot-update.service
+    else systemctl disable spotify-dac-boot-update.service 2>/dev/null || true; fi
     if [ "$APT_UPGRADE" = yes ]; then systemctl enable spotify-dac-boot-apt.service
     else systemctl disable spotify-dac-boot-apt.service 2>/dev/null || true; fi
   else
@@ -526,13 +560,14 @@ install_web
 disable_legacy
 configure_boot
 configure_units
-install_soloist
-
-if [ -n "$SOLOIST_API_KEY" ]; then
-  [ "$REBOOT_NEEDED" = yes ] || systemctl restart soloist.service
-else
-  systemctl stop soloist.service 2>/dev/null || true
-  warn "No Soloist API key set: soloist will not work until you re-run: sudo $0"
+if [ "$SPOTIFY_ENABLED" = yes ]; then
+  install_soloist
+  if [ -n "$SOLOIST_API_KEY" ]; then
+    [ "$REBOOT_NEEDED" = yes ] || systemctl restart soloist.service
+  else
+    systemctl stop soloist.service 2>/dev/null || true
+    warn "No Soloist API key set: soloist will not work until you re-run: sudo $0"
+  fi
 fi
 
 if [ "$REBOOT_NEEDED" = no ]; then
@@ -541,8 +576,11 @@ fi
 
 echo
 log "Done."
-log "Pair: open the Spotify app on the same network -> devices -> '$DEVICE_NAME'."
-log "Check: sudo dac-status    Logs: journalctl -u soloist -f"
+if [ "$SPOTIFY_ENABLED" = yes ]; then
+  log "Pair: open the Spotify app on the same network -> devices -> '$DEVICE_NAME'."
+  log "Check: sudo dac-status    Logs: journalctl -u soloist -f"
+fi
+if [ "$WEB_UI" = yes ]; then log "Web interface: https://$(hostname).local:$WEB_PORT"; fi
 if [ "$REBOOT_NEEDED" = yes ]; then
   if [ "$INTERACTIVE" = yes ] && [ "$(ask_yesno "Boot configuration changed. Reboot now?" yes)" = yes ]; then
     systemctl reboot

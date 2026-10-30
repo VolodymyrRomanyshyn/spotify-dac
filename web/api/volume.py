@@ -9,7 +9,7 @@ import os
 import tempfile
 from pathlib import Path
 
-from .common import SOLOIST_CTL, ApiError, read_config, run
+from .common import SOLOIST_CTL, ApiError, feature_on, read_config, run
 
 VOLUME_FILE = Path(os.environ.get("SPOTIFY_DAC_VOLUME", "/var/lib/spotify-dac/volume.json"))
 FALLBACK_DEFAULT = 25  # used when DEFAULT_VOLUME is not set in the config
@@ -75,7 +75,7 @@ def post_volume(req):
     if isinstance(value, bool) or not isinstance(value, int) or not 0 <= value <= 100:
         raise ApiError(400, "percent must be a whole number from 0 to 100")
     set_level(value)
-    applied = apply_to_spotify(value)
+    applied = apply_to_spotify(value) if feature_on("spotify") else False
     from .radio import apply_to_radio  # local import: radio imports this module
     apply_to_radio(value)
     return 200, {"percent": value, "spotify_applied": applied}

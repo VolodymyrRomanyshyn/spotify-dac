@@ -5,7 +5,7 @@ those go through the installer. The API key is not in the config file and is nev
 """
 import re
 
-from .common import ApiError, read_config, run, write_config
+from .common import ApiError, feature_on, read_config, run, write_config
 
 NAME = re.compile(r"^[A-Za-z0-9 _+\-]{1,32}$")
 APPLY_SERVICES = {"soloist", "spotify-dac-volume"}
@@ -77,3 +77,8 @@ def post_apply(req):
         rc, _, err = run(["systemctl", "restart", name], timeout=60)
         results[name] = "restarted" if rc == 0 else (err.strip() or "failed")
     return 200, {"results": results}
+
+
+def get_features(req):
+    """Which parts of the interface this device has: Spotify and internet radio."""
+    return 200, {"spotify": feature_on("spotify"), "radio": feature_on("radio")}

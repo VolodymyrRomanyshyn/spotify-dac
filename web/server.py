@@ -23,7 +23,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 from api import auth, config, hardware, radio, spotify, status, update, volume  # noqa: E402
-from api.common import MAX_BODY, ApiError, Request  # noqa: E402
+from api.common import MAX_BODY, ApiError, Request, feature_on  # noqa: E402
 
 STATIC = HERE / "static"
 
@@ -45,6 +45,7 @@ ROUTES = {
     ("GET", "/api/volume"): volume.get_volume,
     ("POST", "/api/volume"): volume.post_volume,
     ("GET", "/api/device"): config.get_device,
+    ("GET", "/api/features"): config.get_features,
     ("GET", "/api/hardware"): hardware.get_hardware,
     ("POST", "/api/hardware"): hardware.post_hardware,
     ("GET", "/api/code/update"): update.get_update,
@@ -94,6 +95,9 @@ class Handler(BaseHTTPRequestHandler):
             req.query = {k: v[0] for k, v in parse_qs(urlsplit(self.path).query).items()}
             if (method, path) not in PUBLIC and not auth.is_authorized(req):
                 raise ApiError(401, "sign in first")
+            for prefix, feature, label in (("/api/spotify/", "spotify", "Spotify"), ("/api/radio/", "radio", "Radio")):
+                if path.startswith(prefix) and not feature_on(feature):
+                    raise ApiError(404, f"{label} is turned off on this device")
             result = handler(req)
             status_code, data = result[0], result[1]
             extra = result[2] if len(result) > 2 else {}

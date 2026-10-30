@@ -16,7 +16,7 @@ import time
 from pathlib import Path
 from urllib.parse import urlsplit
 
-from .common import SOLOIST_CTL, SOLOIST_USER, ApiError, run
+from .common import SOLOIST_CTL, SOLOIST_USER, ApiError, feature_on, run
 
 STATIONS_FILE = Path(os.environ.get("SPOTIFY_DAC_RADIO", "/etc/spotify-dac/radio.json"))
 DEFAULT_STATIONS = Path(__file__).resolve().parents[2] / "radio" / "stations.default.json"
@@ -195,8 +195,9 @@ def watch_sources(interval=2):
     while True:
         time.sleep(interval)
         try:
-            now_playing = _spotify_playing()
-            spotify_now = spotify_volume()
+            spotify_on = feature_on("spotify")
+            now_playing = _spotify_playing() if spotify_on else False
+            spotify_now = spotify_volume() if spotify_on else None
             radio_now = _mpv_get_volume() if _current() else None
             if was_playing is None:  # first pass: record only
                 was_playing, last_spotify, last_radio = now_playing, spotify_now, radio_now

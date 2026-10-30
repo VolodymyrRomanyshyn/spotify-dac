@@ -16,7 +16,7 @@
       </button>
       <nav id="menu" class="menu-list" hidden>
         <a href="/">Home</a>
-        <a href="/radio.html">Radio</a>
+        <a data-feature="radio" href="/radio.html">Radio</a>
         <a href="/status.html">Status</a>
         <a href="/settings.html" class="active">Settings</a>
       </nav>
@@ -102,7 +102,7 @@
     <section class="card">
       <h2>Updates</h2>
       <form id="updates-form" class="form">
-        <label class="field">
+        <label class="field" data-feature="spotify">
           <span>Update Soloist after (days)</span>
           <input id="SOLOIST_UPDATE_AFTER_DAYS" type="number" min="1" max="89" step="1">
           <small class="muted" data-hint="SOLOIST_UPDATE_AFTER_DAYS"></small>

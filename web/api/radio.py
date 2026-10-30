@@ -125,10 +125,11 @@ def get_now(req):
     return 200, {"playing": state["station"], "title": _mpv_property("media-title")}
 
 
-def _start_mpv(mpv, url, user):
+def _start_mpv(mpv, url, user, level):
     env = f"XDG_RUNTIME_DIR=/run/user/{user.pw_uid}"
+    # the shared level is given at start, so the stream never plays at mpv's default volume
     argv = ["runuser", "-u", SOLOIST_USER, "--", "env", env, mpv, "--no-video", "--really-quiet",
-            "--ao=pipewire", f"--input-ipc-server={MPV_SOCKET}", url]
+            "--ao=pipewire", f"--volume={level}", f"--input-ipc-server={MPV_SOCKET}", url]
     return subprocess.Popen(argv, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                             stderr=subprocess.DEVNULL, start_new_session=True)
 
@@ -150,8 +151,10 @@ def post_play(req):
         _stop_current()
         run(SOLOIST_CTL + ["pause"])  # ignore the answer: Spotify may already be paused
         played = None
+        from .volume import effective_level
+        level = effective_level()
         for url in addresses:
-            proc = _start_mpv(mpv, url, user)
+            proc = _start_mpv(mpv, url, user, level)
             time.sleep(4)  # mpv exits quickly when the address does not answer
             if proc.poll() is None:
                 played = (proc, url)
@@ -160,7 +163,6 @@ def post_play(req):
             raise ApiError(502, "no address of this station answers; try again later")
         proc, url = played
         STATE_FILE.write_text(json.dumps({"pid": proc.pid, "station": station_id, "url": url}), encoding="utf-8")
-    from .volume import effective_level
     for _ in range(20):  # mpv opens its socket a moment after it starts
         if _mpv_set_volume(effective_level()):
             break

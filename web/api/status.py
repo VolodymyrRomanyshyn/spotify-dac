@@ -56,6 +56,20 @@ def _soloist():
     return {"version": version, "api": api}
 
 
+def _playing():
+    """True when a client is playing into the DAC; False when streams are only held open (corked)."""
+    try:
+        uid = pwd.getpwnam(SOLOIST_USER).pw_uid
+    except KeyError:
+        return None
+    env = ["sudo", "-n", "runuser", "-u", SOLOIST_USER, "--", "env", f"XDG_RUNTIME_DIR=/run/user/{uid}",
+           "pactl", "list", "sink-inputs"]
+    rc, out, _ = run(env, timeout=10)
+    if rc != 0:
+        return None
+    return any(line.strip() == "Corked: no" for line in out.splitlines())
+
+
 def _dac():
     """Sound cards (index, name, driver) and the playback streams that are open."""
     cards = []
@@ -87,6 +101,11 @@ def _dac():
         except OSError:
             pass
         streams.append({"card": names.get(card_index, "card %d" % card_index), "state": state_name, "rate": rate})
+    # Spotify keeps the DAC open while idle; that stream is corked, so it is not playing
+    playing = _playing()
+    for stream in streams:
+        if stream["state"] == "RUNNING" and playing is False:
+            stream["state"] = "idle"
     return {"cards": cards, "streams": streams}
 
 

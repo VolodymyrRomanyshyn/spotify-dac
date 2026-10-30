@@ -46,7 +46,7 @@ body {
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
   padding: 12px 16px; border-bottom: 1px solid var(--line); background: var(--panel);
 }
-.device { font-weight: 600; margin-right: auto; }
+.device { font-weight: 600; }
 nav a { color: var(--muted); text-decoration: none; padding: 6px 10px; border-radius: 8px; }
 nav a.active { color: var(--text); background: var(--bg); }
 .menu { position: relative; }
@@ -254,3 +254,7 @@ pre { white-space: pre-wrap; word-break: break-word; font-size: 13px; color: var
   .station { flex-wrap: wrap; }
   .row-actions { width: 100%; justify-content: flex-end; }
 }
+
+/* header brand: home icon and device name, linking to Home */
+.brand { display: flex; align-items: center; gap: 8px; margin-right: auto; color: var(--text); text-decoration: none; }
+.brand .home-icon { flex: none; }

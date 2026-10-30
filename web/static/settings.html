@@ -50,10 +50,13 @@
       <form id="gpio-form" class="form">
         <label class="field">
           <span>Case</span>
-          <select id="case">
-            <option value="nespi">RetroFlag NESPi Case+</option>
-            <option value="none">No GPIO control</option>
-          </select>
+          <span class="select">
+            <select id="case">
+              <option value="nespi">RetroFlag NESPi Case+</option>
+              <option value="none">No GPIO control</option>
+            </select>
+            <svg class="chevron" viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.5l5 5 5-5"/></svg>
+          </span>
         </label>
         <div id="nespi-only" class="form">
           <label class="field">
@@ -70,10 +73,13 @@
           </label>
           <label class="field">
             <span>When the power switch is turned off</span>
-            <select id="poweroff">
-              <option value="hardcut">Hard cut (proven)</option>
-              <option value="graceful">Graceful (experimental)</option>
-            </select>
+            <span class="select">
+              <select id="poweroff">
+                <option value="hardcut">Hard cut (proven)</option>
+                <option value="graceful">Graceful (experimental)</option>
+              </select>
+              <svg class="chevron" viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.5l5 5 5-5"/></svg>
+            </span>
           </label>
           <p class="muted">Power enable GPIO: <span id="power_enable_pin"></span>. Set by the installer, not here.</p>
         </div>

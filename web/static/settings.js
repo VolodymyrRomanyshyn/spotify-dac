@@ -34,13 +34,6 @@
 
   async function loadHardware() {
     hardware = await api("/api/hardware");
-    const sinkSelect = $("sink");
-    sinkSelect.replaceChildren(...hardware.audio.sinks.map(function (sink) {
-      return new Option(sink.label, sink.name, false, sink.name === hardware.audio.selected);
-    }));
-    if (!hardware.audio.sinks.length) sinkSelect.append(new Option("No audio device found", ""));
-    $("save-general").disabled = false;
-
     $("case").value = hardware.case;
     $("poweroff").value = hardware.poweroff;
     $("power_pin").value = hardware.pins.POWER_PIN;
@@ -60,8 +53,7 @@
     const body = {};
     if ($("DEVICE_NAME").value !== (loaded.DEVICE_NAME || "")) body.DEVICE_NAME = $("DEVICE_NAME").value;
     if ($("DEFAULT_VOLUME").value !== String(loaded.DEFAULT_VOLUME || "")) body.DEFAULT_VOLUME = $("DEFAULT_VOLUME").value;
-    const sinkChanged = $("sink").value && $("sink").value !== hardware.audio.selected;
-    if (!Object.keys(body).length && !sinkChanged) {
+    if (!Object.keys(body).length) {
       status.textContent = "Nothing changed.";
       return;
     }
@@ -74,10 +66,6 @@
           await api("/api/config/apply", { body: { services: result.restart } });
         }
         done.push("name and volume " + restartText(result.restart));
-      }
-      if (sinkChanged) {
-        const result = await api("/api/hardware", { body: { sink: $("sink").value } });
-        done.push("audio device " + restartText(result.restarted));
       }
       await loadConfig();
       await loadHardware();

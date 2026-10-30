@@ -1,51 +1,14 @@
-"""Hardware settings: the audio output and the case and fan GPIO pins.
+"""Hardware settings: the case and fan GPIO pins.
 
 Saved to /etc/spotify-dac/config and applied by restarting the service that uses them. The
 power-enable pin is not editable here: it is written into the boot config by the installer.
 """
-import pwd
-import re
-
-from .common import SOLOIST_USER, ApiError, read_config, run, write_config
+from .common import ApiError, read_config, run, write_config
 
 HAT_PINS = {2, 3, 18, 19, 20, 21}
 DEFAULT_PINS = {"POWER_PIN": 3, "RESET_PIN": 2, "LED_PIN": 14, "FAN_PIN": 21}
-SINK = re.compile(r"^[A-Za-z0-9_.:-]{1,200}$")
 CASES = ("nespi", "none")
 POWEROFF = ("hardcut", "graceful")
-
-
-def _label(name, description):
-    """Name the Pi's two outputs clearly; PipeWire calls both 'Built-in Audio Stereo'."""
-    if "mailbox" in name:
-        return "Onboard headphone jack"
-    if "soc_sound" in name:
-        return "IQaudIO DAC+ (HAT)"
-    return description
-
-
-def _sinks():
-    """Playback devices in the soloist session (PipeWire): [{name, label}]."""
-    uid = pwd.getpwnam(SOLOIST_USER).pw_uid
-    env = ["runuser", "-u", SOLOIST_USER, "--", "env", f"XDG_RUNTIME_DIR=/run/user/{uid}"]
-    rc, out, _ = run(env + ["pactl", "list", "sinks"], timeout=10)
-    if rc != 0:
-        return []
-    sinks = []
-    name = None
-    for line in out.splitlines():
-        text = line.strip()
-        if text.startswith("Name:"):
-            name = text.split(":", 1)[1].strip()
-        elif text.startswith("Description:") and name:
-            sinks.append({"name": name, "label": _label(name, text.split(":", 1)[1].strip())})
-            name = None
-    return sinks
-
-
-def _selected(sinks, pattern):
-    match = next((s["name"] for s in sinks if s["name"].startswith(pattern)), None)
-    return match
 
 
 def _pin(cfg, key):
@@ -57,17 +20,15 @@ def _pin(cfg, key):
 
 def get_hardware(req):
     cfg = read_config()
-    sinks = _sinks()
-    pattern = cfg.get("DAC_SINK_PATTERN", "alsa_output.usb-")
+    hat = cfg.get("AUDIO_OUTPUT") == "hat"
     return 200, {
-        "audio": {"sinks": sinks, "selected": _selected(sinks, pattern), "pattern": pattern},
         "case": cfg.get("CASE", "none"),
         "poweroff": cfg.get("POWEROFF_MODE", "hardcut"),
         "pins": {key: _pin(cfg, key) for key in ("POWER_PIN", "RESET_PIN", "LED_PIN")},
         "power_enable_pin": int(cfg.get("POWER_EN_PIN") or 4),
         "fan": {"enabled": cfg.get("FAN_ENABLED") == "yes", "pin": _pin(cfg, "FAN_PIN")},
-        "hat": cfg.get("AUDIO_OUTPUT") == "hat",
-        "hat_pins": sorted(HAT_PINS) if cfg.get("AUDIO_OUTPUT") == "hat" else [],
+        "hat": hat,
+        "hat_pins": sorted(HAT_PINS) if hat else [],
     }
 
 
@@ -90,11 +51,6 @@ def post_hardware(req):
     cfg = read_config()
     updates = {}
 
-    if "sink" in body:
-        sink = body["sink"]
-        if not isinstance(sink, str) or not SINK.match(sink) or sink not in [s["name"] for s in _sinks()]:
-            raise ApiError(400, "pick one of the audio devices listed")
-        updates["DAC_SINK_PATTERN"] = sink
     if "case" in body:
         if body["case"] not in CASES:
             raise ApiError(400, "case must be nespi or none")
@@ -149,7 +105,4 @@ def post_hardware(req):
         else:
             run(["systemctl", "disable", "--now", "nespi-power.service"], timeout=30)
             restarted.append("nespi-power stopped")
-    if "DAC_SINK_PATTERN" in changed:
-        run(["systemctl", "restart", "spotify-dac-volume.service"], timeout=60)
-        restarted.append("spotify-dac-volume")
     return 200, {"saved": sorted(updates), "restarted": restarted}

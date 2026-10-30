@@ -16,22 +16,29 @@ POWEROFF = ("hardcut", "graceful")
 
 
 def _sinks():
-    """Playback sinks in the soloist session (PipeWire), without the hidden onboard output."""
+    """Playback devices in the soloist session (PipeWire): [{name, label}], without the onboard output."""
     uid = pwd.getpwnam(SOLOIST_USER).pw_uid
     env = ["runuser", "-u", SOLOIST_USER, "--", "env", f"XDG_RUNTIME_DIR=/run/user/{uid}"]
-    rc, out, _ = run(env + ["pactl", "list", "short", "sinks"], timeout=10)
+    rc, out, _ = run(env + ["pactl", "list", "sinks"], timeout=10)
     if rc != 0:
         return []
-    names = []
+    sinks = []
+    name = None
     for line in out.splitlines():
-        parts = line.split("\t")
-        if len(parts) > 1 and "mailbox" not in parts[1]:
-            names.append(parts[1])
-    return names
+        text = line.strip()
+        if text.startswith("Name:"):
+            name = text.split(":", 1)[1].strip()
+        elif text.startswith("Description:") and name:
+            label = text.split(":", 1)[1].strip()
+            if "mailbox" not in name:
+                sinks.append({"name": name, "label": label})
+            name = None
+    return sinks
 
 
 def _selected(sinks, pattern):
-    return next((s for s in sinks if s.startswith(pattern)), None)
+    match = next((s["name"] for s in sinks if s["name"].startswith(pattern)), None)
+    return match
 
 
 def _pin(cfg, key):
@@ -78,7 +85,7 @@ def post_hardware(req):
 
     if "sink" in body:
         sink = body["sink"]
-        if not isinstance(sink, str) or not SINK.match(sink) or sink not in _sinks():
+        if not isinstance(sink, str) or not SINK.match(sink) or sink not in [s["name"] for s in _sinks()]:
             raise ApiError(400, "pick one of the audio devices listed")
         updates["DAC_SINK_PATTERN"] = sink
     if "case" in body:

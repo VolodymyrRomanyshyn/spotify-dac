@@ -24,61 +24,29 @@
     <button id="theme" class="theme" type="button" aria-label="Switch dark or light mode">Theme</button>
   </header>
 
-  <main class="grid">
+  <main class="settings">
     <section class="card">
-      <h2>Device</h2>
-      <form id="device-form" class="form">
+      <h2>General</h2>
+      <form id="general-form" class="form">
         <label class="field">
           <span>Device name</span>
-          <input id="DEVICE_NAME" name="DEVICE_NAME" type="text" maxlength="32" autocomplete="off">
+          <input id="DEVICE_NAME" type="text" maxlength="32" autocomplete="off">
           <small class="muted" data-hint="DEVICE_NAME"></small>
         </label>
-      </form>
-    </section>
-
-    <section class="card">
-      <h2>Volume</h2>
-      <form id="volume-form" class="form">
         <label class="field">
           <span>Default volume</span>
-          <input id="DEFAULT_VOLUME" name="DEFAULT_VOLUME" type="number" min="0" max="100" step="1">
+          <input id="DEFAULT_VOLUME" type="number" min="0" max="100" step="1">
           <small class="muted" data-hint="DEFAULT_VOLUME"></small>
         </label>
-      </form>
-    </section>
-
-    <section class="card">
-      <h2>Updates</h2>
-      <form id="updates-form" class="form">
-        <label class="field">
-          <span>Update Soloist after (days)</span>
-          <input id="SOLOIST_UPDATE_AFTER_DAYS" name="SOLOIST_UPDATE_AFTER_DAYS" type="number" min="1" max="89" step="1">
-          <small class="muted" data-hint="SOLOIST_UPDATE_AFTER_DAYS"></small>
-        </label>
-        <label class="field">
-          <span>Update system packages after (days)</span>
-          <input id="APT_UPGRADE_AFTER_DAYS" name="APT_UPGRADE_AFTER_DAYS" type="number" min="0" max="365" step="1">
-          <small class="muted" data-hint="APT_UPGRADE_AFTER_DAYS"></small>
-        </label>
-      </form>
-      <div class="actions">
-        <button id="save" class="ctl main" type="button">Save settings</button>
-        <span id="save-status" class="muted" role="status"></span>
-      </div>
-    </section>
-
-    <section class="card">
-      <h2>Audio output</h2>
-      <form id="audio-form" class="form">
         <label class="field">
           <span>Audio device</span>
           <select id="sink"></select>
-          <small class="muted">The output the music plays through. Takes effect at once.</small>
+          <small class="muted">Where the music plays. Applies when you save.</small>
         </label>
       </form>
       <div class="actions">
-        <button id="save-audio" class="ctl main" type="button">Save audio device</button>
-        <span id="audio-status" class="muted" role="status"></span>
+        <button id="save-general" class="ctl main" type="button">Save general</button>
+        <span id="general-status" class="muted" role="status"></span>
       </div>
     </section>
 
@@ -114,10 +82,10 @@
           </label>
           <p class="muted">Power enable GPIO: <span id="power_enable_pin"></span>. Set by the installer, not here.</p>
         </div>
-        <label class="field check">
+        <div class="toggle">
           <input id="fan_enabled" type="checkbox">
-          <span>Fan on a GPIO pin</span>
-        </label>
+          <label for="fan_enabled">Fan on a GPIO pin</label>
+        </div>
         <label class="field">
           <span>Fan GPIO</span>
           <input id="fan_pin" type="number" min="0" max="27" step="1">
@@ -125,13 +93,31 @@
         <p id="hat-note" class="muted"></p>
       </form>
       <div class="actions">
-        <button id="save-gpio" class="ctl main" type="button">Save GPIO settings</button>
+        <button id="save-gpio" class="ctl main" type="button">Save GPIO</button>
         <span id="gpio-status" class="muted" role="status"></span>
       </div>
     </section>
 
     <section class="card">
-      <h2>Code from GitHub</h2>
+      <h2>Updates</h2>
+      <form id="updates-form" class="form">
+        <label class="field">
+          <span>Update Soloist after (days)</span>
+          <input id="SOLOIST_UPDATE_AFTER_DAYS" type="number" min="1" max="89" step="1">
+          <small class="muted" data-hint="SOLOIST_UPDATE_AFTER_DAYS"></small>
+        </label>
+        <label class="field">
+          <span>Update system packages after (days)</span>
+          <input id="APT_UPGRADE_AFTER_DAYS" type="number" min="0" max="365" step="1">
+          <small class="muted" data-hint="APT_UPGRADE_AFTER_DAYS"></small>
+        </label>
+      </form>
+      <div class="actions">
+        <button id="save-updates" class="ctl main" type="button">Save updates</button>
+        <span id="updates-status" class="muted" role="status"></span>
+      </div>
+
+      <h3>Code from GitHub</h3>
       <p id="code-status" class="muted">Checking GitHub...</p>
       <ul id="code-commits" class="commits"></ul>
       <div class="actions">

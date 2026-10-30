@@ -1,181 +1,194 @@
-// Settings page: change the simple settings, and update the web interface when GitHub is ahead.
+// Settings page: General, GPIO and Updates, each with its own save; plus the GitHub update check.
 (function () {
-  const FIELDS = ["DEVICE_NAME", "DEFAULT_VOLUME", "SOLOIST_UPDATE_AFTER_DAYS", "APT_UPGRADE_AFTER_DAYS"];
-  const saveButton = document.getElementById("save");
-  const saveStatus = document.getElementById("save-status");
-  const codeStatus = document.getElementById("code-status");
-  const commitList = document.getElementById("code-commits");
-  const checkButton = document.getElementById("check");
-  const updateButton = document.getElementById("update");
+  const $ = function (id) { return document.getElementById(id); };
   let loaded = {};
+  let hardware = null;
 
   function showError(target, err) {
     target.textContent = err.message || String(err);
   }
+  function restartText(restarted) {
+    return restarted && restarted.length ? "applied: " + restarted.join(", ") : "saved";
+  }
+  function pinValue(id) {
+    const text = $(id).value.trim();
+    return text === "" ? null : Number(text);
+  }
+  function setHints(editable) {
+    document.querySelectorAll("[data-hint]").forEach(function (hint) {
+      const key = hint.getAttribute("data-hint");
+      if (editable[key]) hint.textContent = editable[key];
+    });
+  }
 
-  async function loadSettings() {
+  // ---- General: device name, default volume, audio device ----
+  async function loadConfig() {
     const data = await api("/api/config");
     loaded = data.values;
-    FIELDS.forEach(function (key) {
-      const input = document.getElementById(key);
-      if (input) input.value = loaded[key] || "";
-      const hint = document.querySelector('[data-hint="' + key + '"]');
-      if (hint && data.editable[key]) hint.textContent = data.editable[key];
-    });
+    $("DEVICE_NAME").value = loaded.DEVICE_NAME || "";
+    $("DEFAULT_VOLUME").value = loaded.DEFAULT_VOLUME || "";
+    $("SOLOIST_UPDATE_AFTER_DAYS").value = loaded.SOLOIST_UPDATE_AFTER_DAYS || "";
+    $("APT_UPGRADE_AFTER_DAYS").value = loaded.APT_UPGRADE_AFTER_DAYS || "";
+    setHints(data.editable);
   }
 
-  async function save() {
+  async function loadHardware() {
+    hardware = await api("/api/hardware");
+    const sinkSelect = $("sink");
+    sinkSelect.replaceChildren(...hardware.audio.sinks.map(function (sink) {
+      return new Option(sink.label, sink.name, false, sink.name === hardware.audio.selected);
+    }));
+    if (!hardware.audio.sinks.length) sinkSelect.append(new Option("No audio device found", ""));
+    $("save-general").disabled = false;
+
+    $("case").value = hardware.case;
+    $("poweroff").value = hardware.poweroff;
+    $("power_pin").value = hardware.pins.POWER_PIN;
+    $("reset_pin").value = hardware.pins.RESET_PIN;
+    $("led_pin").value = hardware.pins.LED_PIN;
+    $("power_enable_pin").textContent = hardware.power_enable_pin;
+    $("fan_enabled").checked = hardware.fan.enabled;
+    $("fan_pin").value = hardware.fan.pin;
+    $("hat-note").textContent = hardware.hat
+      ? "The IQaudIO HAT uses GPIO " + hardware.hat_pins.join(", ") + ", so those pins can't be used here."
+      : "";
+    $("nespi-only").hidden = $("case").value !== "nespi";
+  }
+
+  async function saveGeneral() {
+    const status = $("general-status");
     const body = {};
-    FIELDS.forEach(function (key) {
-      const input = document.getElementById(key);
-      if (input && input.value !== String(loaded[key] || "")) body[key] = input.value;
-    });
-    if (!Object.keys(body).length) {
-      saveStatus.textContent = "Nothing changed.";
+    if ($("DEVICE_NAME").value !== (loaded.DEVICE_NAME || "")) body.DEVICE_NAME = $("DEVICE_NAME").value;
+    if ($("DEFAULT_VOLUME").value !== String(loaded.DEFAULT_VOLUME || "")) body.DEFAULT_VOLUME = $("DEFAULT_VOLUME").value;
+    const sinkChanged = $("sink").value && $("sink").value !== hardware.audio.selected;
+    if (!Object.keys(body).length && !sinkChanged) {
+      status.textContent = "Nothing changed.";
       return;
     }
-    saveButton.disabled = true;
+    $("save-general").disabled = true;
     try {
-      const result = await api("/api/config", { body: body });
-      if (result.restart && result.restart.length) {
-        await api("/api/config/apply", { body: { services: result.restart } });
+      const done = [];
+      if (Object.keys(body).length) {
+        const result = await api("/api/config", { body: body });
+        if (result.restart && result.restart.length) {
+          await api("/api/config/apply", { body: { services: result.restart } });
+        }
+        done.push("name and volume " + restartText(result.restart));
       }
-      await loadSettings();
-      saveStatus.textContent = "Saved.";
+      if (sinkChanged) {
+        const result = await api("/api/hardware", { body: { sink: $("sink").value } });
+        done.push("audio device " + restartText(result.restarted));
+      }
+      await loadConfig();
+      await loadHardware();
+      status.textContent = done.join("; ") + ".";
     } catch (err) {
-      showError(saveStatus, err);
+      showError(status, err);
     } finally {
-      saveButton.disabled = false;
+      $("save-general").disabled = false;
     }
   }
 
+  // ---- GPIO: case, power switch, reset, LED, power-off mode, fan ----
+  async function saveGpio() {
+    const status = $("gpio-status");
+    const body = {
+      case: $("case").value,
+      poweroff: $("poweroff").value,
+      fan_enabled: $("fan_enabled").checked,
+      fan_pin: pinValue("fan_pin"),
+    };
+    if ($("case").value === "nespi") {
+      body.power_pin = pinValue("power_pin");
+      body.reset_pin = pinValue("reset_pin");
+      body.led_pin = pinValue("led_pin");
+    }
+    $("save-gpio").disabled = true;
+    try {
+      const result = await api("/api/hardware", { body: body });
+      await loadHardware();
+      status.textContent = "Saved; " + restartText(result.restarted) + ".";
+    } catch (err) {
+      showError(status, err);
+    } finally {
+      $("save-gpio").disabled = false;
+    }
+  }
+
+  // ---- Updates: schedules for Soloist and system packages ----
+  async function saveUpdates() {
+    const status = $("updates-status");
+    const body = {};
+    ["SOLOIST_UPDATE_AFTER_DAYS", "APT_UPGRADE_AFTER_DAYS"].forEach(function (key) {
+      if ($(key).value !== String(loaded[key] || "")) body[key] = $(key).value;
+    });
+    if (!Object.keys(body).length) {
+      status.textContent = "Nothing changed.";
+      return;
+    }
+    $("save-updates").disabled = true;
+    try {
+      await api("/api/config", { body: body });
+      await loadConfig();
+      status.textContent = "Saved.";
+    } catch (err) {
+      showError(status, err);
+    } finally {
+      $("save-updates").disabled = false;
+    }
+  }
+
+  // ---- Code from GitHub ----
   async function checkCode() {
-    checkButton.disabled = true;
-    updateButton.disabled = true;
-    codeStatus.textContent = "Checking GitHub...";
-    commitList.replaceChildren();
+    const status = $("code-status");
+    const list = $("code-commits");
+    $("check").disabled = true;
+    $("update").disabled = true;
+    status.textContent = "Checking GitHub...";
+    list.replaceChildren();
     try {
       const info = await api("/api/code/update");
       if (info.update_available) {
-        codeStatus.textContent = "Update available on " + info.branch + ": " + info.current + " to " + info.latest + ".";
+        status.textContent = "Update available on " + info.branch + ": " + info.current + " to " + info.latest + ".";
         info.commits.forEach(function (subject) {
           const item = document.createElement("li");
           item.textContent = subject;
-          commitList.append(item);
+          list.append(item);
         });
-        updateButton.disabled = false;
+        $("update").disabled = false;
       } else {
-        codeStatus.textContent = "Up to date (" + info.branch + ", " + info.current + ").";
+        status.textContent = "Up to date (" + info.branch + ", " + info.current + ").";
       }
     } catch (err) {
-      showError(codeStatus, err);
+      showError(status, err);
     } finally {
-      checkButton.disabled = false;
+      $("check").disabled = false;
     }
   }
 
   async function updateCode() {
     if (!window.confirm("Update the web interface from GitHub now? The page reloads in a few seconds.")) return;
-    updateButton.disabled = true;
-    checkButton.disabled = true;
-    codeStatus.textContent = "Updating...";
+    $("update").disabled = true;
+    $("check").disabled = true;
+    $("code-status").textContent = "Updating...";
     try {
       await api("/api/code/update", { body: { confirm: true } });
-      codeStatus.textContent = "Updated. Restarting the web service...";
+      $("code-status").textContent = "Updated. Restarting the web service...";
       setTimeout(function () { window.location.reload(); }, 6000);
     } catch (err) {
-      showError(codeStatus, err);
-      checkButton.disabled = false;
+      showError($("code-status"), err);
+      $("check").disabled = false;
     }
   }
 
-  // ---- audio output and GPIO (the case and the fan) ----
-  const sinkSelect = document.getElementById("sink");
-  const saveAudioButton = document.getElementById("save-audio");
-  const audioStatus = document.getElementById("audio-status");
-  const caseSelect = document.getElementById("case");
-  const nespiOnly = document.getElementById("nespi-only");
-  const saveGpioButton = document.getElementById("save-gpio");
-  const gpioStatus = document.getElementById("gpio-status");
+  $("save-general").addEventListener("click", function () { saveGeneral(); });
+  $("save-gpio").addEventListener("click", function () { saveGpio(); });
+  $("save-updates").addEventListener("click", function () { saveUpdates(); });
+  $("check").addEventListener("click", checkCode);
+  $("update").addEventListener("click", updateCode);
+  $("case").addEventListener("change", function () { $("nespi-only").hidden = $("case").value !== "nespi"; });
 
-  function pinValue(id) {
-    const text = document.getElementById(id).value.trim();
-    return text === "" ? null : Number(text);
-  }
-  function restartText(result) {
-    return result.restarted && result.restarted.length ? "Applied: " + result.restarted.join(", ") + "." : "Saved.";
-  }
-
-  async function loadHardware() {
-    const hw = await api("/api/hardware");
-    sinkSelect.replaceChildren(...hw.audio.sinks.map(function (name) {
-      const option = new Option(name, name);
-      option.selected = name === hw.audio.selected;
-      return option;
-    }));
-    if (!hw.audio.sinks.length) sinkSelect.append(new Option("No audio device found", ""));
-    saveAudioButton.disabled = !hw.audio.sinks.length;
-
-    caseSelect.value = hw.case;
-    document.getElementById("poweroff").value = hw.poweroff;
-    document.getElementById("power_pin").value = hw.pins.POWER_PIN;
-    document.getElementById("reset_pin").value = hw.pins.RESET_PIN;
-    document.getElementById("led_pin").value = hw.pins.LED_PIN;
-    document.getElementById("power_enable_pin").textContent = hw.power_enable_pin;
-    document.getElementById("fan_enabled").checked = hw.fan.enabled;
-    document.getElementById("fan_pin").value = hw.fan.pin;
-    document.getElementById("hat-note").textContent = hw.hat
-      ? "The IQaudIO HAT uses GPIO " + hw.hat_pins.join(", ") + ", so those pins can't be used here."
-      : "";
-    nespiOnly.hidden = caseSelect.value !== "nespi";
-  }
-
-  async function saveAudio() {
-    saveAudioButton.disabled = true;
-    try {
-      const result = await api("/api/hardware", { body: { sink: sinkSelect.value } });
-      await loadHardware();
-      audioStatus.textContent = restartText(result);
-    } catch (err) {
-      showError(audioStatus, err);
-    } finally {
-      saveAudioButton.disabled = false;
-    }
-  }
-
-  async function saveGpio() {
-    const body = {
-      case: caseSelect.value,
-      poweroff: document.getElementById("poweroff").value,
-      fan_enabled: document.getElementById("fan_enabled").checked,
-      fan_pin: pinValue("fan_pin"),
-    };
-    if (caseSelect.value === "nespi") {
-      body.power_pin = pinValue("power_pin");
-      body.reset_pin = pinValue("reset_pin");
-      body.led_pin = pinValue("led_pin");
-    }
-    saveGpioButton.disabled = true;
-    try {
-      const result = await api("/api/hardware", { body: body });
-      await loadHardware();
-      gpioStatus.textContent = restartText(result);
-    } catch (err) {
-      showError(gpioStatus, err);
-    } finally {
-      saveGpioButton.disabled = false;
-    }
-  }
-
-  caseSelect.addEventListener("change", function () { nespiOnly.hidden = caseSelect.value !== "nespi"; });
-  saveAudioButton.addEventListener("click", function () { saveAudio(); });
-  saveGpioButton.addEventListener("click", function () { saveGpio(); });
-  loadHardware().catch(function (err) { showError(audioStatus, err); });
-
-  saveButton.addEventListener("click", function () { save().catch(function (err) { showError(saveStatus, err); }); });
-  checkButton.addEventListener("click", checkCode);
-  updateButton.addEventListener("click", updateCode);
-
-  loadSettings().catch(function (err) { showError(saveStatus, err); });
+  loadConfig().catch(function (err) { showError($("general-status"), err); });
+  loadHardware().catch(function (err) { showError($("general-status"), err); });
   checkCode();
 })();

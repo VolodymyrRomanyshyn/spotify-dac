@@ -39,6 +39,32 @@
   }
 })();
 
+// Header: the device name instead of a fixed title, and the menu button.
+(function () {
+  const brand = document.querySelector(".device");
+  api("/api/device").then(function (d) {
+    if (brand && d.name) brand.textContent = d.name;
+  }).catch(function () { /* keep the placeholder */ });
+
+  const burger = document.getElementById("burger");
+  const menu = document.getElementById("menu");
+  if (!burger || !menu) return;
+  function setMenu(open) {
+    menu.hidden = !open;
+    burger.setAttribute("aria-expanded", String(open));
+  }
+  burger.addEventListener("click", function (event) {
+    event.stopPropagation();
+    setMenu(menu.hidden);
+  });
+  document.addEventListener("click", function (event) {
+    if (!menu.contains(event.target)) setMenu(false);
+  });
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") setMenu(false);
+  });
+})();
+
 // Calls the JSON API. Resolves with the "data" part, rejects with a readable message.
 async function api(path, options) {
   const opts = Object.assign({ cache: "no-store", credentials: "same-origin" }, options || {});

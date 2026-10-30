@@ -9,12 +9,17 @@
 </head>
 <body>
   <header class="topbar">
-    <span class="device">Spotify DAC</span>
-    <nav>
-      <a href="/">Home</a>
-      <a href="/radio.html" class="active">Radio</a>
-      <a href="/status.html">Status</a>
-    </nav>
+    <span class="device">DAC</span>
+    <div class="menu">
+      <button id="burger" class="theme" type="button" aria-label="Menu" aria-expanded="false" aria-controls="menu">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <nav id="menu" class="menu-list" hidden>
+        <a href="/">Home</a>
+        <a href="/radio.html" class="active">Radio</a>
+        <a href="/status.html">Status</a>
+      </nav>
+    </div>
     <button id="theme" class="theme" type="button" aria-label="Switch dark or light mode">Theme</button>
   </header>
 

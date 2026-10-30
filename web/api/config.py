@@ -40,6 +40,11 @@ def get_config(req):
     return 200, {"values": read_config(), "editable": {k: hint for k, (_, hint) in EDITABLE.items()}}
 
 
+def get_device(req):
+    """The name shown in the page header (the Spotify Connect device name)."""
+    return 200, {"name": read_config().get("DEVICE_NAME") or "DAC"}
+
+
 def post_config(req):
     body = req.json()
     if not body:

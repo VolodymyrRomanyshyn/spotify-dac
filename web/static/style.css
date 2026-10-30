@@ -49,6 +49,14 @@ body {
 .device { font-weight: 600; margin-right: auto; }
 nav a { color: var(--muted); text-decoration: none; padding: 6px 10px; border-radius: 8px; }
 nav a.active { color: var(--text); background: var(--bg); }
+.menu { position: relative; }
+.menu-list {
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: 10; min-width: 160px;
+  display: grid; gap: 4px; padding: 6px; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 8px;
+}
+.menu-list[hidden] { display: none; }
+.menu-list a { display: block; }
 button {
   font: inherit; color: var(--text); background: var(--panel);
   border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; cursor: pointer;

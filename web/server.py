@@ -44,6 +44,7 @@ ROUTES = {
     ("POST", "/api/radio/stop"): radio.post_stop,
     ("GET", "/api/volume"): volume.get_volume,
     ("POST", "/api/volume"): volume.post_volume,
+    ("GET", "/api/device"): config.get_device,
     ("GET", "/api/config"): config.get_config,
     ("POST", "/api/config"): config.post_config,
     ("POST", "/api/config/apply"): config.post_apply,

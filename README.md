@@ -3,6 +3,7 @@
 Turns a Raspberry Pi into a zero-maintenance Spotify Connect streamer using
 Spotify's official headless client, [Spotify Soloist](https://developer.spotify.com/documentation/soloist).
 
+- Spotify Connect, internet radio, or both: the installer asks which ones to turn on
 - USB DAC (Topping E30, ...) or a HAT: IQaudIO DAC+, HiFiBerry DAC/DAC+/Digi+, PiFi DAC+/Digi+
 - Optional RetroFlag NESPi Case+ support (USB DAC only): power switch, reset button, LED, GPIO fan
 - Self-updating: Soloist builds expire after 90 days, so updates run when you
@@ -35,7 +36,8 @@ cd spotify-dac
 sudo bash install.sh
 ```
 
-The installer asks for the device name, sound card, case, update policy and API key,
+The installer asks whether to turn on Spotify and radio, the device name, sound card,
+case, update policy and API key (Spotify only),
 then downloads Soloist straight from Spotify. It reboots if the boot config changed.
 Then open Spotify on your phone, tap the devices icon and pick your device.
 

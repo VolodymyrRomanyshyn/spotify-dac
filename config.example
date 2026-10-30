@@ -3,6 +3,11 @@
 
 DEVICE_NAME="Living Room"
 
+# What this box plays: Spotify (Soloist, needs the API key below) and/or internet radio
+# (the station list lives in the web interface, so radio needs WEB_UI="yes").
+SPOTIFY_ENABLED="yes"
+RADIO_ENABLED="yes"
+
 # Sound card: usb = USB DAC (Topping E30 ...), hat = I2S/S-PDIF HAT (set the overlay)
 AUDIO_OUTPUT="usb"
 AUDIO_HAT_OVERLAY=""                # iqaudio-dacplus | hifiberry-dacplus (also PiFi DAC+) | hifiberry-dac | hifiberry-digi (PiFi Digi+)

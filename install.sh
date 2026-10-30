@@ -103,6 +103,15 @@ hat_pin_defaults() {
   return 0
 }
 
+# pin_hint usb_default hat_default -> the default line shown under a pin question
+pin_hint() {
+  if [ "$AUDIO_OUTPUT" = hat ]; then
+    printf '(default %s; the IQaudIO HAT uses GPIO 18-21, so the case default %s moves)' "$2" "$1"
+  else
+    printf '(default %s)' "$1"
+  fi
+}
+
 # ask_pin "label" current -> a BCM number that is usable with this sound card
 ask_pin() {
   local label="$1" val
@@ -147,14 +156,14 @@ ask_questions() {
       POWEROFF_MODE="$(ask_menu "What happens when the power switch is turned OFF (after updates):" "$POWEROFF_MODE" \
             hardcut  "Stop, sync, read-only remount, cut power via GPIO $POWER_EN_PIN (proven)" \
             graceful "Full systemctl poweroff, kernel cuts power (EXPERIMENTAL)")"
-      POWER_PIN="$(ask_pin "GPIO for the power switch" "$POWER_PIN")"
-      RESET_PIN="$(ask_pin "GPIO for the reset button" "$RESET_PIN")"
+      POWER_PIN="$(ask_pin "GPIO for the power switch\n$(pin_hint 3 17)" "$POWER_PIN")"
+      RESET_PIN="$(ask_pin "GPIO for the reset button\n$(pin_hint 2 27)" "$RESET_PIN")"
       LED_PIN="$(ask_pin "GPIO for the case LED" "$LED_PIN")"
     fi
     POWER_EN_PIN="$(ask_pin "GPIO that keeps the case powered (power enable)" "$POWER_EN_PIN")"
     FAN_ENABLED="$(ask_yesno "Control a fan with the case?\n(on at ${FAN_TEMP_ON}C, off at ${FAN_TEMP_OFF}C, ${FAN_STARTUP_SECONDS}s spin at boot)" "$FAN_ENABLED")"
     if [ "$FAN_ENABLED" = yes ]; then
-      FAN_PIN="$(ask_pin "GPIO for the fan" "$FAN_PIN")"
+      FAN_PIN="$(ask_pin "GPIO for the fan\n$(pin_hint 21 22)" "$FAN_PIN")"
     fi
   fi
 

@@ -32,6 +32,9 @@ else
   git clone -q --branch "$BRANCH" "$REPO_URL" "$DEST"
 fi
 
+# the clone belongs to the user who ran sudo, so later git pulls work without root
+if [ -n "${SUDO_USER:-}" ]; then chown -R "$SUDO_USER:$SUDO_USER" "$DEST"; fi
+
 log "Running the installer"
 cd "$DEST"
 # when run as `curl ... | sudo bash`, stdin is the script itself: give the installer the terminal

@@ -17,12 +17,21 @@ Spotify's official headless client, [Spotify Soloist](https://developer.spotify.
 
 ## Install
 
-On a fresh Pi OS Lite:
+On a fresh Pi OS Lite, one command installs git, downloads the project and runs the installer:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/VolodymyrRomanyshyn/spotify-dac/feature/web-ui/bootstrap.sh | sudo bash
+```
+
+To update later, run the same script from the project folder: `sudo bash bootstrap.sh`.
+It pulls the newest code and runs the installer again, keeping your settings.
+
+Or do it by hand:
 
 ```bash
 sudo apt-get install -y git
-git clone https://github.com/<your-user>/pi-spotify-dac.git
-cd pi-spotify-dac
+git clone https://github.com/VolodymyrRomanyshyn/spotify-dac.git
+cd spotify-dac
 sudo bash install.sh
 ```
 

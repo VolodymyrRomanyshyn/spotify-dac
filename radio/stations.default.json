@@ -82,5 +82,61 @@
     "url": "https://rs102-krk.rmfstream.pl/rmf_fm",
     "genre": "Pop",
     "logo": ""
+  },
+  {
+    "id": "eska-radio-eska-rock",
+    "name": "Radio ESKA Rock",
+    "url": "https://liveradio.timesa.pl/5980-1.aac/playlist.m3u8",
+    "genre": "Rock",
+    "logo": "https://cdn.music.smcloud.net/t/cover/677b175e-35bd-4b9b-a271-629040ccdd98_ER_500x500-2-cover_500x500.png"
+  },
+  {
+    "id": "eska-eska-rock-warszawa",
+    "name": "Eska ROCK Warszawa",
+    "url": "https://liveradio.timesa.pl/5380-1.aac/playlist.m3u8",
+    "genre": "Rock",
+    "logo": "https://cdn.music.smcloud.net/t/cover/677b175e-35bd-4b9b-a271-629040ccdd98_ER_500x500-2-cover_500x500.png"
+  },
+  {
+    "id": "eska-eska-rock",
+    "name": "Eska ROCK",
+    "url": "https://liveradio.timesa.pl/5990-1.aac/playlist.m3u8",
+    "genre": "Rock",
+    "logo": "https://cdn.music.smcloud.net/t/cover/677b175e-35bd-4b9b-a271-629040ccdd98_ER_500x500-2-cover_500x500.png"
+  },
+  {
+    "id": "eska-rocktoberfest",
+    "name": "Rocktoberfest",
+    "url": "https://liveradio.timesa.pl/6200-1.aac/playlist.m3u8",
+    "genre": "Rock",
+    "logo": "https://cdn.music.smcloud.net/t/cover/f981679b-db9d-4cee-823f-d17c9305b640_ER_RF26_Logo_500x500.png"
+  },
+  {
+    "id": "eska-nowy-rock",
+    "name": "Nowy Rock",
+    "url": "https://liveradio.timesa.pl/6060-1.aac/playlist.m3u8",
+    "genre": "Rock",
+    "logo": "https://cdn.music.smcloud.net/t/cover/34928037-9ef6-4ccb-9ee3-37b8337437f6_cover_relaunch_ROCK_dobrze_-rockuje_500x500.png"
+  },
+  {
+    "id": "eska-rock-ballads",
+    "name": "Rock Ballads",
+    "url": "https://liveradio.timesa.pl/6010-1.aac/playlist.m3u8",
+    "genre": "Rock ballads",
+    "logo": "https://cdn.music.smcloud.net/t/cover/ce74f94d-3fea-44b4-bc27-3a7d301f67b8_icon-ROCK-NEW-ballads_500x500.png"
+  },
+  {
+    "id": "eska-klasyka-rocka",
+    "name": "Klasyka Rocka",
+    "url": "https://liveradio.timesa.pl/6070-1.aac/playlist.m3u8",
+    "genre": "Classic rock",
+    "logo": "https://cdn.music.smcloud.net/t/cover/149dbf70-95f7-4818-8de4-e36c91559d82_cover_relaunch_ROCK_klasyka_rocka_500x500.png"
+  },
+  {
+    "id": "eska-teraz-polski-rock",
+    "name": "Teraz Polski Rock",
+    "url": "https://liveradio.timesa.pl/6090-1.aac/playlist.m3u8",
+    "genre": "Polish rock",
+    "logo": "https://cdn.music.smcloud.net/t/cover/ec4f87d0-9365-4f7d-baba-e45fd39ca51a_cover_-ROCK_relaunch_-polski_rock_500x500.png"
   }
 ]

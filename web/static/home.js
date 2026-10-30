@@ -106,7 +106,18 @@
     else thumb.textContent = initials(s.name);
     return thumb;
   }
+  // Rebuilding the rows on every poll makes them flash under a finger, so they are rebuilt
+  // only when what they show changes.
+  let stationsKey = null, controlsKey = null;
+  function setControls(key, nodes) {
+    if (key === controlsKey) return;
+    controlsKey = key;
+    controls.replaceChildren(...nodes);
+  }
   function drawStations(playingId) {
+    const key = JSON.stringify([stations, playingId]);
+    if (key === stationsKey) return;
+    stationsKey = key;
     stationsBox.replaceChildren(...stations.map(function (s) {
       const playing = playingId === s.id;
       const row = el("button", "station" + (playing ? " playing" : ""));
@@ -132,7 +143,7 @@
     cover.classList.toggle("empty", !now.cover);
     cover.classList.remove("initials", "radio-icon");
     cover.textContent = "";
-    controls.replaceChildren(
+    setControls("spotify:" + playing, [
       iconButton("prev", "Previous", function () { return api("/api/spotify/control", { body: { action: "prev" } }); }),
       iconButton(playing ? "pause" : "play", playing ? "Pause" : "Play", function () {
         // show the new state at once; the next poll confirms it
@@ -141,7 +152,7 @@
         return api("/api/spotify/control", { body: { action: playing ? "pause" : "play" } });
       }, "main"),
       iconButton("next", "Next", function () { return api("/api/spotify/control", { body: { action: "next" } }); })
-    );
+    ]);
     if (!seeking) {
       const duration = now.duration_ms, position = currentPosition(now);
       progress.disabled = !duration;
@@ -214,11 +225,11 @@
       cover.innerHTML = '<svg viewBox="0 0 24 24" width="72" height="72" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M7 8l10-4"/><circle cx="16" cy="14" r="2.5"/><path d="M6 12h4"/></svg>';
       cover.classList.add("radio-icon");
     }
-    controls.replaceChildren(
+    setControls("radio:" + (radio.playing ? "playing" : "idle"), [
       radio.playing
         ? iconButton("stop", "Stop", function () { return api("/api/radio/stop", { method: "POST" }).then(refreshFast); }, "main")
         : el("p", "muted", "Choose a station below.")
-    );
+    ]);
     progressCard.hidden = true;
   }
 
@@ -273,7 +284,7 @@
       } else {
         title.textContent = "Spotify not reachable";
         subtitle.textContent = "";
-        controls.replaceChildren();
+        setControls("none", []);
       }
       drawStations(radio.playing);
       if (!volumeDirty) drawVolume(volumeNow.percent);

@@ -44,6 +44,13 @@
   }
 
   // ---- now playing ----
+  // The buttons are rebuilt only when they change: rebuilding them every poll makes them flash.
+  let nowKey = null;
+  function setNowControls(key, nodes) {
+    if (key === nowKey) return;
+    nowKey = key;
+    nowControls.replaceChildren(...nodes);
+  }
   async function refreshNow() {
     try {
       const now = await api("/api/radio/now");
@@ -54,13 +61,13 @@
         const t = now.title;
         const fileish = t && /\.(m3u8?|mp3|aac|ogg|opus|pls)$/i.test(t);
         nowSub.textContent = (t && !fileish && t.toLowerCase() !== (station.name || "").toLowerCase()) ? t : "Live";
-        nowControls.replaceChildren(iconButton("Stop", function () {
+        setNowControls("stop:" + playing, [iconButton("Stop", function () {
           return api("/api/radio/stop", { method: "POST" }).then(function () { playing = null; draw(); });
-        }, "main"));
+        }, "main")]);
       } else {
         nowTitle.textContent = "Not playing";
         nowSub.textContent = "Tap a station to play it.";
-        nowControls.replaceChildren();
+        setNowControls("none", []);
       }
       drawStations();
     } catch (err) { /* keep the last values */ }
@@ -94,7 +101,11 @@
     else box.textContent = s.name.split(/\s+/).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join("");
     return box;
   }
+  let stationsKey = null;
   function drawStations() {
+    const key = JSON.stringify([stations, playing]);
+    if (key === stationsKey) return;
+    stationsKey = key;
     stationsBox.replaceChildren(...stations.map(function (s, i) {
       const isPlaying = s.id === playing;
       const row = el("div", "station" + (isPlaying ? " playing" : ""));

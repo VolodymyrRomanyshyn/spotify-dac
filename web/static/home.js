@@ -15,7 +15,8 @@
 
   let source = null;            // "spotify" or "radio", set by the user or on first load
   let stations = [];
-  let lastStation = null;       // last station played from this page
+  // last station played from this browser (kept across reloads; the page works without storage)
+  let lastStation = (function () { try { return localStorage.getItem("lastStation"); } catch (e) { return null; } })();
   let spotify = null;           // last Spotify answer
   let spotifyPosition = null;   // ms, advanced locally between answers
   let spotifyAt = 0;            // when spotifyPosition was taken
@@ -95,6 +96,7 @@
   async function playStation(id) {
     await api("/api/radio/play", { body: { id: id } });   // this also pauses Spotify
     lastStation = id;
+    try { localStorage.setItem("lastStation", id); } catch (e) { /* private mode: nothing to keep */ }
     refreshFast();
   }
 
@@ -225,10 +227,14 @@
       cover.innerHTML = '<svg viewBox="0 0 24 24" width="72" height="72" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M7 8l10-4"/><circle cx="16" cy="14" r="2.5"/><path d="M6 12h4"/></svg>';
       cover.classList.add("radio-icon");
     }
-    setControls("radio:" + (radio.playing ? "playing" : "idle"), [
+    // stopped: the last station can be played again from here
+    const resume = !radio.playing && station ? station.id : null;
+    setControls("radio:" + (radio.playing ? "playing" : "idle:" + (resume || "")), [
       radio.playing
         ? iconButton("stop", "Stop", function () { return api("/api/radio/stop", { method: "POST" }).then(refreshFast); }, "main")
-        : el("p", "muted", "Choose a station below.")
+        : resume
+          ? iconButton("play", "Play", function () { return playStation(resume).catch(fail); }, "main")
+          : el("p", "muted", "Choose a station below.")
     ]);
     progressCard.hidden = true;
   }

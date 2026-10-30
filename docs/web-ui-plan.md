@@ -1,6 +1,6 @@
 # Web UI and internet radio: draft plan
 
-Status: draft for review. No code yet. Branch `feature/web-ui` (from `main`).
+Status: implemented; merged into `main`.
 
 ## Goals
 

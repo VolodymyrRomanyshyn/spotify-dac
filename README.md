@@ -20,7 +20,7 @@ Spotify's official headless client, [Spotify Soloist](https://developer.spotify.
 On a fresh Pi OS Lite, one command installs git, downloads the project and runs the installer:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/VolodymyrRomanyshyn/spotify-dac/feature/web-ui/bootstrap.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/VolodymyrRomanyshyn/spotify-dac/main/bootstrap.sh | sudo bash
 ```
 
 To update later, run the same script from the project folder: `sudo bash bootstrap.sh`.

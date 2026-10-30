@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # bootstrap.sh - install git, fetch spotify-dac from GitHub and run the installer.
-#   curl -fsSL https://raw.githubusercontent.com/VolodymyrRomanyshyn/spotify-dac/feature/web-ui/bootstrap.sh | sudo bash
+#   curl -fsSL https://raw.githubusercontent.com/VolodymyrRomanyshyn/spotify-dac/main/bootstrap.sh | sudo bash
 #   sudo bash bootstrap.sh     # run again to update: pulls the newest code, then reinstalls
 # Optional: SPOTIFY_DAC_BRANCH, SPOTIFY_DAC_DIR. Your settings are kept (see install.sh).
 if [ -z "${BASH_VERSION:-}" ]; then exec /usr/bin/env bash "$0" "$@"; fi
 set -euo pipefail
 
 REPO_URL="https://github.com/VolodymyrRomanyshyn/spotify-dac.git"
-BRANCH="${SPOTIFY_DAC_BRANCH:-feature/web-ui}"
+BRANCH="${SPOTIFY_DAC_BRANCH:-main}"
 OWNER_HOME="$(getent passwd "${SUDO_USER:-root}" | cut -d: -f6)"
 DEST="${SPOTIFY_DAC_DIR:-$OWNER_HOME/spotify-dac}"
 

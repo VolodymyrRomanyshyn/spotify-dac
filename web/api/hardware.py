@@ -16,7 +16,7 @@ POWEROFF = ("hardcut", "graceful")
 
 
 def _sinks():
-    """Playback devices in the soloist session (PipeWire): [{name, label}], without the onboard output."""
+    """Playback devices in the soloist session (PipeWire): [{name, label}]."""
     uid = pwd.getpwnam(SOLOIST_USER).pw_uid
     env = ["runuser", "-u", SOLOIST_USER, "--", "env", f"XDG_RUNTIME_DIR=/run/user/{uid}"]
     rc, out, _ = run(env + ["pactl", "list", "sinks"], timeout=10)
@@ -29,9 +29,7 @@ def _sinks():
         if text.startswith("Name:"):
             name = text.split(":", 1)[1].strip()
         elif text.startswith("Description:") and name:
-            label = text.split(":", 1)[1].strip()
-            if "mailbox" not in name:
-                sinks.append({"name": name, "label": label})
+            sinks.append({"name": name, "label": text.split(":", 1)[1].strip()})
             name = None
     return sinks
 

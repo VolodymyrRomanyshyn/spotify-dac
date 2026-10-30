@@ -106,9 +106,9 @@ hat_pin_defaults() {
 # pin_hint usb_default hat_default -> the default line shown under a pin question
 pin_hint() {
   if [ "$AUDIO_OUTPUT" = hat ]; then
-    printf '(default %s; the IQaudIO HAT uses GPIO 18-21, so the case default %s moves)' "$2" "$1"
+    printf '(default %s with this HAT, which uses I2C on GPIO 2 and 3 and GPIO 18-21; otherwise %s)' "$2" "$1"
   else
-    printf '(default %s)' "$1"
+    printf '(default %s; %s if you use the IQaudIO HAT)' "$1" "$2"
   fi
 }
 

@@ -367,6 +367,8 @@ install_web() {
   log "Installing the web interface on port $WEB_PORT"
   install -d -m 755 "$WEB_DIR" "$CONF_DIR/web"
   cp -r "$REPO_DIR/web/." "$WEB_DIR/"
+  # station catalogs (RMF ON, Eska) and the starter list sit next to the web folder
+  rm -rf "$(dirname "$WEB_DIR")/radio" && cp -r "$REPO_DIR/radio" "$(dirname "$WEB_DIR")/"
   find "$WEB_DIR" -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 
   # HTTPS certificate for this Pi's name and address (kept if it exists)

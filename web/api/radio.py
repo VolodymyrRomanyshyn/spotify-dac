@@ -6,6 +6,7 @@ user. Only one source plays at a time: starting a station pauses Spotify first.
 import json
 import os
 import pwd
+import re
 import shutil
 import signal
 import socket
@@ -124,14 +125,23 @@ def get_now(req):
     return 200, {"playing": state["station"], "title": _mpv_property("media-title")}
 
 
+def _start_mpv(mpv, url, user):
+    env = f"XDG_RUNTIME_DIR=/run/user/{user.pw_uid}"
+    argv = ["runuser", "-u", SOLOIST_USER, "--", "env", env, mpv, "--no-video", "--really-quiet",
+            "--ao=pipewire", f"--input-ipc-server={MPV_SOCKET}", url]
+    return subprocess.Popen(argv, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL, start_new_session=True)
+
+
 def post_play(req):
     station_id = req.json().get("id")
     if not isinstance(station_id, str):
         raise ApiError(400, "id is required")
     station = _station(station_id)
-    url = station.get("url", "")
-    if urlsplit(url).scheme not in ("http", "https"):
-        raise ApiError(400, "station URL must start with http:// or https://")
+    addresses = [station.get("url", "")] + list(station.get("fallback") or [])
+    addresses = [u for u in addresses if isinstance(u, str) and urlsplit(u).scheme in ("http", "https")]
+    if not addresses:
+        raise ApiError(400, "station has no http:// or https:// address")
     mpv = shutil.which("mpv")
     if not mpv:
         raise ApiError(503, "mpv is not installed; the installer adds it with the radio feature")
@@ -139,18 +149,23 @@ def post_play(req):
     with _lock:
         _stop_current()
         run(SOLOIST_CTL + ["pause"])  # ignore the answer: Spotify may already be paused
-        env = f"XDG_RUNTIME_DIR=/run/user/{user.pw_uid}"
-        argv = ["runuser", "-u", SOLOIST_USER, "--", "env", env, mpv, "--no-video", "--really-quiet",
-                "--ao=pipewire", f"--input-ipc-server={MPV_SOCKET}", url]
-        proc = subprocess.Popen(argv, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL, start_new_session=True)
-        STATE_FILE.write_text(json.dumps({"pid": proc.pid, "station": station_id}), encoding="utf-8")
+        played = None
+        for url in addresses:
+            proc = _start_mpv(mpv, url, user)
+            time.sleep(4)  # mpv exits quickly when the address does not answer
+            if proc.poll() is None:
+                played = (proc, url)
+                break
+        if played is None:
+            raise ApiError(502, "no address of this station answers; try again later")
+        proc, url = played
+        STATE_FILE.write_text(json.dumps({"pid": proc.pid, "station": station_id, "url": url}), encoding="utf-8")
     from .volume import effective_level
     for _ in range(20):  # mpv opens its socket a moment after it starts
         if _mpv_set_volume(effective_level()):
             break
         time.sleep(0.25)
-    return 200, {"playing": station_id}
+    return 200, {"playing": station_id, "address": url}
 
 
 def post_stop(req):
@@ -203,3 +218,83 @@ def watch_sources(interval=2):
             was_playing, last_spotify, last_radio = now_playing, spotify_now, radio_now
         except Exception:  # the watcher must never stop the server
             pass
+
+
+CATALOG_DIR = Path(os.environ.get("SPOTIFY_DAC_CATALOG", DEFAULT_STATIONS.parent))
+ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,63}$")
+
+
+def _catalog_items():
+    items = []
+    for path in sorted(CATALOG_DIR.glob("catalog-*.json")):
+        try:
+            items.extend(json.loads(path.read_text(encoding="utf-8")))
+        except (OSError, ValueError):
+            continue
+    return items
+
+
+def get_catalog(req):
+    """Search the built-in catalogs (RMF ON, Eska). ?q=text matches name or description."""
+    query = (req.query.get("q") or "").strip().lower()
+    current = load_stations()
+    have_ids = {x.get("id") for x in current}
+    have_urls = {x.get("url") for x in current}
+    results = []
+    for item in _catalog_items():
+        text = (item.get("name", "") + " " + item.get("description", "")).lower()
+        if query and query not in text:
+            continue
+        results.append({
+            "id": item.get("id"), "name": item.get("name"), "description": item.get("description", ""),
+            "url": item.get("url"), "logo": item.get("logo", ""), "fallback": item.get("fallback", []),
+            "source": item.get("source", ""), "added": item.get("id") in have_ids or item.get("url") in have_urls,
+        })
+        if len(results) >= 60:
+            break
+    return 200, {"results": results}
+
+
+def _check_station(item):
+    """Validates one station record. Returns the cleaned record or raises ApiError."""
+    if not isinstance(item, dict):
+        raise ApiError(400, "each station must be an object")
+    station_id = str(item.get("id", "")).strip()
+    name = str(item.get("name", "")).strip()
+    url = str(item.get("url", "")).strip()
+    if not ID_RE.match(station_id):
+        raise ApiError(400, f"bad id '{station_id}': use lowercase letters, digits and dashes")
+    if not 1 <= len(name) <= 60:
+        raise ApiError(400, f"station '{station_id}': name must be 1-60 characters")
+    if urlsplit(url).scheme not in ("http", "https") or len(url) > 500:
+        raise ApiError(400, f"station '{station_id}': address must start with http:// or https://")
+    logo = str(item.get("logo", "") or "").strip()
+    if logo and urlsplit(logo).scheme not in ("http", "https"):
+        raise ApiError(400, f"station '{station_id}': logo must be an http:// or https:// address")
+    fallback = [str(u).strip() for u in (item.get("fallback") or []) if str(u).strip()]
+    if len(fallback) > 5 or any(urlsplit(u).scheme not in ("http", "https") for u in fallback):
+        raise ApiError(400, f"station '{station_id}': up to 5 backup addresses, each http:// or https://")
+    return {"id": station_id, "name": name, "url": url, "genre": str(item.get("genre", "") or "")[:40],
+            "logo": logo, "fallback": fallback}
+
+
+def put_stations(req):
+    """Saves the whole station list. The old file is copied to a backup first."""
+    try:
+        items = json.loads(req.body.decode("utf-8") or "[]")
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        raise ApiError(400, "body must be a JSON list of stations")
+    if not isinstance(items, list) or len(items) > 200:
+        raise ApiError(400, "body must be a JSON list of at most 200 stations")
+    cleaned = [_check_station(item) for item in items]
+    ids = [x["id"] for x in cleaned]
+    if len(set(ids)) != len(ids):
+        raise ApiError(400, "station ids must be unique")
+    target = STATIONS_FILE
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if target.exists():
+        shutil.copy(target, target.with_name(target.name + ".bak-" + time.strftime("%Y%m%d%H%M%S")))
+    tmp = target.with_name(target.name + ".tmp")
+    tmp.write_text(json.dumps(cleaned, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    os.replace(tmp, target)
+    return 200, {"stations": cleaned}

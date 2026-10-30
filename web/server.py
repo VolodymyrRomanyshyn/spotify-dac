@@ -17,7 +17,7 @@ import threading
 import traceback
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
@@ -37,6 +37,8 @@ ROUTES = {
     ("GET", "/api/spotify/update"): spotify.get_update,
     ("POST", "/api/spotify/update"): spotify.post_update,
     ("GET", "/api/radio/stations"): radio.get_stations,
+    ("PUT", "/api/radio/stations"): radio.put_stations,
+    ("GET", "/api/radio/catalog"): radio.get_catalog,
     ("GET", "/api/radio/now"): radio.get_now,
     ("POST", "/api/radio/play"): radio.post_play,
     ("POST", "/api/radio/stop"): radio.post_stop,
@@ -69,6 +71,9 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         self._dispatch("POST")
 
+    def do_PUT(self):
+        self._dispatch("PUT")
+
     def _dispatch(self, method):
         path = urlsplit(self.path).path
         if not path.startswith("/api/"):
@@ -81,6 +86,7 @@ class Handler(BaseHTTPRequestHandler):
         try:
             body = self._body()
             req = Request(method, path, self.headers, body)
+            req.query = {k: v[0] for k, v in parse_qs(urlsplit(self.path).query).items()}
             if (method, path) not in PUBLIC and not auth.is_authorized(req):
                 raise ApiError(401, "sign in first")
             result = handler(req)

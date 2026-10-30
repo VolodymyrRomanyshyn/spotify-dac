@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Spotify DAC - Radio</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <span class="device">Spotify DAC</span>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/radio.html" class="active">Radio</a>
+      <a href="/status.html">Status</a>
+    </nav>
+    <button id="theme" class="theme" type="button" aria-label="Switch dark or light mode">Theme</button>
+  </header>
+
+  <main>
+    <div id="banner" class="banner" hidden></div>
+
+    <section class="card now">
+      <div class="meta">
+        <h1 id="now-title">Not playing</h1>
+        <p class="muted" id="now-sub">Tap a station to play it.</p>
+        <div class="controls" id="now-controls"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="row-between">
+        <h2>Stations</h2>
+        <button type="button" class="pill" id="add-station">Add station</button>
+      </div>
+      <div id="stations" class="stations"></div>
+    </section>
+
+    <section class="card" id="form-card" hidden>
+      <h2 id="form-title">New station</h2>
+      <form id="station-form" class="form">
+        <label>Name <input name="name" required maxlength="60"></label>
+        <label>Stream address <input name="url" type="url" required maxlength="500" placeholder="https://..."></label>
+        <label>Genre <input name="genre" maxlength="40"></label>
+        <label>Logo address <input name="logo" type="url" maxlength="500" placeholder="https://... (optional)"></label>
+        <label>Backup addresses (one per line, up to 5)
+          <textarea name="fallback" rows="3" placeholder="https://..."></textarea>
+        </label>
+        <div class="form-actions">
+          <button type="button" id="form-cancel">Cancel</button>
+          <button type="submit" class="main-btn">Save</button>
+        </div>
+        <p class="muted small" id="form-error"></p>
+      </form>
+    </section>
+
+    <section class="card">
+      <div class="row-between">
+        <h2>Search the catalogs</h2>
+      </div>
+      <input id="search" class="search" type="search" placeholder="Search RMF ON and Eska stations, e.g. rock, Kraków, classic">
+      <div id="results" class="stations"></div>
+      <p class="muted small" id="search-note"></p>
+    </section>
+  </main>
+
+  <script src="common.js"></script>
+  <script src="radio.js"></script>
+</body>
+</html>

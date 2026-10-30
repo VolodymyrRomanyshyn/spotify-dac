@@ -158,9 +158,9 @@ ask_questions() {
             graceful "Full systemctl poweroff, kernel cuts power (EXPERIMENTAL)")"
       POWER_PIN="$(ask_pin "GPIO for the power switch\n$(pin_hint 3 17)" "$POWER_PIN")"
       RESET_PIN="$(ask_pin "GPIO for the reset button\n$(pin_hint 2 27)" "$RESET_PIN")"
-      LED_PIN="$(ask_pin "GPIO for the case LED" "$LED_PIN")"
+      LED_PIN="$(ask_pin "GPIO for the case LED\n(default 14)" "$LED_PIN")"
     fi
-    POWER_EN_PIN="$(ask_pin "GPIO that keeps the case powered (power enable)" "$POWER_EN_PIN")"
+    POWER_EN_PIN="$(ask_pin "GPIO that keeps the case powered (power enable)\n(default 4)" "$POWER_EN_PIN")"
     FAN_ENABLED="$(ask_yesno "Control a fan with the case?\n(on at ${FAN_TEMP_ON}C, off at ${FAN_TEMP_OFF}C, ${FAN_STARTUP_SECONDS}s spin at boot)" "$FAN_ENABLED")"
     if [ "$FAN_ENABLED" = yes ]; then
       FAN_PIN="$(ask_pin "GPIO for the fan\n$(pin_hint 21 22)" "$FAN_PIN")"

@@ -165,6 +165,12 @@ ask_questions() {
     if [ "$FAN_ENABLED" = yes ]; then
       FAN_PIN="$(ask_pin "GPIO for the fan\n$(pin_hint 21 22)" "$FAN_PIN")"
     fi
+  else
+    hat_pin_defaults
+    FAN_ENABLED="$(ask_yesno "Control a fan on a GPIO pin?\n(on at ${FAN_TEMP_ON}C, off at ${FAN_TEMP_OFF}C, ${FAN_STARTUP_SECONDS}s spin at boot)" no)"
+    if [ "$FAN_ENABLED" = yes ]; then
+      FAN_PIN="$(ask_pin "GPIO for the fan\n$(pin_hint 21 22)" "$FAN_PIN")"
+    fi
   fi
 
   if [ "$CASE" = nespi ] && [ "$SAFE_SHUTDOWN" = yes ]; then
@@ -258,7 +264,8 @@ validate() {
 
 confirm() {
   local hw="USB DAC"; [ "$AUDIO_OUTPUT" = hat ] && hw="HAT ($AUDIO_HAT_OVERLAY)"
-  local cs="none"; [ "$CASE" = nespi ] && cs="NESPi Case+ (fan: $FAN_ENABLED, power-off: $POWEROFF_MODE)"
+  local cs="none"; [ "$CASE" = nespi ] && cs="NESPi Case+ (power-off: $POWEROFF_MODE)"
+  [ "$FAN_ENABLED" = yes ] && cs="$cs, fan on GPIO $FAN_PIN"
   whiptail --title "$WT_TITLE" --yesno "Install with these settings?
 
   Device name : $DEVICE_NAME
@@ -485,11 +492,12 @@ configure_units() {
   if [ "$CASE" = nespi ]; then
     systemctl enable nespi-power.service
     systemctl restart nespi-power.service
-    if [ "$FAN_ENABLED" = yes ]; then systemctl enable nespi-fan.service; systemctl restart nespi-fan.service
-    else systemctl disable --now nespi-fan.service 2>/dev/null || true; fi
   else
-    systemctl disable --now nespi-power.service nespi-fan.service 2>/dev/null || true
+    systemctl disable --now nespi-power.service 2>/dev/null || true
   fi
+  # the fan runs with or without the case; it only needs FAN_PIN
+  if [ "$FAN_ENABLED" = yes ]; then systemctl enable nespi-fan.service; systemctl restart nespi-fan.service
+  else systemctl disable --now nespi-fan.service 2>/dev/null || true; fi
 
   # PipeWire resets the DAC sink to 0.40 on every start; make it the default at 100% (bit-perfect)
   systemctl enable spotify-dac-volume.service

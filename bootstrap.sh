@@ -34,4 +34,6 @@ fi
 
 log "Running the installer"
 cd "$DEST"
+# when run as `curl ... | sudo bash`, stdin is the script itself: give the installer the terminal
+if [ -r /dev/tty ]; then exec bash install.sh "$@" </dev/tty; fi
 exec bash install.sh "$@"

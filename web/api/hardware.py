@@ -15,6 +15,15 @@ CASES = ("nespi", "none")
 POWEROFF = ("hardcut", "graceful")
 
 
+def _label(name, description):
+    """Name the Pi's two outputs clearly; PipeWire calls both 'Built-in Audio Stereo'."""
+    if "mailbox" in name:
+        return "Onboard headphone jack"
+    if "soc_sound" in name:
+        return "IQaudIO DAC+ (HAT)"
+    return description
+
+
 def _sinks():
     """Playback devices in the soloist session (PipeWire): [{name, label}]."""
     uid = pwd.getpwnam(SOLOIST_USER).pw_uid
@@ -29,7 +38,7 @@ def _sinks():
         if text.startswith("Name:"):
             name = text.split(":", 1)[1].strip()
         elif text.startswith("Description:") and name:
-            sinks.append({"name": name, "label": text.split(":", 1)[1].strip()})
+            sinks.append({"name": name, "label": _label(name, text.split(":", 1)[1].strip())})
             name = None
     return sinks
 

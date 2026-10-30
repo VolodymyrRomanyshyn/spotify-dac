@@ -161,16 +161,13 @@ ask_questions() {
       LED_PIN="$(ask_pin "GPIO for the case LED\n(default 14)" "$LED_PIN")"
     fi
     POWER_EN_PIN="$(ask_pin "GPIO that keeps the case powered (power enable)\n(default 4)" "$POWER_EN_PIN")"
-    FAN_ENABLED="$(ask_yesno "Control a fan with the case?\n(on at ${FAN_TEMP_ON}C, off at ${FAN_TEMP_OFF}C, ${FAN_STARTUP_SECONDS}s spin at boot)" "$FAN_ENABLED")"
-    if [ "$FAN_ENABLED" = yes ]; then
-      FAN_PIN="$(ask_pin "GPIO for the fan\n$(pin_hint 21 22)" "$FAN_PIN")"
-    fi
-  else
-    hat_pin_defaults
-    FAN_ENABLED="$(ask_yesno "Control a fan on a GPIO pin?\n(on at ${FAN_TEMP_ON}C, off at ${FAN_TEMP_OFF}C, ${FAN_STARTUP_SECONDS}s spin at boot)" no)"
-    if [ "$FAN_ENABLED" = yes ]; then
-      FAN_PIN="$(ask_pin "GPIO for the fan\n$(pin_hint 21 22)" "$FAN_PIN")"
-    fi
+  fi
+
+  # the fan is independent of the case: any board can drive one
+  hat_pin_defaults
+  FAN_ENABLED="$(ask_yesno "Control a fan on a GPIO pin?\n(on at ${FAN_TEMP_ON}C, off at ${FAN_TEMP_OFF}C, ${FAN_STARTUP_SECONDS}s spin at boot)" "$FAN_ENABLED")"
+  if [ "$FAN_ENABLED" = yes ]; then
+    FAN_PIN="$(ask_pin "GPIO for the fan\n$(pin_hint 21 22)" "$FAN_PIN")"
   fi
 
   if [ "$CASE" = nespi ] && [ "$SAFE_SHUTDOWN" = yes ]; then

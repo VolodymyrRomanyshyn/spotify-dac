@@ -14,3 +14,6 @@ Thumbs.db
 __pycache__/
 *.pyc
 *~
+
+# personal notes with device credentials; never commit
+settings.md

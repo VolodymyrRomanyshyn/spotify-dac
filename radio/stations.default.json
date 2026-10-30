@@ -12,5 +12,33 @@
     "url": "https://stream13.polskieradio.pl/pr3/pr3.sdp/playlist.m3u8",
     "genre": "Music",
     "logo": ""
+  },
+  {
+    "id": "eska-rock",
+    "name": "Eska Rock",
+    "url": "https://liveradio.timesa.pl/5980-1-noad.aac/playlist.m3u8",
+    "genre": "Rock",
+    "logo": ""
+  },
+  {
+    "id": "rmf-classic",
+    "name": "RMF Classic",
+    "url": "https://rs102-krk.rmfstream.pl/rmf_classic",
+    "genre": "Film music",
+    "logo": ""
+  },
+  {
+    "id": "radio-nowy-swiat",
+    "name": "Radio Nowy Swiat",
+    "url": "https://stream.nowyswiat.online/mp3",
+    "genre": "Rock, Alternative",
+    "logo": ""
+  },
+  {
+    "id": "radio-357",
+    "name": "Radio 357",
+    "url": "https://stream.rcs.revma.com/an1ugyygzk8uv",
+    "genre": "Rock, Alternative",
+    "logo": ""
   }
 ]

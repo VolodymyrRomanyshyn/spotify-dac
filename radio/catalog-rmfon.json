@@ -1,0 +1,1163 @@
+[
+ {
+  "id": "rmfon-36lat-rmf-fm",
+  "name": "36 lat RMF FM",
+  "description": "muzyczna historia radia RMF FM",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_20lat",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-fmf",
+  "name": "FMF CLASSIC",
+  "description": "FMF Classic",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_classic_fmf",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-fresh-dance",
+  "name": "FRESH Dance",
+  "description": "taneczne nowości",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_top17",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-fresh-hip-hop",
+  "name": "FRESH Hip Hop",
+  "description": "hip-hopowe świeżynki",
+  "url": "https://rs102-krk.rmfstream.pl/rmf-top",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-fresh-polski-hip-hop",
+  "name": "FRESH Polski Hip Hop",
+  "description": "nowy polski rap",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_top18",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-fresh-polskie",
+  "name": "FRESH Polskie",
+  "description": "nowe numery polskich artystów",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_top20",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-fresh-pop",
+  "name": "FRESH Pop",
+  "description": "najnowsze popowe hity",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_top16",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-lista-przebojow-muzyki-filmowej",
+  "name": "Lista Przebojów Muzyki Filmowej RMF Classic",
+  "description": "najnowsze filmowe przeboje",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_top3",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-radiogra",
+  "name": "Radio Gra Toruń",
+  "description": "Radio Gra Toruń - Moje Miasto Moje Radio",
+  "url": "https://rs102-krk.rmfstream.pl/radio_gra",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-24",
+  "name": "RADIO RMF24",
+  "description": "Jeszcze więcej informacji",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_24",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-10s",
+  "name": "RMF 10s",
+  "description": "druga dekada XXI wieku",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_2010",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-2-pop",
+  "name": "RMF 2 Pop",
+  "description": "młodszy brat RMF FM",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_2",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-2000",
+  "name": "RMF 2000",
+  "description": "klimat pierwszej dekady XXI wieku",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_2000",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-20s",
+  "name": "RMF 20s",
+  "description": "druga dekada XXI wieku",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_20s",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-3-pop-rock",
+  "name": "RMF 3 Pop-Rock",
+  "description": "RMF FM w wersji rockowej",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_3",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-4-dance-rnb",
+  "name": "RMF 4 Dance & RNB",
+  "description": "RMF FM w tanecznym rytmie",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_4",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-5-lagodne-przeboje",
+  "name": "RMF 5 Łagodne przeboje",
+  "description": "RMF FM dla dojrzałego słuchacza",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_5",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-50s",
+  "name": "RMF 50s",
+  "description": "Muzyka lat 50",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_50s",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-60s",
+  "name": "RMF 60s",
+  "description": "Muzyka lat 60",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_60s",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-70s",
+  "name": "RMF 70s",
+  "description": "Muzyka lat 70",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_70s",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-80s",
+  "name": "RMF 80s",
+  "description": "Muzyka lat 80",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_80s",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-80s-disco",
+  "name": "RMF 80s disco",
+  "description": "taneczne hity lat 80",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_80s_disco",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-90s",
+  "name": "RMF 90s",
+  "description": "Muzyka lat 90",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_90s",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-90s-dance",
+  "name": "RMF 90s dance",
+  "description": "niezapomniane hity parkietów!",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_90s_dance",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-alternatywa",
+  "name": "RMF Alternatywa",
+  "description": "sam wybierasz - masz alternatywę",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_alternatywa",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-ballady",
+  "name": "RMF Ballady",
+  "description": "wytchnienie i refleksja",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_nostalgia",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-blues",
+  "name": "RMF Blues",
+  "description": "blues w każdym kolorze i nastroju",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_blues",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-cafe",
+  "name": "RMF Cafe",
+  "description": "dźwięki jazzu, soft popu i indie",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_studencka_impreza",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-chillout",
+  "name": "RMF Chillout",
+  "description": "Muzyka chillout",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_chillout",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-classic",
+  "name": "RMF Classic",
+  "description": "RMF Classic. Muzyka z klasą",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_classic",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_classicplus_sku",
+  "name": "RMF Classic Czas skupienia",
+  "description": "RMF Classic Czas skupienia",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_classicplus_sku",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_classicplus_zim",
+  "name": "RMF Classic Hans Zimmer",
+  "description": "RMF Classic Hans Zimmer",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_classicplus_zim",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_classicplus_wil",
+  "name": "RMF Classic John Williams",
+  "description": "RMF Classic John Williams",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_classicplus_wil",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_classicplus_wer",
+  "name": "RMF Classic Klasyka z werwą",
+  "description": "RMF Classic Klasyka z werwą",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_classicplus_wer",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_classicplus_min",
+  "name": "RMF Classic Mindfulness",
+  "description": "RMF Classic Mindfulness",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_classicplus_min",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_classicplus_wes",
+  "name": "RMF Classic Morricone Westerny",
+  "description": "RMF Classic Morricone Westerny",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_classicplus_wes",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_classicplus_osc",
+  "name": "RMF Classic Muzyka Oscarowa",
+  "description": "RMF Classic Muzyka Oscarowa",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_classicplus_osc",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_classicplus_pir",
+  "name": "RMF Classic Na pirackich wodach",
+  "description": "RMF Classic Na pirackich wodach",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_classicplus_pir",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-oscary-2025",
+  "name": "RMF Classic Oscary 2025",
+  "description": "Muzyka oscarowa 2025",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_top13",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-classic-rock",
+  "name": "RMF Classic rock",
+  "description": "absolutny kanon muzyki rockowej",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_classic_rock",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_classicplus_tar",
+  "name": "RMF Classic Tarantino",
+  "description": "RMF Classic Tarantino",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_classicplus_tar",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_classicplus_tho",
+  "name": "RMF Classic Thor",
+  "description": "RMF Classic Thor",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_classicplus_tho",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_classicplus_srd",
+  "name": "RMF Classic Śródziemie",
+  "description": "RMF Classic Śródziemie",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_classicplus_srd",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_classicplus_cza",
+  "name": "RMF Classic Świat Czarodziejów",
+  "description": "RMF Classic Świat Czarodziejów",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_classicplus_cza",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-crush",
+  "name": "RMF Crush",
+  "description": "ładni chłopcy i ładne piosenki",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_top9",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-dance",
+  "name": "RMF Dance",
+  "description": "dance bez ograniczeń",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_dance",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-disco-polo",
+  "name": "RMF Disco polo",
+  "description": "Disco polo",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_disco_polo",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-dla-dzieci",
+  "name": "RMF Dla dzieci",
+  "description": "Muzyka dla dzieci",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_baby",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-fitness",
+  "name": "RMF Fitness",
+  "description": "czas na rozgrzewkę",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_fitness",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-fitness-rock",
+  "name": "RMF Fitness rock",
+  "description": "duża dawka energii",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_fitness_rock",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-fm",
+  "name": "RMF FM",
+  "description": "Najlepsza muzyka",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_fm",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-gold",
+  "name": "RMF Gold",
+  "description": "klasyka lat 60., 70., 80. i 90.",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_gold",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-hard-and-heavy",
+  "name": "RMF Hard & Heavy",
+  "description": "30 lat historii muzyki hard & heavy",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_hard_heavy",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-hip-hop",
+  "name": "RMF Hip hop",
+  "description": "przegląd Hip-Hopowych brzmień",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_hip_hop",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-hot-new",
+  "name": "RMF Hot new",
+  "description": "muzyczne nowości",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_hot_new",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-jesienny-vibe",
+  "name": "RMF Jesienny vibe",
+  "description": "piosenki idealne na jesień",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_top8",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-k-pop",
+  "name": "RMF K-pop",
+  "description": "k-pop",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_gamemusic",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-klasyka-polskiego-hip-hop",
+  "name": "RMF Klasyka polskiego hip hopu",
+  "description": "sute bity dla ziomali z kwadratu",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_ziom",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-koledy",
+  "name": "RMF Kolędy",
+  "description": "Najpiękniejsze polskie kolędy",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_koledy",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-ladies",
+  "name": "RMF Ladies",
+  "description": "RMF Ladies",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_ladies",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-latino",
+  "name": "RMF Latino",
+  "description": "gorące klimaty",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_latino",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-leniwaniedziela",
+  "name": "RMF Leniwa niedziela",
+  "description": "RMF Leniwa niedziela",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_leniwa_niedziela",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-love",
+  "name": "RMF Love",
+  "description": "Piosenki miłosne",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_love",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-mainstage",
+  "name": "RMF Mainstage",
+  "description": "mainstage",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_club",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-maxx",
+  "name": "RMF MAXX",
+  "description": "RMF MAXX. Hity #naMAXXa",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_maxxx_byd",
+  "name": "RMF MAXX Bydgoszcz",
+  "description": "RMF MAXX Bydgoszcz",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx_byd",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_maxxx_cze",
+  "name": "RMF MAXX Częstochowa",
+  "description": "RMF MAXX Częstochowa",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx_cze",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-maxx-dance",
+  "name": "RMF MAXX Dance",
+  "description": "Taneczne przeboje w RMF MAXX",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_maxx_dance",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_maxxx_wal",
+  "name": "RMF MAXX Dolny Śląsk",
+  "description": "RMF MAXX Dolny Śląsk",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx_wal",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-hopbec",
+  "name": "RMF MAXX Hop Bęc",
+  "description": "lista przebojów RMF MAXX",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_hop_bec",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_maxxx_ino",
+  "name": "RMF MAXX Inowrocław",
+  "description": "RMF MAXX Inowrocław",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx_ino",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_maxxx_knn",
+  "name": "RMF MAXX Konin",
+  "description": "RMF MAXX Konin",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx_knn",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_maxxx_kra",
+  "name": "RMF MAXX Kraków",
+  "description": "RMF MAXX Kraków",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx_kra",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_maxxx_ksn",
+  "name": "RMF MAXX Krosno",
+  "description": "RMF MAXX Krosno",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx_ksn",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_maxxx_zgr",
+  "name": "RMF MAXX Lubuskie",
+  "description": "RMF MAXX Lubuskie",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx_zgr",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_maxxx_cie",
+  "name": "RMF MAXX Mazowsze",
+  "description": "RMF MAXX Mazowsze",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx_cie",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-maxx-new-hits",
+  "name": "RMF MAXX New Hits",
+  "description": "Najnowsze hity z RMF MAXX",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_maxx_new_hits",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_maxxx_nsa",
+  "name": "RMF MAXX Nowy Sącz",
+  "description": "RMF MAXX Nowy Sącz",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx_nsa",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_maxxx_ole",
+  "name": "RMF MAXX Oleśnica",
+  "description": "RMF MAXX Oleśnica",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx_ole",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_maxxx_opo",
+  "name": "RMF MAXX Opole",
+  "description": "RMF MAXX Opole",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx_opo",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_maxxx_pil",
+  "name": "RMF MAXX Piła",
+  "description": "RMF MAXX Piła",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx_pil",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_maxxx_lom",
+  "name": "RMF MAXX Podlasie",
+  "description": "RMF MAXX Podlasie",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx_lom",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_maxxx_slu",
+  "name": "RMF MAXX Pomorze",
+  "description": "RMF MAXX Pomorze",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx_slu",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_maxxx_poz",
+  "name": "RMF MAXX Poznań",
+  "description": "RMF MAXX Poznań",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx_poz",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-maxx-rap",
+  "name": "RMF MAXX Rap",
+  "description": "Rapowe hity w RMF MAXX",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_maxx_rap",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_maxxx_szc",
+  "name": "RMF MAXX Szczecin",
+  "description": "RMF MAXX Szczecin",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx_szc",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_maxxx_tmz",
+  "name": "RMF MAXX Tomaszów Mazowiecki",
+  "description": "RMF MAXX Tomaszów Mazowiecki",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx_tmz",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_maxxx_gda",
+  "name": "RMF MAXX Trójmiasto",
+  "description": "RMF MAXX Trójmiasto",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx_gda",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_maxxx_waw",
+  "name": "RMF MAXX Warszawa",
+  "description": "RMF MAXX Warszawa",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx_waw",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_maxxx_wlc",
+  "name": "RMF MAXX Włocławek",
+  "description": "RMF MAXX Włocławek",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx_wlc",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_maxxx_slk",
+  "name": "RMF MAXX Śląsk",
+  "description": "RMF MAXX Śląsk",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx_slk",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf_maxxx_kie",
+  "name": "RMF MAXX Świętokrzyskie",
+  "description": "RMF MAXX Świętokrzyskie",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx_kie",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-muzyka-filmowa",
+  "name": "RMF Muzyka filmowa",
+  "description": "najpiękniejsze tematy filmowe",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_muzyka_filmowa",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-muzyka-klasyczna",
+  "name": "RMF Muzyka klasyczna",
+  "description": "Filharmonia RMFOn.pl",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_muzyka_klasyczna",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-na-wiosne",
+  "name": "RMF Na wiosnę",
+  "description": "idzie wiosna",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_top14",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-najwieksze-polskie-przeboje-rmf-on",
+  "name": "RMF Największe polskie przeboje",
+  "description": "polskie top wszech czasów",
+  "url": "https://rs102-krk.rmfstream.pl/npp_rmf_on",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-niezapomniane-melodie",
+  "name": "RMF Niezapomniane melodie",
+  "description": "niezapomniana zabawa",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_niezapomniane_melodie",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-party",
+  "name": "RMF Party",
+  "description": "taneczne hity ostatnich 20 lat",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_party",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-piosenka-filmowa",
+  "name": "RMF Piosenka filmowa",
+  "description": "przeboje znane z kina",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_piosenka_filmowa",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-piosenka-literacka",
+  "name": "RMF Piosenka literacka",
+  "description": "daj sie zwieść na cudne manowce",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_piosenka_literacka",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-pobudka",
+  "name": "RMF Pobudka",
+  "description": "budzimy muzyką",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_pobudka",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-polskaalternartwa",
+  "name": "RMF Polska alternatywa",
+  "description": "RMF Polska alternatywa",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_polska_alternatywa",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-polski-hip-hop",
+  "name": "RMF Polski hip hop",
+  "description": "to co najlepsze w polskim Hip Hopie",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_trend_sounds",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-polski-rock",
+  "name": "RMF Polski rock",
+  "description": "rock znad Wisły w najlepszym wydaniu",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_polski_rock",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-polskie-przeboje",
+  "name": "RMF Polskie przeboje",
+  "description": "gramy tylko po polsku",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_polskie_przeboje",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-poplista",
+  "name": "RMF Poplista",
+  "description": "kultowa lista przebojów RMF FM",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_poplista",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-prl",
+  "name": "RMF PRL",
+  "description": "gdzie się podziały tamte prywatki?",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_prl",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-top4",
+  "name": "RMF Przeboje lata 2026",
+  "description": "lato 2026",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_top4",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-przeboj-roku",
+  "name": "RMF Przebój roku 2025",
+  "description": "wybierz piosenkę 2025 roku",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_przeboj_roku",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-relaks",
+  "name": "RMF Relaks",
+  "description": "Muzyka relaksacyjna",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_relaks",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-rock",
+  "name": "RMF Rock",
+  "description": "rockowe trendy XXI wieku",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_rock",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-rock-progresywny",
+  "name": "RMF Rock progresywny",
+  "description": "mistyczna kraina muzyki",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_rock_progresywny",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-smooth-jazz",
+  "name": "RMF Smooth jazz",
+  "description": "wyjątkowy nastrój i dobry smak",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_smooth_jazz",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-styl",
+  "name": "RMF Styl",
+  "description": "przeboje ze stylem",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_styl",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-szanty",
+  "name": "RMF Szanty",
+  "description": "ahoj żeglarze!",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_szanty",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-sloneczne-przeboje",
+  "name": "RMF Słoneczne przeboje",
+  "description": "wakacyjne przeboje i aktualne hity",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_sloneczne_przeboje",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-top-1000",
+  "name": "RMF Top 1000",
+  "description": "top10",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_top10",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-top-2026-disco-polo",
+  "name": "RMF Top 2026 disco polo",
+  "description": "RMF Top 2026 disco polo",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_top2",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-top-30-swieta",
+  "name": "RMF Top 30 święta",
+  "description": "przebojowe święta",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_top_30_swieta",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-true-crime",
+  "name": "RMF True Crime",
+  "description": "Stacja z podcastami true crime",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_true_crime",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-vibe",
+  "name": "RMF Vibe",
+  "description": "RMF Vibe",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_vibe",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-viral",
+  "name": "RMF Viral",
+  "description": "młodzi artyści, nowe głosy, potężne zasięgi",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_bravo",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-w-kuchni",
+  "name": "RMF W kuchni",
+  "description": "gotowanie jak w reklamie",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_w_kuchni",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-w-pracy",
+  "name": "RMF W pracy",
+  "description": "dzień jak z nut",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_w_pracy",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-top",
+  "name": "RMF Świąteczne nowości 2025",
+  "description": "najnowsze świąteczne piosenki",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_top",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-swieta",
+  "name": "RMF Święta",
+  "description": "Muzyka świąteczna",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_swieta",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-rmf-24-wro",
+  "name": "RMF24 WROCŁAW",
+  "description": "Jeszcze więcej informacji z Wrocławia",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_24_wroc",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-sizeer-fm",
+  "name": "Sizeer FM",
+  "description": "oficjalna stacja radiowa Sizeer",
+  "url": "https://rs102-krk.rmfstream.pl/sizeer_fm",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ },
+ {
+  "id": "rmfon-top-100-muzyki-filmowej",
+  "name": "TOP 100 Muzyki Filmowej",
+  "description": "top-100-muzyki-filmowej",
+  "url": "https://rs102-krk.rmfstream.pl/rmf_top11",
+  "genre": "",
+  "logo": "",
+  "source": "rmfon"
+ }
+]

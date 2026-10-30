@@ -40,5 +40,47 @@
     "url": "https://stream.rcs.revma.com/an1ugyygzk8uv",
     "genre": "Rock, Alternative",
     "logo": ""
+  },
+  {
+    "id": "rmf-rock",
+    "name": "RMF Rock",
+    "url": "https://rs102-krk.rmfstream.pl/rmf_rock",
+    "genre": "Rock",
+    "logo": ""
+  },
+  {
+    "id": "rmf-classic-rock",
+    "name": "RMF Classic Rock",
+    "url": "https://rs102-krk.rmfstream.pl/rmf_classic_rock",
+    "genre": "Classic rock",
+    "logo": ""
+  },
+  {
+    "id": "rmf-polski-rock",
+    "name": "RMF Polski Rock",
+    "url": "https://rs102-krk.rmfstream.pl/rmf_polski_rock",
+    "genre": "Polish rock",
+    "logo": ""
+  },
+  {
+    "id": "rmf-rock-progresywny",
+    "name": "RMF Rock progresywny",
+    "url": "https://rs102-krk.rmfstream.pl/rmf_rock_progresywny",
+    "genre": "Progressive rock",
+    "logo": ""
+  },
+  {
+    "id": "rmf-maxx-krakow",
+    "name": "RMF MAXX Kraków",
+    "url": "https://rs102-krk.rmfstream.pl/rmf_maxxx_kra",
+    "genre": "Kraków",
+    "logo": ""
+  },
+  {
+    "id": "rmf-fm",
+    "name": "RMF FM",
+    "url": "https://rs102-krk.rmfstream.pl/rmf_fm",
+    "genre": "Pop",
+    "logo": ""
   }
 ]

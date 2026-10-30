@@ -289,6 +289,7 @@ write_config() {
 # /etc/spotify-dac/config - written by install.sh, re-run the installer to change.
 # Read by bash scripts and by systemd (EnvironmentFile).
 DEVICE_NAME="$DEVICE_NAME"
+SOURCE_DIR="$REPO_DIR"
 AUDIO_OUTPUT="$AUDIO_OUTPUT"
 AUDIO_HAT_OVERLAY="$AUDIO_HAT_OVERLAY"
 DAC_SINK_PATTERN="$DAC_SINK_PATTERN"

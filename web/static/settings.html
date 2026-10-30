@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Spotify DAC - Settings</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <span class="device">DAC</span>
+    <div class="menu">
+      <button id="burger" class="theme" type="button" aria-label="Menu" aria-expanded="false" aria-controls="menu">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <nav id="menu" class="menu-list" hidden>
+        <a href="/">Home</a>
+        <a href="/radio.html">Radio</a>
+        <a href="/status.html">Status</a>
+        <a href="/settings.html" class="active">Settings</a>
+      </nav>
+    </div>
+    <button id="theme" class="theme" type="button" aria-label="Switch dark or light mode">Theme</button>
+  </header>
+
+  <main class="grid">
+    <section class="card">
+      <h2>Device</h2>
+      <form id="device-form" class="form">
+        <label class="field">
+          <span>Device name</span>
+          <input id="DEVICE_NAME" name="DEVICE_NAME" type="text" maxlength="32" autocomplete="off">
+          <small class="muted" data-hint="DEVICE_NAME"></small>
+        </label>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Volume</h2>
+      <form id="volume-form" class="form">
+        <label class="field">
+          <span>Default volume</span>
+          <input id="DEFAULT_VOLUME" name="DEFAULT_VOLUME" type="number" min="0" max="100" step="1">
+          <small class="muted" data-hint="DEFAULT_VOLUME"></small>
+        </label>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Updates</h2>
+      <form id="updates-form" class="form">
+        <label class="field">
+          <span>Update Soloist after (days)</span>
+          <input id="SOLOIST_UPDATE_AFTER_DAYS" name="SOLOIST_UPDATE_AFTER_DAYS" type="number" min="1" max="89" step="1">
+          <small class="muted" data-hint="SOLOIST_UPDATE_AFTER_DAYS"></small>
+        </label>
+        <label class="field">
+          <span>Update system packages after (days)</span>
+          <input id="APT_UPGRADE_AFTER_DAYS" name="APT_UPGRADE_AFTER_DAYS" type="number" min="0" max="365" step="1">
+          <small class="muted" data-hint="APT_UPGRADE_AFTER_DAYS"></small>
+        </label>
+      </form>
+      <div class="actions">
+        <button id="save" class="ctl main" type="button">Save settings</button>
+        <span id="save-status" class="muted" role="status"></span>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Code from GitHub</h2>
+      <p id="code-status" class="muted">Checking GitHub...</p>
+      <ul id="code-commits" class="commits"></ul>
+      <div class="actions">
+        <button id="check" class="ctl" type="button">Check for updates</button>
+        <button id="update" class="ctl main" type="button" disabled>Update from GitHub</button>
+      </div>
+      <p class="muted">Updates the web interface and radio files and restarts the web service. Audio and boot changes still need <code>sudo bash install.sh</code>.</p>
+    </section>
+  </main>
+
+  <script src="common.js"></script>
+  <script src="settings.js"></script>
+</body>
+</html>

@@ -89,6 +89,89 @@
     }
   }
 
+  // ---- audio output and GPIO (the case and the fan) ----
+  const sinkSelect = document.getElementById("sink");
+  const saveAudioButton = document.getElementById("save-audio");
+  const audioStatus = document.getElementById("audio-status");
+  const caseSelect = document.getElementById("case");
+  const nespiOnly = document.getElementById("nespi-only");
+  const saveGpioButton = document.getElementById("save-gpio");
+  const gpioStatus = document.getElementById("gpio-status");
+
+  function pinValue(id) {
+    const text = document.getElementById(id).value.trim();
+    return text === "" ? null : Number(text);
+  }
+  function restartText(result) {
+    return result.restarted && result.restarted.length ? "Applied: " + result.restarted.join(", ") + "." : "Saved.";
+  }
+
+  async function loadHardware() {
+    const hw = await api("/api/hardware");
+    sinkSelect.replaceChildren(...hw.audio.sinks.map(function (name) {
+      const option = new Option(name, name);
+      option.selected = name === hw.audio.selected;
+      return option;
+    }));
+    if (!hw.audio.sinks.length) sinkSelect.append(new Option("No audio device found", ""));
+    saveAudioButton.disabled = !hw.audio.sinks.length;
+
+    caseSelect.value = hw.case;
+    document.getElementById("poweroff").value = hw.poweroff;
+    document.getElementById("power_pin").value = hw.pins.POWER_PIN;
+    document.getElementById("reset_pin").value = hw.pins.RESET_PIN;
+    document.getElementById("led_pin").value = hw.pins.LED_PIN;
+    document.getElementById("power_enable_pin").textContent = hw.power_enable_pin;
+    document.getElementById("fan_enabled").checked = hw.fan.enabled;
+    document.getElementById("fan_pin").value = hw.fan.pin;
+    document.getElementById("hat-note").textContent = hw.hat
+      ? "The IQaudIO HAT uses GPIO " + hw.hat_pins.join(", ") + ", so those pins can't be used here."
+      : "";
+    nespiOnly.hidden = caseSelect.value !== "nespi";
+  }
+
+  async function saveAudio() {
+    saveAudioButton.disabled = true;
+    try {
+      const result = await api("/api/hardware", { body: { sink: sinkSelect.value } });
+      await loadHardware();
+      audioStatus.textContent = restartText(result);
+    } catch (err) {
+      showError(audioStatus, err);
+    } finally {
+      saveAudioButton.disabled = false;
+    }
+  }
+
+  async function saveGpio() {
+    const body = {
+      case: caseSelect.value,
+      poweroff: document.getElementById("poweroff").value,
+      fan_enabled: document.getElementById("fan_enabled").checked,
+      fan_pin: pinValue("fan_pin"),
+    };
+    if (caseSelect.value === "nespi") {
+      body.power_pin = pinValue("power_pin");
+      body.reset_pin = pinValue("reset_pin");
+      body.led_pin = pinValue("led_pin");
+    }
+    saveGpioButton.disabled = true;
+    try {
+      const result = await api("/api/hardware", { body: body });
+      await loadHardware();
+      gpioStatus.textContent = restartText(result);
+    } catch (err) {
+      showError(gpioStatus, err);
+    } finally {
+      saveGpioButton.disabled = false;
+    }
+  }
+
+  caseSelect.addEventListener("change", function () { nespiOnly.hidden = caseSelect.value !== "nespi"; });
+  saveAudioButton.addEventListener("click", function () { saveAudio(); });
+  saveGpioButton.addEventListener("click", function () { saveGpio(); });
+  loadHardware().catch(function (err) { showError(audioStatus, err); });
+
   saveButton.addEventListener("click", function () { save().catch(function (err) { showError(saveStatus, err); }); });
   checkButton.addEventListener("click", checkCode);
   updateButton.addEventListener("click", updateCode);

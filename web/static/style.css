@@ -69,6 +69,12 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
   background: var(--bg); color: var(--text); font: inherit;
 }
 .field small { font-size: 13px; }
+.field select {
+  width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--bg); color: var(--text); font: inherit;
+}
+.field.check { grid-template-columns: auto 1fr; align-items: center; }
+.field.check input { width: auto; }
 .actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
 .commits { margin: 8px 0 0; padding-left: 20px; color: var(--muted); }
 .commits li { margin: 2px 0; }

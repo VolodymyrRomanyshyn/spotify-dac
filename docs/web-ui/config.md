@@ -63,8 +63,8 @@ Desktop: section list on the left, the open section on the right.
 - Shows the DAC type and overlay. Changed with the installer.
 
 ### Volume
-- **Default volume** (`DEFAULT_VOLUME`, 0–100): the level used until a level is set from Spotify or
-  the radio. Default 25%. After that the shared level is the last one set, from either source.
+- **Default volume** (`DEFAULT_VOLUME`, 0–100): the level used until the volume is first changed
+  Default 25%. After that the shared level is the last one set, from either source.
 
 ### Updates
 - Update trigger (`poweroff`, `boot`, `none`), Soloist update days, APT upgrade and its days.

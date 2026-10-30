@@ -56,7 +56,7 @@ WIFI_POWERSAVE_OFF="yes"
 GPIO_CHIP="/dev/gpiochip0"
 POWER_PIN="3"; RESET_PIN="2"; LED_PIN="14"; POWER_EN_PIN="4"
 SAFE_SHUTDOWN="yes"                # yes: power switch and buttons work | no: case stays powered, switch ignored
-DEFAULT_VOLUME="25"               # 0-100: shared volume until a level is set from Spotify or the radio
+DEFAULT_VOLUME="25"               # 0-100: shared volume until the volume is first changed
 WEB_UI="yes"                      # web interface (HTTPS) on WEB_PORT
 WEB_PORT="8443"
 WEB_USE_PASSWORD="yes"            # no: anyone on the LAN can open the config page
@@ -188,7 +188,7 @@ ask_questions() {
     fi
   fi
 
-  DEFAULT_VOLUME="$(ask_input "Default volume (0-100) until a level is set from Spotify or the radio:" "$DEFAULT_VOLUME")"
+  DEFAULT_VOLUME="$(ask_input "Default volume (0-100) until the volume is first changed:" "$DEFAULT_VOLUME")"
 
   WEB_UI="$(ask_yesno "Install the web interface (control, radio, config and status in a browser)?" "$WEB_UI")"
   if [ "$WEB_UI" = yes ]; then

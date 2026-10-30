@@ -94,9 +94,12 @@
       const info = el("button", "station-main");
       info.type = "button";
       info.setAttribute("aria-pressed", String(isPlaying));
+      const thumb = el("span", "thumb");
+      if (s.logo) thumb.style.backgroundImage = 'url("' + s.logo + '")';
+      else thumb.textContent = s.name.split(/\s+/).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join("");
       const info2 = el("div", "info");
       info2.append(el("span", "name", s.name), el("span", "muted small genre", s.genre || ""));
-      info.append(info2);
+      info.append(thumb, info2);
       if (isPlaying) info.append(el("span", "badge", "Playing"));
       info.addEventListener("click", function () { play(s).catch(fail); });
       const actions = el("div", "row-actions");

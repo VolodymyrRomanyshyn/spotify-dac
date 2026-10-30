@@ -85,6 +85,12 @@
 
   // ---- stations ----
   // the whole row is the button: tap a station to play it
+  function stationThumb(s) {
+    const thumb = el("span", "thumb");
+    if (s.logo) thumb.style.backgroundImage = 'url("' + s.logo + '")';
+    else thumb.textContent = initials(s.name);
+    return thumb;
+  }
   function drawStations(playingId) {
     stationsBox.replaceChildren(...stations.map(function (s) {
       const playing = playingId === s.id;
@@ -95,7 +101,7 @@
       badge.classList.toggle("off", !playing);  // always present, so the row does not move
       const info = el("div", "info");
       info.append(el("span", "name", s.name), el("span", "muted small genre", s.genre || ""));
-      row.append(info, badge);
+      row.append(stationThumb(s), info, badge);
       row.addEventListener("click", function () { playStation(s.id).catch(fail); });
       return row;
     }));

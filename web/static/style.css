@@ -178,6 +178,10 @@ pre { white-space: pre-wrap; word-break: break-word; font-size: 13px; color: var
 .cover.radio-icon { display: flex; align-items: center; justify-content: center; color: var(--muted); background-color: var(--bg); }
 .station .info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .station .genre { margin-top: 2px; }
+.station .thumb {
+  flex: none; width: 44px; height: 44px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+  background: var(--bg) center / contain no-repeat; color: var(--muted); font-size: 14px; font-weight: 600;
+}
 
 /* phone: the cover and text stack in one column, so there is no empty side area */
 @media (max-width: 600px) {

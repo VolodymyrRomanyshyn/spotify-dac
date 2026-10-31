@@ -3,7 +3,7 @@
   const $ = (id) => document.getElementById(id);
   const banner = $("banner"), nowTitle = $("now-title"), nowSub = $("now-sub"), nowControls = $("now-controls");
   const stationsBox = $("stations"), resultsBox = $("results"), searchInput = $("search"), searchNote = $("search-note");
-  const formCard = $("form-card"), form = $("station-form"), formTitle = $("form-title"), formError = $("form-error");
+  const dialog = $("form-dialog"), form = $("station-form"), formTitle = $("form-title"), formError = $("form-error");
   let stations = [];
   let playing = null;        // id of the station playing now
   let editingIndex = -1;     // -1 = adding
@@ -118,12 +118,13 @@
       if (isPlaying) info.append(el("span", "badge", "Playing"));
       info.addEventListener("click", function () { play(s).catch(fail); });
       const actions = el("div", "row-actions");
-      actions.append(
-        iconButton("Up", function () { return move(i, -1); }),
-        iconButton("Down", function () { return move(i, 1); }),
-        iconButton("Edit", async function () { openForm(i); }),
-        iconButton("Delete", function () { return remove(i); }, "danger")
-      );
+      // no Up on the first row and no Down on the last one
+      const buttons = [];
+      if (i > 0) buttons.push(iconButton("Up", function () { return move(i, -1); }));
+      if (i < stations.length - 1) buttons.push(iconButton("Down", function () { return move(i, 1); }));
+      buttons.push(iconButton("Edit", async function () { openForm(i); }));
+      buttons.push(iconButton("Delete", function () { return remove(i); }, "danger"));
+      actions.append(...buttons);
       row.append(info, actions);
       return row;
     }));
@@ -141,10 +142,11 @@
     form.logo.value = s.logo || "";
     form.fallback.value = (s.fallback || []).join("\n");
     formError.textContent = "";
-    formCard.hidden = false;
-    formCard.scrollIntoView({ behavior: "smooth", block: "start" });
+    dialog.showModal();
+    form.name.focus();
   }
-  function closeForm() { formCard.hidden = true; editingIndex = -1; }
+  function closeForm() { dialog.close(); }
+  dialog.addEventListener("close", function () { editingIndex = -1; });
   $("add-station").addEventListener("click", function () { openForm(-1); });
   $("form-cancel").addEventListener("click", closeForm);
   form.addEventListener("submit", function (e) {

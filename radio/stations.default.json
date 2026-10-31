@@ -14,13 +14,6 @@
     "logo": ""
   },
   {
-    "id": "eska-rock",
-    "name": "Eska Rock",
-    "url": "https://liveradio.timesa.pl/5980-1-noad.aac/playlist.m3u8",
-    "genre": "Rock",
-    "logo": "/logos/eska-radio-eska-rock.png"
-  },
-  {
     "id": "rmf-classic",
     "name": "RMF Classic",
     "url": "https://rs102-krk.rmfstream.pl/rmf_classic",

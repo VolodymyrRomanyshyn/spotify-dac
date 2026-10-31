@@ -237,12 +237,22 @@ def _catalog_items():
     return items
 
 
+GENERIC_PATH = {"playlist.m3u8", "playlist.m3u", "playlist", "mp3", "aac", "stream", "live"}
+
+
+def _mount(url):
+    """The stream's name on its server (rmf_rock, 5980-1), so one station is known under two names."""
+    parts = [p for p in urlsplit(url or "").path.split("/") if p and p.lower() not in GENERIC_PATH]
+    return parts[-1].rsplit(".", 1)[0].lower() if parts else ""
+
+
 def get_catalog(req):
     """Search the built-in catalogs (RMF ON, Eska). ?q=text matches name or description."""
     query = (req.query.get("q") or "").strip().lower()
     current = load_stations()
     have_ids = {x.get("id") for x in current}
     have_urls = {x.get("url") for x in current}
+    have_mounts = {_mount(x.get("url")) for x in current} - {""}
     results = []
     for item in _catalog_items():
         text = (item.get("name", "") + " " + item.get("description", "")).lower()
@@ -251,7 +261,8 @@ def get_catalog(req):
         results.append({
             "id": item.get("id"), "name": item.get("name"), "description": item.get("description", ""),
             "url": item.get("url"), "logo": item.get("logo", ""), "fallback": item.get("fallback", []),
-            "source": item.get("source", ""), "added": item.get("id") in have_ids or item.get("url") in have_urls,
+            "source": item.get("source", ""),
+            "added": item.get("id") in have_ids or item.get("url") in have_urls or _mount(item.get("url")) in have_mounts,
         })
         if len(results) >= 60:
             break
@@ -272,8 +283,9 @@ def _check_station(item):
     if urlsplit(url).scheme not in ("http", "https") or len(url) > 500:
         raise ApiError(400, f"station '{station_id}': address must start with http:// or https://")
     logo = str(item.get("logo", "") or "").strip()
-    if logo and urlsplit(logo).scheme not in ("http", "https"):
-        raise ApiError(400, f"station '{station_id}': logo must be an http:// or https:// address")
+    local_logo = logo.startswith("/logos/") and ".." not in logo and " " not in logo
+    if logo and not local_logo and urlsplit(logo).scheme not in ("http", "https"):
+        raise ApiError(400, f"station '{station_id}': logo must be an http:// or https:// address or /logos/ file")
     fallback = [str(u).strip() for u in (item.get("fallback") or []) if str(u).strip()]
     if len(fallback) > 5 or any(urlsplit(u).scheme not in ("http", "https") for u in fallback):
         raise ApiError(400, f"station '{station_id}': up to 5 backup addresses, each http:// or https://")

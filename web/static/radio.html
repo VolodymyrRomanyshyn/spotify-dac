@@ -43,7 +43,7 @@
       <div id="stations" class="stations"></div>
     </section>
 
-    <section class="card" id="form-card" hidden>
+    <dialog id="form-dialog" class="modal" aria-labelledby="form-title">
       <h2 id="form-title">New station</h2>
       <form id="station-form" class="form">
         <label>Name <input name="name" required maxlength="60"></label>
@@ -59,7 +59,7 @@
         </div>
         <p class="muted small" id="form-error"></p>
       </form>
-    </section>
+    </dialog>
 
     <section class="card">
       <div class="row-between">

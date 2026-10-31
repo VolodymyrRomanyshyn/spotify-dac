@@ -287,8 +287,8 @@ def _check_station(item):
     if logo and not local_logo and urlsplit(logo).scheme not in ("http", "https"):
         raise ApiError(400, f"station '{station_id}': logo must be an http:// or https:// address or /logos/ file")
     fallback = [str(u).strip() for u in (item.get("fallback") or []) if str(u).strip()]
-    if len(fallback) > 5 or any(urlsplit(u).scheme not in ("http", "https") for u in fallback):
-        raise ApiError(400, f"station '{station_id}': up to 5 backup addresses, each http:// or https://")
+    if len(fallback) > 10 or any(urlsplit(u).scheme not in ("http", "https") for u in fallback):
+        raise ApiError(400, f"station '{station_id}': up to 10 backup addresses, each http:// or https://")
     return {"id": station_id, "name": name, "url": url, "genre": str(item.get("genre", "") or "")[:40],
             "logo": logo, "fallback": fallback}
 

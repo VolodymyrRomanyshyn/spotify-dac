@@ -26,6 +26,7 @@ from api import auth, config, hardware, radio, spotify, status, update, volume  
 from api.common import MAX_BODY, ApiError, Request, feature_on  # noqa: E402
 
 STATIC = HERE / "static"
+CERT_FILE = Path("/etc/spotify-dac/web/cert.pem")  # set from --cert in main()
 mimetypes.add_type("application/manifest+json", ".webmanifest")
 
 ROUTES = {
@@ -83,6 +84,8 @@ class Handler(BaseHTTPRequestHandler):
 
     def _dispatch(self, method):
         path = urlsplit(self.path).path
+        if path == "/certificate.cer" and method == "GET":
+            return self._certificate()
         if not path.startswith("/api/"):
             if method != "GET":
                 return self._json(405, {"ok": False, "error": "method not allowed"})
@@ -127,6 +130,20 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(raw)
 
+    def _certificate(self):
+        """The web certificate as a download, so a phone can install and trust it. It is public."""
+        try:
+            data = ssl.PEM_cert_to_DER_cert(CERT_FILE.read_text(encoding="ascii"))
+        except (OSError, ValueError):
+            return self._json(404, {"ok": False, "error": "certificate not found"})
+        self.send_response(200)
+        self._common_headers()
+        self.send_header("Content-Type", "application/x-x509-ca-cert")
+        self.send_header("Content-Disposition", 'attachment; filename="spotify-dac.cer"')
+        self.send_header("Content-Length", str(len(data)))
+        self.end_headers()
+        self.wfile.write(data)
+
     def _static(self, url_path):
         rel = url_path.lstrip("/") or "index.html"
         target = (STATIC / rel).resolve()
@@ -155,6 +172,8 @@ def main():
     parser.add_argument("--key", default="/etc/spotify-dac/web/key.pem")
     parser.add_argument("--http", action="store_true", help="development only: serve plain HTTP")
     args = parser.parse_args()
+    global CERT_FILE
+    CERT_FILE = Path(args.cert)
 
     threading.Thread(target=radio.watch_sources, daemon=True).start()
     httpd = ThreadingHTTPServer((args.host, args.port), Handler)

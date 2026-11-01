@@ -26,6 +26,7 @@ from api import auth, config, hardware, radio, spotify, status, update, volume  
 from api.common import MAX_BODY, ApiError, Request, feature_on  # noqa: E402
 
 STATIC = HERE / "static"
+mimetypes.add_type("application/manifest+json", ".webmanifest")
 
 ROUTES = {
     ("POST", "/api/login"): auth.login,

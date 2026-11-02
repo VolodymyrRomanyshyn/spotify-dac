@@ -67,15 +67,26 @@
     if (!features.spotify) setSource("radio");
     else if (!features.radio) setSource("spotify");
   }
-  function defaultSource(radioPlaying) {
+  // On a fresh load: Spotify while it plays, otherwise the source used last, otherwise what plays.
+  function defaultSource(radioPlaying, spotifyPlaying) {
     if (!features.spotify) return "radio";
     if (!features.radio) return "spotify";
+    if (spotifyPlaying) return "spotify";
+    const last = lastSourceChoice();
+    if (last) return last;
     return radioPlaying ? "radio" : "spotify";
+  }
+  function lastSourceChoice() {
+    try {
+      const value = localStorage.getItem("source");
+      return value === "radio" || value === "spotify" ? value : null;
+    } catch (e) { return null; }
   }
 
   // ---- source switch: the user decides; nothing else changes it ----
   function setSource(choice) {
     source = choice;
+    try { localStorage.setItem("source", choice); } catch (e) { /* private mode: nothing to keep */ }
     srcSpotify.classList.toggle("selected", choice === "spotify");
     srcRadio.classList.toggle("selected", choice === "radio");
     srcSpotify.setAttribute("aria-pressed", String(choice === "spotify"));
@@ -282,7 +293,7 @@
       ]);
       spotify = now;
       if (now) { spotifyPosition = now.position_ms; spotifyAt = Date.now(); }
-      if (source === null) setSource(defaultSource(radio.playing));  // first load only
+      if (source === null) setSource(defaultSource(radio.playing, !!(now && now.status === "playing")));  // first load only
       if (source === "radio") {
         drawRadio(radio, stations.find(function (x) { return x.id === (radio.playing || lastStation); }) || null);
       } else if (now) {

@@ -42,11 +42,17 @@
 // Header: the device name instead of a fixed title, and the menu button.
 (function () {
   const brand = document.querySelector(".device");
-  api("/api/device").then(function (d) {
-    if (brand && d.name) brand.textContent = d.name;
-    if (d.accent_light) document.documentElement.style.setProperty("--accent-light", d.accent_light);
-    if (d.accent_dark) document.documentElement.style.setProperty("--accent-dark", d.accent_dark);
-  }).catch(function () { /* keep the placeholder */ });
+  // name and colour come from the device: read on load, when the page is shown again, and once a minute
+  function loadDevice() {
+    api("/api/device").then(function (d) {
+      if (brand && d.name) brand.textContent = d.name;
+      if (d.accent_light) document.documentElement.style.setProperty("--accent-light", d.accent_light);
+      if (d.accent_dark) document.documentElement.style.setProperty("--accent-dark", d.accent_dark);
+    }).catch(function () { /* keep the placeholder */ });
+  }
+  loadDevice();
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) loadDevice(); });
+  setInterval(loadDevice, 60000);
 
   const burger = document.getElementById("burger");
   const menu = document.getElementById("menu");

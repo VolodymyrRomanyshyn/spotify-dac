@@ -292,6 +292,9 @@
         api("/api/volume"),
       ]);
       spotify = now;
+      // the LEDs light up while their source is playing
+      srcSpotify.classList.toggle("live", !!(now && now.status === "playing"));
+      srcRadio.classList.toggle("live", !!radio.playing);
       if (now) { spotifyPosition = now.position_ms; spotifyAt = Date.now(); }
       if (source === null) setSource(defaultSource(radio.playing, !!(now && now.status === "playing")));  // first load only
       if (source === "radio") {

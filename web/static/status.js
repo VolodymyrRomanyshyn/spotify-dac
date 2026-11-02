@@ -124,7 +124,7 @@
       if (!body.ok) throw new Error(body.error || "request failed");
       banner.hidden = true;
       draw(body.data);
-      updated.textContent = "Updated " + new Date().toLocaleTimeString();
+      updated.textContent = "Updated " + new Date().toLocaleString(undefined, { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" });
     } catch (err) {
       showBanner("Cannot reach the Pi (" + err.message + "). Showing the last values.");
     }

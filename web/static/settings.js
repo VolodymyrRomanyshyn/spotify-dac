@@ -84,18 +84,18 @@
     }
     $("save-general").disabled = true;
     try {
-      const done = [];
-      if (Object.keys(body).length) {
-        const result = await api("/api/config", { body: body });
-        if (result.restart && result.restart.length) {
-          await api("/api/config/apply", { body: { services: result.restart } });
-        }
-        done.push("name and volume " + restartText(result.restart));
+      const result = await api("/api/config", { body: body });
+      if (result.restart && result.restart.length) {
+        await api("/api/config/apply", { body: { services: result.restart } });
       }
+      // say what was saved, not a fixed phrase
+      const saved = [];
+      if (body.DEVICE_NAME || body.DEFAULT_VOLUME) saved.push("name and volume");
+      if (body.ACCENT_COLOR) saved.push("colour");
       applyAccent();
       await loadConfig();
       await loadHardware();
-      status.textContent = done.join("; ") + ".";
+      status.textContent = "Saved: " + saved.join(", ") + ".";
     } catch (err) {
       showError(status, err);
     } finally {
@@ -120,7 +120,9 @@
     try {
       const result = await api("/api/hardware", { body: body });
       await loadHardware();
-      status.textContent = "Saved; " + restartText(result.restarted) + ".";
+      status.textContent = result.restarted && result.restarted.length
+        ? "Saved. Applied: " + result.restarted.join(", ") + "."
+        : "Saved.";
     } catch (err) {
       showError(status, err);
     } finally {

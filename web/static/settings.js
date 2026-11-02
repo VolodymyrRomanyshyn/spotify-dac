@@ -33,12 +33,17 @@
     });
     previewAccent();
   }
+  // only the label changes while choosing; the page colour changes after Save general
   function previewAccent() {
+    const pressed = document.querySelector("#accent-swatches [aria-pressed='true']");
+    if (!pressed) return;
+    $("accent-name").textContent = pressed.dataset.name.charAt(0).toUpperCase() + pressed.dataset.name.slice(1);
+  }
+  function applyAccent() {
     const pressed = document.querySelector("#accent-swatches [aria-pressed='true']");
     if (!pressed) return;
     document.documentElement.style.setProperty("--accent-light", pressed.dataset.light);
     document.documentElement.style.setProperty("--accent-dark", pressed.dataset.dark);
-    $("accent-name").textContent = pressed.dataset.name.charAt(0).toUpperCase() + pressed.dataset.name.slice(1);
   }
   async function loadConfig() {
     const data = await api("/api/config");
@@ -87,6 +92,7 @@
         }
         done.push("name and volume " + restartText(result.restart));
       }
+      applyAccent();
       await loadConfig();
       await loadHardware();
       status.textContent = done.join("; ") + ".";

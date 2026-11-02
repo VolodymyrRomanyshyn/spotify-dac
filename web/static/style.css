@@ -284,3 +284,10 @@ dialog.modal h2 { margin-top: 0; }
   border: 2px solid var(--line);
 }
 .swatch[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--panel), 0 0 0 5px var(--text); }
+.swatch[data-name="blue"] { background: #2f6fed; }
+.swatch[data-name="green"] { background: #1f8f4e; }
+.swatch[data-name="amber"] { background: #b7791f; }
+.swatch[data-name="red"] { background: #c53030; }
+.swatch[data-name="violet"] { background: #6b46c1; }
+.swatch[data-name="teal"] { background: #0f8a86; }
+.swatch[data-name="grey"] { background: #5b6270; }

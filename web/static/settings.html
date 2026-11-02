@@ -44,21 +44,19 @@
           <input id="DEFAULT_VOLUME" type="number" min="0" max="100" step="1">
           <small class="muted" data-hint="DEFAULT_VOLUME"></small>
         </label>
-        <label class="field">
-          <span>Button color</span>
-          <span class="select">
-            <select id="ACCENT_COLOR">
-              <option value="blue" data-light="#2f6fed" data-dark="#7aa7ff">Blue</option>
-              <option value="green" data-light="#1f8f4e" data-dark="#3ddc84">Green</option>
-              <option value="amber" data-light="#b7791f" data-dark="#f5b041">Amber</option>
-              <option value="red" data-light="#c53030" data-dark="#ff7b7b">Red</option>
-              <option value="violet" data-light="#6b46c1" data-dark="#b98cff">Violet</option>
-              <option value="teal" data-light="#0f8a86" data-dark="#4fd1c5">Teal</option>
-            </select>
-            <svg class="chevron" viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.5l5 5 5-5"/></svg>
-          </span>
-          <small class="muted">The colour of the buttons on every page.</small>
-        </label>
+        <div class="field">
+          <span>Accent color</span>
+          <div id="accent-swatches" class="swatches" role="group" aria-label="Accent color">
+            <button type="button" class="swatch" data-name="blue" data-light="#2f6fed" data-dark="#7aa7ff" style="background:#2f6fed" title="Blue" aria-label="Blue" aria-pressed="false"></button>
+            <button type="button" class="swatch" data-name="green" data-light="#1f8f4e" data-dark="#3ddc84" style="background:#1f8f4e" title="Green" aria-label="Green" aria-pressed="false"></button>
+            <button type="button" class="swatch" data-name="amber" data-light="#b7791f" data-dark="#f5b041" style="background:#b7791f" title="Amber" aria-label="Amber" aria-pressed="false"></button>
+            <button type="button" class="swatch" data-name="red" data-light="#c53030" data-dark="#ff7b7b" style="background:#c53030" title="Red" aria-label="Red" aria-pressed="false"></button>
+            <button type="button" class="swatch" data-name="violet" data-light="#6b46c1" data-dark="#b98cff" style="background:#6b46c1" title="Violet" aria-label="Violet" aria-pressed="false"></button>
+            <button type="button" class="swatch" data-name="teal" data-light="#0f8a86" data-dark="#4fd1c5" style="background:#0f8a86" title="Teal" aria-label="Teal" aria-pressed="false"></button>
+            <button type="button" class="swatch" data-name="grey" data-light="#5b6270" data-dark="#9aa1ad" style="background:#5b6270" title="Grey" aria-label="Grey" aria-pressed="false"></button>
+          </div>
+          <small class="muted"><span id="accent-name"></span>. Colours the buttons and highlights on every page.</small>
+        </div>
       </form>
       <div class="actions">
         <button id="save-general" class="ctl main" type="button">Save general</button>

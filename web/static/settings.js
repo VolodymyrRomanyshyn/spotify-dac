@@ -22,20 +22,30 @@
   }
 
   // ---- General: device name, default volume, audio device ----
-  // shows the chosen button colour at once; it is saved with Save general
+  // Accent colour: swatches show the choice; it is applied at once and saved with Save general
+  function chosenAccent() {
+    const pressed = document.querySelector("#accent-swatches [aria-pressed='true']");
+    return pressed ? pressed.dataset.name : "blue";
+  }
+  function selectAccent(name) {
+    document.querySelectorAll("#accent-swatches [data-name]").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(b.dataset.name === name));
+    });
+    previewAccent();
+  }
   function previewAccent() {
-    const option = $("ACCENT_COLOR").selectedOptions[0];
-    if (!option) return;
-    document.documentElement.style.setProperty("--accent-light", option.dataset.light);
-    document.documentElement.style.setProperty("--accent-dark", option.dataset.dark);
+    const pressed = document.querySelector("#accent-swatches [aria-pressed='true']");
+    if (!pressed) return;
+    document.documentElement.style.setProperty("--accent-light", pressed.dataset.light);
+    document.documentElement.style.setProperty("--accent-dark", pressed.dataset.dark);
+    $("accent-name").textContent = pressed.dataset.name.charAt(0).toUpperCase() + pressed.dataset.name.slice(1);
   }
   async function loadConfig() {
     const data = await api("/api/config");
     loaded = data.values;
     $("DEVICE_NAME").value = loaded.DEVICE_NAME || "";
     $("DEFAULT_VOLUME").value = loaded.DEFAULT_VOLUME || "";
-    $("ACCENT_COLOR").value = loaded.ACCENT_COLOR || "blue";
-    previewAccent();
+    selectAccent(loaded.ACCENT_COLOR || "blue");
     $("SOLOIST_UPDATE_AFTER_DAYS").value = loaded.SOLOIST_UPDATE_AFTER_DAYS || "";
     $("APT_UPGRADE_AFTER_DAYS").value = loaded.APT_UPGRADE_AFTER_DAYS || "";
     setHints(data.editable);
@@ -62,7 +72,7 @@
     const body = {};
     if ($("DEVICE_NAME").value !== (loaded.DEVICE_NAME || "")) body.DEVICE_NAME = $("DEVICE_NAME").value;
     if ($("DEFAULT_VOLUME").value !== String(loaded.DEFAULT_VOLUME || "")) body.DEFAULT_VOLUME = $("DEFAULT_VOLUME").value;
-    if ($("ACCENT_COLOR").value !== (loaded.ACCENT_COLOR || "blue")) body.ACCENT_COLOR = $("ACCENT_COLOR").value;
+    if (chosenAccent() !== (loaded.ACCENT_COLOR || "blue")) body.ACCENT_COLOR = chosenAccent();
     if (!Object.keys(body).length) {
       status.textContent = "Nothing changed.";
       return;
@@ -178,6 +188,9 @@
     }
   }
 
+  document.querySelectorAll("#accent-swatches [data-name]").forEach(function (b) {
+    b.addEventListener("click", function () { selectAccent(b.dataset.name); });
+  });
   $("save-general").addEventListener("click", function () { saveGeneral(); });
   $("save-gpio").addEventListener("click", function () { saveGpio(); });
   $("save-updates").addEventListener("click", function () { saveUpdates(); });

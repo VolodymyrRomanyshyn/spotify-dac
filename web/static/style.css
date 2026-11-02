@@ -276,3 +276,11 @@ dialog.modal h2 { margin-top: 0; }
 .switch button.selected .led {
   background: #3ddc84; box-shadow: 0 0 6px #3ddc84, 0 0 12px rgba(61, 220, 132, 0.55);
 }
+
+/* accent colour swatches on the Settings page */
+.swatches { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+.swatch {
+  width: 34px; height: 34px; border-radius: 50%; padding: 0; cursor: pointer;
+  border: 2px solid var(--line);
+}
+.swatch[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--panel), 0 0 0 5px var(--text); }

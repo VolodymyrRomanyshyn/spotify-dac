@@ -16,6 +16,7 @@ ACCENTS = {
     "red": ("#c53030", "#ff7b7b"),
     "violet": ("#6b46c1", "#b98cff"),
     "teal": ("#0f8a86", "#4fd1c5"),
+    "grey": ("#5b6270", "#9aa1ad"),
 }
 APPLY_SERVICES = {"soloist", "spotify-dac-volume"}
 
@@ -48,7 +49,7 @@ EDITABLE = {
     "SOLOIST_UPDATE_AFTER_DAYS": (_int_between(1, 89), "whole number 1-89"),
     "APT_UPGRADE_AFTER_DAYS": (_int_between(0, 365), "whole number 0-365"),
     "DEFAULT_VOLUME": (_int_between(0, 100), "whole number 0-100 (used until a level is set)"),
-    "ACCENT_COLOR": (_accent, "blue, green, amber, red, violet or teal"),
+    "ACCENT_COLOR": (_accent, "blue, green, amber, red, violet, teal or grey"),
 }
 
 

@@ -22,11 +22,20 @@
   }
 
   // ---- General: device name, default volume, audio device ----
+  // shows the chosen button colour at once; it is saved with Save general
+  function previewAccent() {
+    const option = $("ACCENT_COLOR").selectedOptions[0];
+    if (!option) return;
+    document.documentElement.style.setProperty("--accent-light", option.dataset.light);
+    document.documentElement.style.setProperty("--accent-dark", option.dataset.dark);
+  }
   async function loadConfig() {
     const data = await api("/api/config");
     loaded = data.values;
     $("DEVICE_NAME").value = loaded.DEVICE_NAME || "";
     $("DEFAULT_VOLUME").value = loaded.DEFAULT_VOLUME || "";
+    $("ACCENT_COLOR").value = loaded.ACCENT_COLOR || "blue";
+    previewAccent();
     $("SOLOIST_UPDATE_AFTER_DAYS").value = loaded.SOLOIST_UPDATE_AFTER_DAYS || "";
     $("APT_UPGRADE_AFTER_DAYS").value = loaded.APT_UPGRADE_AFTER_DAYS || "";
     setHints(data.editable);
@@ -53,6 +62,7 @@
     const body = {};
     if ($("DEVICE_NAME").value !== (loaded.DEVICE_NAME || "")) body.DEVICE_NAME = $("DEVICE_NAME").value;
     if ($("DEFAULT_VOLUME").value !== String(loaded.DEFAULT_VOLUME || "")) body.DEFAULT_VOLUME = $("DEFAULT_VOLUME").value;
+    if ($("ACCENT_COLOR").value !== (loaded.ACCENT_COLOR || "blue")) body.ACCENT_COLOR = $("ACCENT_COLOR").value;
     if (!Object.keys(body).length) {
       status.textContent = "Nothing changed.";
       return;

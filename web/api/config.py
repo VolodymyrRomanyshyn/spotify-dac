@@ -8,6 +8,15 @@ import re
 from .common import ApiError, feature_on, read_config, run, write_config
 
 NAME = re.compile(r"^[A-Za-z0-9 _+\-]{1,32}$")
+# button colours: name -> (light theme, dark theme)
+ACCENTS = {
+    "blue": ("#2f6fed", "#7aa7ff"),
+    "green": ("#1f8f4e", "#3ddc84"),
+    "amber": ("#b7791f", "#f5b041"),
+    "red": ("#c53030", "#ff7b7b"),
+    "violet": ("#6b46c1", "#b98cff"),
+    "teal": ("#0f8a86", "#4fd1c5"),
+}
 APPLY_SERVICES = {"soloist", "spotify-dac-volume"}
 
 
@@ -28,11 +37,18 @@ def _name(value):
     return value
 
 
+def _accent(value):
+    if value not in ACCENTS:
+        raise ValueError
+    return value
+
+
 EDITABLE = {
     "DEVICE_NAME": (_name, "1-32 characters: letters, digits, space, - _ +"),
     "SOLOIST_UPDATE_AFTER_DAYS": (_int_between(1, 89), "whole number 1-89"),
     "APT_UPGRADE_AFTER_DAYS": (_int_between(0, 365), "whole number 0-365"),
     "DEFAULT_VOLUME": (_int_between(0, 100), "whole number 0-100 (used until a level is set)"),
+    "ACCENT_COLOR": (_accent, "blue, green, amber, red, violet or teal"),
 }
 
 
@@ -42,7 +58,9 @@ def get_config(req):
 
 def get_device(req):
     """The name shown in the page header (the Spotify Connect device name)."""
-    return 200, {"name": read_config().get("DEVICE_NAME") or "DAC"}
+    cfg = read_config()
+    light, dark = ACCENTS.get(cfg.get("ACCENT_COLOR"), ACCENTS["blue"])
+    return 200, {"name": cfg.get("DEVICE_NAME") or "DAC", "accent_light": light, "accent_dark": dark}
 
 
 def post_config(req):

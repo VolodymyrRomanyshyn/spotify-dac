@@ -44,6 +44,8 @@
   const brand = document.querySelector(".device");
   api("/api/device").then(function (d) {
     if (brand && d.name) brand.textContent = d.name;
+    if (d.accent_light) document.documentElement.style.setProperty("--accent-light", d.accent_light);
+    if (d.accent_dark) document.documentElement.style.setProperty("--accent-dark", d.accent_dark);
   }).catch(function () { /* keep the placeholder */ });
 
   const burger = document.getElementById("burger");

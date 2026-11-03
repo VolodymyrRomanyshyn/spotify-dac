@@ -61,7 +61,7 @@ EDITABLE = {
     "RADIO_ENABLED": (_yesno, "yes or no"),
     "DEVICE_NAME": (_name, "1-32 characters: letters, digits, space, - _ +"),
     "SOLOIST_UPDATE_AFTER_DAYS": (_int_between(1, 89), "whole number 1-89"),
-    "APT_UPGRADE_AFTER_DAYS": (_int_between(0, 365), "whole number 0-365"),
+    "APT_UPGRADE_AFTER_DAYS": (_int_between(0, 365), "0 = every time updates run; 1-365 = at most once every N days"),
     "DEFAULT_VOLUME": (_int_between(0, 100), "whole number 0-100 (used until a level is set)"),
     "ACCENT_COLOR": (_accent, "blue, green, amber, red, violet, teal or grey"),
 }

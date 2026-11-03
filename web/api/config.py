@@ -114,7 +114,8 @@ def _spotify_on(on):
         return "Spotify on"
     run(["systemctl", "disable", "--now", "soloist.service"], timeout=60)
     run(["systemctl", "disable", "spotify-dac-boot-update.service"], timeout=60)
-    return "Spotify off"
+    rc, out, _ = run(["systemctl", "is-active", "soloist.service"], timeout=10)
+    return "Spotify off" if out.strip() != "active" else "Spotify is still running: check the Soloist service"
 
 
 def post_config(req):
@@ -152,6 +153,10 @@ def post_config(req):
     if updates:
         write_config(updates)
     applied = []
+    if updates.get("RADIO_ENABLED") == "no":
+        from .radio import stop_playback  # local import: radio is not needed for the other settings
+        if stop_playback():
+            applied.append("radio stopped")
     if api_key is not None:
         _save_api_key(api_key)
         applied.append("API key saved")

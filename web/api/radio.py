@@ -63,6 +63,15 @@ def _stop_current():
     MPV_SOCKET.unlink(missing_ok=True)
 
 
+def stop_playback():
+    """Stops the radio if it is playing. Used when radio is turned off in Settings."""
+    with _lock:
+        if _current():
+            _stop_current()
+            return True
+    return False
+
+
 def _mpv_property(name):
     """Read one property from the running mpv over its IPC socket. None when not available."""
     if not MPV_SOCKET.exists():

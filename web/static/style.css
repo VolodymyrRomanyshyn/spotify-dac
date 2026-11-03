@@ -291,3 +291,24 @@ dialog.modal h2 { margin-top: 0; }
 .swatch[data-name="violet"] { background: #6b46c1; }
 .swatch[data-name="teal"] { background: #0f8a86; }
 .swatch[data-name="grey"] { background: #5b6270; }
+
+/* LED indicator and LED toggle buttons: green when on, grey when off */
+.led {
+  display: inline-block; flex: none; width: 10px; height: 10px; border-radius: 50%;
+  background: #4a4f5a; box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.55);
+}
+.toggle-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 96px; }
+.toggle-btn[aria-pressed="true"] .led {
+  background: #3ddc84; box-shadow: 0 0 6px #3ddc84, 0 0 12px rgba(61, 220, 132, 0.55);
+}
+.row-toggle { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 6px 0; }
+.row-toggle > span { font-weight: 600; }
+.status { font-weight: 600; font-size: 13px; }
+.status.ok { color: #3ddc84; }
+.status.warn { color: #f5b041; }
+.status.bad { color: #ff7b7b; }
+.status.off { color: var(--muted); }
+.reason { margin: 2px 0 8px; font-size: 14px; color: var(--muted); }
+.reason.warning { color: #f5b041; }
+.reason.error { color: #ff7b7b; }
+

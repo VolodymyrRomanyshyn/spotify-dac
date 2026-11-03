@@ -1,13 +1,19 @@
-"""Config page: read the settings, change the simple ones, restart services.
+"""Settings API: read the settings, change them, and restart or stop the services they control.
 
-Only the keys in EDITABLE can be changed here. Hardware (pins, case, sound card) is not editable;
-those go through the installer. The API key is not in the config file and is never returned.
+The keys in EDITABLE can be changed here, plus the Spotify API key (stored in the Soloist secret
+file, never returned). Hardware (pins and case) is changed through /api/hardware; the sound
+card is chosen by the installer.
 """
+import grp
+import os
 import re
+from pathlib import Path
 
-from .common import ApiError, feature_on, read_config, run, write_config
+from .common import SOLOIST_USER, ApiError, feature_on, read_config, run, write_config
 
+SECRET_FILE = Path(os.environ.get("SPOTIFY_DAC_SECRET", "/etc/spotify-dac/soloist.env"))
 NAME = re.compile(r"^[A-Za-z0-9 _+\-]{1,32}$")
+KEY = re.compile(r'^[^\s"\\$`]{8,200}$')
 # button colours: name -> (light theme, dark theme)
 ACCENTS = {
     "blue": ("#2f6fed", "#7aa7ff"),
@@ -44,33 +50,91 @@ def _accent(value):
     return value
 
 
+def _yesno(value):
+    if value not in ("yes", "no"):
+        raise ValueError
+    return value
+
+
 EDITABLE = {
+    "SPOTIFY_ENABLED": (_yesno, "yes or no"),
+    "RADIO_ENABLED": (_yesno, "yes or no"),
     "DEVICE_NAME": (_name, "1-32 characters: letters, digits, space, - _ +"),
     "SOLOIST_UPDATE_AFTER_DAYS": (_int_between(1, 89), "whole number 1-89"),
-    "APT_UPGRADE_AFTER_DAYS": (_int_between(0, 365), "whole number 0-365"),
+    "APT_UPGRADE_AFTER_DAYS": (_int_between(0, 365), "0 = every time updates run; 1-365 = at most once every N days"),
     "DEFAULT_VOLUME": (_int_between(0, 100), "whole number 0-100 (used until a level is set)"),
     "ACCENT_COLOR": (_accent, "blue, green, amber, red, violet, teal or grey"),
 }
 
 
+def api_key_set():
+    """True when a key is stored. The key itself is never sent to the browser."""
+    try:
+        text = SECRET_FILE.read_text(encoding="utf-8")
+    except OSError:
+        return False
+    for line in text.splitlines():
+        if line.startswith("SOLOIST_API_KEY="):
+            return line.split("=", 1)[1].strip().strip('"') != ""
+    return False
+
+
+def _save_api_key(key):
+    """Writes the key the way the installer does: readable by root and the soloist group only."""
+    SECRET_FILE.parent.mkdir(parents=True, exist_ok=True)
+    tmp = SECRET_FILE.with_name(SECRET_FILE.name + ".tmp")
+    tmp.write_text(f'SOLOIST_API_KEY="{key}"\n', encoding="utf-8")
+    os.chmod(tmp, 0o640)
+    try:
+        os.chown(tmp, 0, grp.getgrnam(SOLOIST_USER).gr_gid)
+    except KeyError:
+        os.chown(tmp, 0, 0)
+    os.replace(tmp, SECRET_FILE)
+
+
 def get_config(req):
-    return 200, {"values": read_config(), "editable": {k: hint for k, (_, hint) in EDITABLE.items()}}
+    return 200, {
+        "values": read_config(),
+        "editable": {k: hint for k, (_, hint) in EDITABLE.items()},
+        "api_key_set": api_key_set(),
+    }
 
 
 def get_device(req):
-    """The name shown in the page header (the Spotify Connect device name)."""
+    """The name shown in the page header and the colours used on every page."""
     cfg = read_config()
     light, dark = ACCENTS.get(cfg.get("ACCENT_COLOR"), ACCENTS["blue"])
     return 200, {"name": cfg.get("DEVICE_NAME") or "DAC", "accent_light": light, "accent_dark": dark}
+
+
+def _spotify_on(on):
+    """Starts Soloist and enables it at boot, or stops it and keeps it off."""
+    if on:
+        run(["systemctl", "enable", "--now", "soloist.service"], timeout=60)
+        return "Spotify on"
+    run(["systemctl", "disable", "--now", "soloist.service"], timeout=60)
+    run(["systemctl", "disable", "spotify-dac-boot-update.service"], timeout=60)
+    rc, out, _ = run(["systemctl", "is-active", "soloist.service"], timeout=10)
+    return "Spotify off" if out.strip() != "active" else "Spotify is still running: check the Soloist service"
 
 
 def post_config(req):
     body = req.json()
     if not body:
         raise ApiError(400, "nothing to save")
+    cfg = read_config()
     updates = {}
     errors = {}
+    api_key = None
     for key, value in body.items():
+        if key == "SOLOIST_API_KEY":
+            if isinstance(value, str) and value.strip() == "":
+                continue  # an empty field keeps the stored key
+            if isinstance(value, str) and KEY.match(value.strip()):
+                api_key = value.strip()
+            else:
+                errors[key] = "8-200 characters, no spaces or quotes"
+            continue
         if key not in EDITABLE:
             raise ApiError(400, f"{key} can't be changed here")
         check, hint = EDITABLE[key]
@@ -80,9 +144,33 @@ def post_config(req):
             errors[key] = hint
     if errors:
         raise ApiError(400, "; ".join(f"{k}: {v}" for k, v in errors.items()))
-    write_config(updates)
-    restart = ["soloist"] if "DEVICE_NAME" in updates else []
-    return 200, {"saved": sorted(updates), "restart": restart}
+
+    spotify = updates.get("SPOTIFY_ENABLED", cfg.get("SPOTIFY_ENABLED", "yes"))
+    radio = updates.get("RADIO_ENABLED", cfg.get("RADIO_ENABLED", "yes"))
+    if spotify == "no" and radio == "no":
+        raise ApiError(400, "Turn on Spotify or internet radio: at least one must stay on")
+
+    if updates:
+        write_config(updates)
+    applied = []
+    if updates.get("RADIO_ENABLED") == "no":
+        from .radio import stop_playback  # local import: radio is not needed for the other settings
+        if stop_playback():
+            applied.append("radio stopped")
+    if api_key is not None:
+        _save_api_key(api_key)
+        applied.append("API key saved")
+    if "SPOTIFY_ENABLED" in updates:
+        if spotify == "no":
+            applied.append(_spotify_on(False))
+        elif api_key_set():
+            applied.append(_spotify_on(True))
+        else:
+            applied.append("Spotify on: add the API key to start it")
+    elif spotify == "yes" and ("DEVICE_NAME" in updates or api_key is not None) and api_key_set():
+        run(["systemctl", "restart", "soloist.service"], timeout=60)
+        applied.append("Spotify restarted")
+    return 200, {"saved": sorted(list(updates) + (["SOLOIST_API_KEY"] if api_key else [])), "applied": applied}
 
 
 def post_apply(req):

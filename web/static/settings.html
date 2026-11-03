@@ -21,9 +21,9 @@
         <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
       <nav id="menu" class="menu-list" hidden>
-        <a href="/">Home</a>
         <a data-feature="radio" href="/radio.html">Radio</a>
         <a href="/status.html">Status</a>
+        <a href="/">Home</a>
         <a href="/settings.html" class="active">Settings</a>
       </nav>
     </div>
@@ -31,39 +31,58 @@
   </header>
 
   <main class="settings">
+    <!-- ===== General ===== -->
     <section class="card">
       <h2>General</h2>
-      <form id="general-form" class="form">
+
+      <div class="row-toggle">
+        <span>Spotify <span id="spotify-status" class="status"></span></span>
+        <button id="toggle-spotify" class="toggle-btn" type="button" aria-pressed="false"><span class="led" aria-hidden="true"></span><span class="state">Off</span></button>
+      </div>
+      <div id="spotify-fields" class="form" hidden>
         <label class="field">
-          <span>Device name</span>
+          <span>Device name (shown in the Spotify app)</span>
           <input id="DEVICE_NAME" type="text" maxlength="32" autocomplete="off">
           <small class="muted" data-hint="DEVICE_NAME"></small>
         </label>
-        <label class="field">
-          <span>Default volume</span>
-          <input id="DEFAULT_VOLUME" type="number" min="0" max="100" step="1">
-          <small class="muted" data-hint="DEFAULT_VOLUME"></small>
-        </label>
-        <div class="field">
-          <span>Accent color</span>
-          <div id="accent-swatches" class="swatches" role="group" aria-label="Accent color">
-            <button type="button" class="swatch" data-name="blue" data-light="#2f6fed" data-dark="#7aa7ff" title="Blue" aria-label="Blue" aria-pressed="false"></button>
-            <button type="button" class="swatch" data-name="green" data-light="#1f8f4e" data-dark="#3ddc84" title="Green" aria-label="Green" aria-pressed="false"></button>
-            <button type="button" class="swatch" data-name="amber" data-light="#b7791f" data-dark="#f5b041" title="Amber" aria-label="Amber" aria-pressed="false"></button>
-            <button type="button" class="swatch" data-name="red" data-light="#c53030" data-dark="#ff7b7b" title="Red" aria-label="Red" aria-pressed="false"></button>
-            <button type="button" class="swatch" data-name="violet" data-light="#6b46c1" data-dark="#b98cff" title="Violet" aria-label="Violet" aria-pressed="false"></button>
-            <button type="button" class="swatch" data-name="teal" data-light="#0f8a86" data-dark="#4fd1c5" title="Teal" aria-label="Teal" aria-pressed="false"></button>
-            <button type="button" class="swatch" data-name="grey" data-light="#5b6270" data-dark="#9aa1ad" title="Grey" aria-label="Grey" aria-pressed="false"></button>
-          </div>
-          <small class="muted"><span id="accent-name"></span>. Colours the buttons and highlights on every page.</small>
+        <div class="row-toggle">
+          <span>API key <span id="key-state" class="status"></span></span>
+          <button id="open-key" class="ctl small" type="button">Set API key</button>
         </div>
-      </form>
+      </div>
+
+      <div class="row-toggle">
+        <span>Internet radio</span>
+        <button id="toggle-radio" class="toggle-btn" type="button" aria-pressed="false"><span class="led" aria-hidden="true"></span><span class="state">Off</span></button>
+      </div>
+
+      <label class="field">
+        <span>Default volume</span>
+        <input id="DEFAULT_VOLUME" type="number" min="0" max="100" step="1">
+        <small class="muted" data-hint="DEFAULT_VOLUME"></small>
+      </label>
+
+      <div class="field">
+        <span>Accent color</span>
+        <div id="accent-swatches" class="swatches" role="group" aria-label="Accent color">
+          <button type="button" class="swatch" data-name="blue" data-light="#2f6fed" data-dark="#7aa7ff" title="Blue" aria-label="Blue" aria-pressed="false"></button>
+          <button type="button" class="swatch" data-name="green" data-light="#1f8f4e" data-dark="#3ddc84" title="Green" aria-label="Green" aria-pressed="false"></button>
+          <button type="button" class="swatch" data-name="amber" data-light="#b7791f" data-dark="#f5b041" title="Amber" aria-label="Amber" aria-pressed="false"></button>
+          <button type="button" class="swatch" data-name="red" data-light="#c53030" data-dark="#ff7b7b" title="Red" aria-label="Red" aria-pressed="false"></button>
+          <button type="button" class="swatch" data-name="violet" data-light="#6b46c1" data-dark="#b98cff" title="Violet" aria-label="Violet" aria-pressed="false"></button>
+          <button type="button" class="swatch" data-name="teal" data-light="#0f8a86" data-dark="#4fd1c5" title="Teal" aria-label="Teal" aria-pressed="false"></button>
+          <button type="button" class="swatch" data-name="grey" data-light="#5b6270" data-dark="#9aa1ad" title="Grey" aria-label="Grey" aria-pressed="false"></button>
+        </div>
+        <small class="muted"><span id="accent-name"></span>. Colours the buttons and highlights on every page.</small>
+      </div>
+
       <div class="actions">
         <button id="save-general" class="ctl main" type="button">Save general</button>
         <span id="general-status" class="muted" role="status"></span>
       </div>
     </section>
 
+    <!-- ===== GPIO ===== -->
     <section class="card">
       <h2>GPIO</h2>
       <form id="gpio-form" class="form">
@@ -72,7 +91,7 @@
           <span class="select">
             <select id="case">
               <option value="nespi">RetroFlag NESPi Case+</option>
-              <option value="none">No GPIO control</option>
+              <option value="none">No case</option>
             </select>
             <svg class="chevron" viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.5l5 5 5-5"/></svg>
           </span>
@@ -92,9 +111,10 @@
           </label>
           <p class="muted">Power enable GPIO: <span id="power_enable_pin"></span>. Set by the installer, not here.</p>
         </div>
-        <div class="toggle">
-          <input id="fan_enabled" type="checkbox">
-          <label for="fan_enabled">Fan on a GPIO pin</label>
+
+        <div class="row-toggle">
+          <span>Fan on a GPIO pin</span>
+          <button id="fan_enabled" class="toggle-btn" type="button" aria-pressed="false"><span class="led" aria-hidden="true"></span><span class="state">Off</span></button>
         </div>
         <label id="fan-pin-field" class="field" hidden>
           <span>Fan GPIO</span>
@@ -108,6 +128,7 @@
       </div>
     </section>
 
+    <!-- ===== Updates ===== -->
     <section class="card">
       <h2>Updates</h2>
       <form id="updates-form" class="form">
@@ -137,6 +158,22 @@
       <p class="muted">Updates the web interface and radio files and restarts the web service. Audio and boot changes still need <code>sudo bash install.sh</code>.</p>
     </section>
   </main>
+
+  <dialog id="key-dialog" class="modal" aria-labelledby="key-title">
+    <h2 id="key-title">Spotify API key</h2>
+    <p class="muted">Paste the Soloist key from developer.spotify.com. It is saved on the Pi and is never shown again.</p>
+    <form id="key-form" class="form">
+      <label class="field">
+        <span>API key</span>
+        <input id="key-input" type="password" autocomplete="off" required minlength="8" maxlength="200">
+      </label>
+      <p id="key-error" class="muted" role="status"></p>
+      <div class="actions">
+        <button id="key-cancel" type="button">Cancel</button>
+        <button type="submit" class="ctl main">Save key</button>
+      </div>
+    </form>
+  </dialog>
 
   <script src="common.js"></script>
   <script src="settings.js"></script>

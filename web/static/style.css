@@ -308,4 +308,7 @@ dialog.modal h2 { margin-top: 0; }
 .status.warn { color: #f5b041; }
 .status.bad { color: #ff7b7b; }
 .status.off { color: var(--muted); }
+.reason { margin: 2px 0 8px; font-size: 14px; color: var(--muted); }
+.reason.warning { color: #f5b041; }
+.reason.error { color: #ff7b7b; }
 

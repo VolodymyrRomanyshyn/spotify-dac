@@ -21,11 +21,14 @@
     r.append(el("span", "", label), el("span", "", value === null || value === undefined || value === "" ? "-" : String(value)));
     return r;
   }
-  function card(title, mark, body) {
+  // reasons: what is wrong, shown under the title when the card is not green
+  function card(title, mark, body, reasons) {
     const c = el("section", "card");
     const h = el("h2");
     h.append(el("span", "mark " + mark), document.createTextNode(title));
-    c.append(h, ...body);
+    c.append(h);
+    if (mark !== "ok" && reasons && reasons.length) c.append(el("p", "reason " + mark, reasons.join(" - ")));
+    c.append(...body);
     return c;
   }
   function uptimeText(seconds) {
@@ -79,31 +82,45 @@
     });
 
     const soloist = s.soloist.version ? "" : null;
+    const diskUsed = s.system.disk_used_percent || 0;
     const cardsList = [
-      card("Services", s.services.some(x => x.enabled === "enabled" && x.active !== "active") ? "error" : "ok", services),
+      card("Services", s.services.some(x => x.enabled === "enabled" && x.active !== "active") ? "error" : "ok", services,
+        s.services.filter(x => x.enabled === "enabled" && x.active !== "active").map(x => x.name + " is enabled but not running")
+          .concat(s.services.filter(x => x.enabled !== "enabled" && x.active === "active").map(x => x.name + " runs but is not enabled at boot"))),
       card("Soloist", soloistMark(s.soloist), [
         row("Version", s.soloist.version || "not found"),
         row("Local API (websocket)", s.soloist.api.websocket || "not listening"),
         row("API reachable", yesNo(s.soloist.api.reachable)),
         row("Logged in to Spotify", yesNo(s.soloist.api.logged_in)),
         row("Active device", yesNo(s.soloist.api.active_device)),
-      ]),
+      ], [
+        !s.soloist.version ? "Soloist is not installed" : null,
+        s.soloist.version && !s.soloist.api.reachable ? "Soloist does not answer on its local API (the service may be stopped)" : null,
+        s.soloist.api.logged_in === false ? "not logged in to Spotify: pair the device from the Spotify app" : null,
+      ].filter(Boolean)),
       card("DAC", dacMark(s.dac), [
         row("Sound card", dacCardNames(s.dac) || "not found"),
         row("Onboard audio", onboardText(s.dac)),
         row("Playing", playingText(s.dac)),
-      ]),
+      ], [dacCardNames(s.dac) ? null : "no sound card found: check the DAC cable and power"].filter(Boolean)),
       card("Power and heat", s.power.flags && (s.power.flags.undervoltage_now) ? "error"
         : (s.power.flags && (s.power.flags.throttled_seen || s.power.flags.undervoltage_seen) ? "warning" : "ok"), [
         row("Undervoltage now", s.power.flags ? (s.power.flags.undervoltage_now ? "yes" : "no") : "not available"),
         row("Throttled earlier", s.power.flags ? (s.power.flags.throttled_seen || s.power.flags.undervoltage_seen ? "yes" : "no") : "-"),
         row("CPU temperature", s.power.temperature_c === null ? "-" : s.power.temperature_c + " C"),
-      ]),
-      card("System", (s.system.disk_used_percent || 0) > 90 ? "error" : (s.system.disk_used_percent || 0) > 80 ? "warning" : "ok", [
+      ], [
+        s.power.flags && s.power.flags.undervoltage_now ? "undervoltage now: use a 5 V power supply with enough current" : null,
+        s.power.flags && !s.power.flags.undervoltage_now && (s.power.flags.throttled_seen || s.power.flags.undervoltage_seen)
+          ? "the Pi was throttled or short of power earlier (check the power supply)" : null,
+      ].filter(Boolean)),
+      card("System", diskUsed > 90 ? "error" : diskUsed > 80 ? "warning" : "ok", [
         row("Uptime", uptimeText(s.system.uptime_seconds)),
         row("Disk used", s.system.disk_used_percent === null ? "-" : s.system.disk_used_percent + " %"),
         row("Addresses", s.system.addresses.join(", ") || "-"),
-      ]),
+      ], [
+        diskUsed > 90 ? "disk " + diskUsed + " % full: free space now" : null,
+        diskUsed > 80 && diskUsed <= 90 ? "disk " + diskUsed + " % full (warning above 80 %)" : null,
+      ].filter(Boolean)),
       card("Last update log", "ok", [
         s.last_update.length ? el("pre", "", s.last_update.join("\n")) : el("p", "muted", "No update log yet."),
       ]),

@@ -1,28 +1,24 @@
-// Settings page: General, GPIO and Updates, each with its own save; plus the GitHub update check.
+// Settings page: General (Spotify, radio, device name, key, volume, colour), GPIO and Updates.
 (function () {
   const $ = function (id) { return document.getElementById(id); };
-  let loaded = {};
-  let hardware = null;
+  let loaded = {};          // settings as saved on the device
+  let hardware = null;      // GPIO settings as saved on the device
 
-  function showError(target, err) {
-    target.textContent = err.message || String(err);
+  function showError(target, err) { target.textContent = err.message || String(err); }
+
+  // ---- LED toggle buttons ----
+  function isOn(button) { return button.getAttribute("aria-pressed") === "true"; }
+  function setOn(button, on) {
+    button.setAttribute("aria-pressed", String(on));
+    button.querySelector(".state").textContent = on ? "On" : "Off";
   }
-  function restartText(restarted) {
-    return restarted && restarted.length ? "applied: " + restarted.join(", ") : "saved";
-  }
-  function pinValue(id) {
-    const text = $(id).value.trim();
-    return text === "" ? null : Number(text);
-  }
-  function setHints(editable) {
-    document.querySelectorAll("[data-hint]").forEach(function (hint) {
-      const key = hint.getAttribute("data-hint");
-      if (editable[key]) hint.textContent = editable[key];
-    });
+  function showSpotifyFields() {
+    const on = isOn($("toggle-spotify"));
+    $("spotify-fields").hidden = !on;
+    document.querySelectorAll('[data-feature="spotify"]').forEach(function (el) { el.hidden = !on; });
   }
 
-  // ---- General: device name, default volume, audio device ----
-  // Accent colour: swatches show the choice; it is applied at once and saved with Save general
+  // ---- accent colour swatches: the page colour changes after Save general ----
   function chosenAccent() {
     const pressed = document.querySelector("#accent-swatches [aria-pressed='true']");
     return pressed ? pressed.dataset.name : "blue";
@@ -31,13 +27,8 @@
     document.querySelectorAll("#accent-swatches [data-name]").forEach(function (b) {
       b.setAttribute("aria-pressed", String(b.dataset.name === name));
     });
-    previewAccent();
-  }
-  // only the label changes while choosing; the page colour changes after Save general
-  function previewAccent() {
     const pressed = document.querySelector("#accent-swatches [aria-pressed='true']");
-    if (!pressed) return;
-    $("accent-name").textContent = pressed.dataset.name.charAt(0).toUpperCase() + pressed.dataset.name.slice(1);
+    if (pressed) $("accent-name").textContent = pressed.dataset.name.charAt(0).toUpperCase() + pressed.dataset.name.slice(1);
   }
   function applyAccent() {
     const pressed = document.querySelector("#accent-swatches [aria-pressed='true']");
@@ -45,15 +36,24 @@
     document.documentElement.style.setProperty("--accent-light", pressed.dataset.light);
     document.documentElement.style.setProperty("--accent-dark", pressed.dataset.dark);
   }
+
+  // ---- loading ----
   async function loadConfig() {
     const data = await api("/api/config");
     loaded = data.values;
     $("DEVICE_NAME").value = loaded.DEVICE_NAME || "";
     $("DEFAULT_VOLUME").value = loaded.DEFAULT_VOLUME || "";
-    selectAccent(loaded.ACCENT_COLOR || "blue");
     $("SOLOIST_UPDATE_AFTER_DAYS").value = loaded.SOLOIST_UPDATE_AFTER_DAYS || "";
     $("APT_UPGRADE_AFTER_DAYS").value = loaded.APT_UPGRADE_AFTER_DAYS || "";
-    setHints(data.editable);
+    setOn($("toggle-spotify"), loaded.SPOTIFY_ENABLED !== "no");
+    setOn($("toggle-radio"), loaded.RADIO_ENABLED !== "no");
+    $("key-state").textContent = data.api_key_set ? "A key is saved. Leave empty to keep it." : "No key saved yet.";
+    selectAccent(loaded.ACCENT_COLOR || "blue");
+    showSpotifyFields();
+    document.querySelectorAll("[data-hint]").forEach(function (hint) {
+      const key = hint.getAttribute("data-hint");
+      if (data.editable[key]) hint.textContent = data.editable[key];
+    });
   }
 
   async function loadHardware() {
@@ -63,19 +63,33 @@
     $("reset_pin").value = hardware.pins.RESET_PIN;
     $("led_pin").value = hardware.pins.LED_PIN;
     $("power_enable_pin").textContent = hardware.power_enable_pin;
-    $("fan_enabled").checked = hardware.fan.enabled;
+    setOn($("fan_enabled"), hardware.fan.enabled);
     $("fan_pin").value = hardware.fan.pin;
-    $("fan-pin-field").hidden = !hardware.fan.enabled;
     $("hat-note").textContent = hardware.hat
       ? "The IQaudIO HAT uses GPIO " + hardware.hat_pins.join(", ") + ", so those pins can't be used here."
       : "";
+    showGpioFields();
+  }
+  function showGpioFields() {
     $("nespi-only").hidden = $("case").value !== "nespi";
+    $("fan-pin-field").hidden = !isOn($("fan_enabled"));
+  }
+
+  // ---- saving ----
+  function pinValue(id) {
+    const text = $(id).value.trim();
+    return text === "" ? null : Number(text);
   }
 
   async function saveGeneral() {
     const status = $("general-status");
     const body = {};
-    if ($("DEVICE_NAME").value !== (loaded.DEVICE_NAME || "")) body.DEVICE_NAME = $("DEVICE_NAME").value;
+    const spotifyOn = isOn($("toggle-spotify"));
+    const radioOn = isOn($("toggle-radio"));
+    if (spotifyOn !== (loaded.SPOTIFY_ENABLED !== "no")) body.SPOTIFY_ENABLED = spotifyOn ? "yes" : "no";
+    if (radioOn !== (loaded.RADIO_ENABLED !== "no")) body.RADIO_ENABLED = radioOn ? "yes" : "no";
+    if (spotifyOn && $("DEVICE_NAME").value !== (loaded.DEVICE_NAME || "")) body.DEVICE_NAME = $("DEVICE_NAME").value;
+    if (spotifyOn && $("api_key").value.trim() !== "") body.SOLOIST_API_KEY = $("api_key").value.trim();
     if ($("DEFAULT_VOLUME").value !== String(loaded.DEFAULT_VOLUME || "")) body.DEFAULT_VOLUME = $("DEFAULT_VOLUME").value;
     if (chosenAccent() !== (loaded.ACCENT_COLOR || "blue")) body.ACCENT_COLOR = chosenAccent();
     if (!Object.keys(body).length) {
@@ -85,17 +99,10 @@
     $("save-general").disabled = true;
     try {
       const result = await api("/api/config", { body: body });
-      if (result.restart && result.restart.length) {
-        await api("/api/config/apply", { body: { services: result.restart } });
-      }
-      // say what was saved, not a fixed phrase
-      const saved = [];
-      if (body.DEVICE_NAME || body.DEFAULT_VOLUME) saved.push("name and volume");
-      if (body.ACCENT_COLOR) saved.push("colour");
+      $("api_key").value = "";
       applyAccent();
       await loadConfig();
-      await loadHardware();
-      status.textContent = "Saved: " + saved.join(", ") + ".";
+      status.textContent = "Saved" + (result.applied && result.applied.length ? ": " + result.applied.join(", ") : "") + ".";
     } catch (err) {
       showError(status, err);
     } finally {
@@ -103,12 +110,11 @@
     }
   }
 
-  // ---- GPIO: case, power switch, reset, LED, power-off mode, fan ----
   async function saveGpio() {
     const status = $("gpio-status");
     const body = {
       case: $("case").value,
-      fan_enabled: $("fan_enabled").checked,
+      fan_enabled: isOn($("fan_enabled")),
       fan_pin: pinValue("fan_pin"),
     };
     if ($("case").value === "nespi") {
@@ -130,7 +136,6 @@
     }
   }
 
-  // ---- Updates: schedules for Soloist and system packages ----
   async function saveUpdates() {
     const status = $("updates-status");
     const body = {};
@@ -196,6 +201,11 @@
     }
   }
 
+  // ---- wiring ----
+  $("toggle-spotify").addEventListener("click", function () { setOn($("toggle-spotify"), !isOn($("toggle-spotify"))); showSpotifyFields(); });
+  $("toggle-radio").addEventListener("click", function () { setOn($("toggle-radio"), !isOn($("toggle-radio"))); });
+  $("fan_enabled").addEventListener("click", function () { setOn($("fan_enabled"), !isOn($("fan_enabled"))); showGpioFields(); });
+  $("case").addEventListener("change", showGpioFields);
   document.querySelectorAll("#accent-swatches [data-name]").forEach(function (b) {
     b.addEventListener("click", function () { selectAccent(b.dataset.name); });
   });
@@ -204,10 +214,8 @@
   $("save-updates").addEventListener("click", function () { saveUpdates(); });
   $("check").addEventListener("click", checkCode);
   $("update").addEventListener("click", updateCode);
-  $("case").addEventListener("change", function () { $("nespi-only").hidden = $("case").value !== "nespi"; });
-  $("fan_enabled").addEventListener("change", function () { $("fan-pin-field").hidden = !$("fan_enabled").checked; });
 
   loadConfig().catch(function (err) { showError($("general-status"), err); });
-  loadHardware().catch(function (err) { showError($("general-status"), err); });
+  loadHardware().catch(function (err) { showError($("gpio-status"), err); });
   checkCode();
 })();

@@ -43,6 +43,7 @@ fi
 DEVICE_NAME="$(hostname)"
 SPOTIFY_ENABLED="yes"              # yes: Soloist (Spotify Connect) | no: radio only
 RADIO_ENABLED="yes"                # yes: internet radio on the web page | no: Spotify only
+ACCENT_COLOR="blue"                # colour of the web interface buttons (set on the Settings page)
 AUDIO_OUTPUT="usb"                 # usb | hat
 AUDIO_HAT_OVERLAY=""               # e.g. iqaudio-dacplus (only for AUDIO_OUTPUT=hat)
 CASE="none"                        # nespi | none
@@ -309,6 +310,7 @@ write_config() {
 DEVICE_NAME="$DEVICE_NAME"
 SPOTIFY_ENABLED="$SPOTIFY_ENABLED"
 RADIO_ENABLED="$RADIO_ENABLED"
+ACCENT_COLOR="$ACCENT_COLOR"
 SOURCE_DIR="$REPO_DIR"
 AUDIO_OUTPUT="$AUDIO_OUTPUT"
 AUDIO_HAT_OVERLAY="$AUDIO_HAT_OVERLAY"

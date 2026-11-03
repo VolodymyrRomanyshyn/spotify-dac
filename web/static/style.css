@@ -303,4 +303,9 @@ dialog.modal h2 { margin-top: 0; }
 }
 .row-toggle { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 6px 0; }
 .row-toggle > span { font-weight: 600; }
+.status { font-weight: 600; font-size: 13px; }
+.status.ok { color: #3ddc84; }
+.status.warn { color: #f5b041; }
+.status.bad { color: #ff7b7b; }
+.status.off { color: var(--muted); }
 

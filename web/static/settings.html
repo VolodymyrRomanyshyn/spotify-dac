@@ -36,7 +36,7 @@
       <h2>General</h2>
 
       <div class="row-toggle">
-        <span>Spotify</span>
+        <span>Spotify <span id="spotify-status" class="status"></span></span>
         <button id="toggle-spotify" class="toggle-btn" type="button" aria-pressed="false"><span class="led" aria-hidden="true"></span><span class="state">Off</span></button>
       </div>
       <div id="spotify-fields" class="form" hidden>
@@ -45,11 +45,10 @@
           <input id="DEVICE_NAME" type="text" maxlength="32" autocomplete="off">
           <small class="muted" data-hint="DEVICE_NAME"></small>
         </label>
-        <label class="field">
-          <span>Spotify API key</span>
-          <input id="api_key" type="password" autocomplete="off" placeholder="Paste a new key to change it">
-          <small class="muted" id="key-state"></small>
-        </label>
+        <div class="row-toggle">
+          <span>API key <span id="key-state" class="status"></span></span>
+          <button id="open-key" class="ctl small" type="button">Set API key</button>
+        </div>
       </div>
 
       <div class="row-toggle">
@@ -159,6 +158,22 @@
       <p class="muted">Updates the web interface and radio files and restarts the web service. Audio and boot changes still need <code>sudo bash install.sh</code>.</p>
     </section>
   </main>
+
+  <dialog id="key-dialog" class="modal" aria-labelledby="key-title">
+    <h2 id="key-title">Spotify API key</h2>
+    <p class="muted">Paste the Soloist key from developer.spotify.com. It is saved on the Pi and is never shown again.</p>
+    <form id="key-form" class="form">
+      <label class="field">
+        <span>API key</span>
+        <input id="key-input" type="password" autocomplete="off" required minlength="8" maxlength="200">
+      </label>
+      <p id="key-error" class="muted" role="status"></p>
+      <div class="actions">
+        <button id="key-cancel" type="button">Cancel</button>
+        <button type="submit" class="ctl main">Save key</button>
+      </div>
+    </form>
+  </dialog>
 
   <script src="common.js"></script>
   <script src="settings.js"></script>

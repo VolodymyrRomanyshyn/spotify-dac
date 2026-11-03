@@ -18,6 +18,31 @@
     document.querySelectorAll('[data-feature="spotify"]').forEach(function (el) { el.hidden = !on; });
   }
 
+  // ---- Spotify: online status and the API key (set in a popup) ----
+  function setKeyState(set) {
+    const el = $("key-state");
+    el.textContent = set ? "saved" : "not set";
+    el.className = "status " + (set ? "ok" : "bad");
+  }
+  async function refreshSpotifyStatus() {
+    const el = $("spotify-status");
+    if (!isOn($("toggle-spotify"))) {
+      el.textContent = "off";
+      el.className = "status off";
+      return;
+    }
+    try {
+      const status = await api("/api/status");
+      const sp = status.soloist.api;
+      if (sp.reachable && sp.logged_in) { el.textContent = "online"; el.className = "status ok"; }
+      else if (sp.reachable) { el.textContent = "not logged in"; el.className = "status warn"; }
+      else { el.textContent = "offline"; el.className = "status bad"; }
+    } catch (err) {
+      el.textContent = "unknown";
+      el.className = "status off";
+    }
+  }
+
   // ---- accent colour swatches: the page colour changes after Save general ----
   function chosenAccent() {
     const pressed = document.querySelector("#accent-swatches [aria-pressed='true']");
@@ -47,7 +72,7 @@
     $("APT_UPGRADE_AFTER_DAYS").value = loaded.APT_UPGRADE_AFTER_DAYS || "";
     setOn($("toggle-spotify"), loaded.SPOTIFY_ENABLED !== "no");
     setOn($("toggle-radio"), loaded.RADIO_ENABLED !== "no");
-    $("key-state").textContent = data.api_key_set ? "A key is saved. Leave empty to keep it." : "No key saved yet.";
+    setKeyState(data.api_key_set);
     selectAccent(loaded.ACCENT_COLOR || "blue");
     showSpotifyFields();
     document.querySelectorAll("[data-hint]").forEach(function (hint) {
@@ -89,7 +114,6 @@
     if (spotifyOn !== (loaded.SPOTIFY_ENABLED !== "no")) body.SPOTIFY_ENABLED = spotifyOn ? "yes" : "no";
     if (radioOn !== (loaded.RADIO_ENABLED !== "no")) body.RADIO_ENABLED = radioOn ? "yes" : "no";
     if (spotifyOn && $("DEVICE_NAME").value !== (loaded.DEVICE_NAME || "")) body.DEVICE_NAME = $("DEVICE_NAME").value;
-    if (spotifyOn && $("api_key").value.trim() !== "") body.SOLOIST_API_KEY = $("api_key").value.trim();
     if ($("DEFAULT_VOLUME").value !== String(loaded.DEFAULT_VOLUME || "")) body.DEFAULT_VOLUME = $("DEFAULT_VOLUME").value;
     if (chosenAccent() !== (loaded.ACCENT_COLOR || "blue")) body.ACCENT_COLOR = chosenAccent();
     if (!Object.keys(body).length) {
@@ -99,7 +123,6 @@
     $("save-general").disabled = true;
     try {
       const result = await api("/api/config", { body: body });
-      $("api_key").value = "";
       applyAccent();
       await loadConfig();
       status.textContent = "Saved" + (result.applied && result.applied.length ? ": " + result.applied.join(", ") : "") + ".";
@@ -202,7 +225,27 @@
   }
 
   // ---- wiring ----
-  $("toggle-spotify").addEventListener("click", function () { setOn($("toggle-spotify"), !isOn($("toggle-spotify"))); showSpotifyFields(); });
+  $("toggle-spotify").addEventListener("click", function () {
+    setOn($("toggle-spotify"), !isOn($("toggle-spotify")));
+    showSpotifyFields();
+    refreshSpotifyStatus();
+  });
+  $("open-key").addEventListener("click", function () {
+    $("key-input").value = "";
+    $("key-error").textContent = "";
+    $("key-dialog").showModal();
+    $("key-input").focus();
+  });
+  $("key-cancel").addEventListener("click", function () { $("key-dialog").close(); });
+  $("key-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const value = $("key-input").value.trim();
+    api("/api/config", { body: { SOLOIST_API_KEY: value } }).then(function () {
+      $("key-dialog").close();
+      $("general-status").textContent = "API key saved.";
+      return loadConfig();
+    }).then(refreshSpotifyStatus).catch(function (err) { showError($("key-error"), err); });
+  });
   $("toggle-radio").addEventListener("click", function () { setOn($("toggle-radio"), !isOn($("toggle-radio"))); });
   $("fan_enabled").addEventListener("click", function () { setOn($("fan_enabled"), !isOn($("fan_enabled"))); showGpioFields(); });
   $("case").addEventListener("change", showGpioFields);
@@ -217,5 +260,7 @@
 
   loadConfig().catch(function (err) { showError($("general-status"), err); });
   loadHardware().catch(function (err) { showError($("gpio-status"), err); });
+  refreshSpotifyStatus();
+  setInterval(refreshSpotifyStatus, 15000);
   checkCode();
 })();

@@ -3,6 +3,8 @@ import glob
 import os
 import pwd
 import re
+import threading
+import time
 from pathlib import Path
 
 from . import airplay
@@ -129,6 +131,52 @@ def _power():
     return {"flags": flags, "temperature_c": temp}
 
 
+# CPU and network use are rates: each reading is compared with the previous one (the page refreshes every 10 s)
+_PREVIOUS = {"cpu": None, "net": None, "time": None}
+_SAMPLE_LOCK = threading.Lock()
+
+
+def _cpu_counters():
+    """Total and idle jiffies from the first line of /proc/stat (idle includes iowait)."""
+    values = [int(x) for x in Path("/proc/stat").read_text().splitlines()[0].split()[1:]]
+    return sum(values), values[3] + values[4]
+
+
+def _net_counters():
+    """Received and sent bytes per network interface (loopback left out)."""
+    counters = {}
+    for line in Path("/proc/net/dev").read_text().splitlines()[2:]:
+        name, _, rest = line.partition(":")
+        name = name.strip()
+        if name and name != "lo":
+            fields = rest.split()
+            counters[name] = (int(fields[0]), int(fields[8]))
+    return counters
+
+
+def _cpu_and_network():
+    """CPU use in percent and network rates in KB/s since the previous reading; None on the first one."""
+    now = time.monotonic()
+    cpu_total, cpu_idle = _cpu_counters()
+    net = _net_counters()
+    with _SAMPLE_LOCK:
+        prev = dict(_PREVIOUS)
+        _PREVIOUS.update(cpu=(cpu_total, cpu_idle), net=net, time=now)
+    if not prev["cpu"] or prev["time"] is None or now <= prev["time"]:
+        return None, None
+    seconds = now - prev["time"]
+    total = cpu_total - prev["cpu"][0]
+    busy = total - (cpu_idle - prev["cpu"][1])
+    cpu = round(100 * busy / total, 1) if total > 0 else 0.0
+    network = {}
+    for name, (rx, tx) in net.items():
+        if name in prev["net"]:
+            prx, ptx = prev["net"][name]
+            network[name] = {"rx_kbps": round((rx - prx) / seconds / 1024, 1),
+                             "tx_kbps": round((tx - ptx) / seconds / 1024, 1)}
+    return cpu, network
+
+
 def _system():
     st = os.statvfs("/")
     used = round(100 * (1 - st.f_bavail / st.f_blocks), 1) if st.f_blocks else None
@@ -137,7 +185,9 @@ def _system():
     except (OSError, ValueError):
         uptime = None
     _, ips, _ = run(["hostname", "-I"])
-    return {"uptime_seconds": uptime, "disk_used_percent": used, "addresses": ips.split()}
+    cpu, network = _cpu_and_network()
+    return {"uptime_seconds": uptime, "disk_used_percent": used, "addresses": ips.split(),
+            "cpu_percent": cpu, "load": [round(x, 2) for x in os.getloadavg()], "network": network}
 
 
 def _last_update():

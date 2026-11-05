@@ -535,6 +535,8 @@ configure_units() {
   if [ "$FAN_ENABLED" = yes ]; then systemctl enable nespi-fan.service; systemctl restart nespi-fan.service
   else systemctl disable --now nespi-fan.service 2>/dev/null || true; fi
 
+  # the package starts its own receiver; ours (spotify-dac-airplay) runs as the soloist user
+  systemctl disable --now shairport-sync.service 2>/dev/null || true
   if [ "$AIRPLAY_ENABLED" = yes ]; then systemctl enable spotify-dac-airplay.service; systemctl restart spotify-dac-airplay.service
   else systemctl disable --now spotify-dac-airplay.service 2>/dev/null || true; fi
 

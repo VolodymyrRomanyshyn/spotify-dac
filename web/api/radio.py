@@ -16,7 +16,10 @@ import time
 from pathlib import Path
 from urllib.parse import urlsplit
 
+from . import airplay
 from .common import SOLOIST_CTL, SOLOIST_USER, ApiError, feature_on, run
+
+AIRPLAY_UNIT = "spotify-dac-airplay.service"
 
 STATIONS_FILE = Path(os.environ.get("SPOTIFY_DAC_RADIO", "/etc/spotify-dac/radio.json"))
 DEFAULT_STATIONS = Path(__file__).resolve().parents[2] / "radio" / "stations.default.json"
@@ -63,11 +66,23 @@ def _stop_current():
     MPV_SOCKET.unlink(missing_ok=True)
 
 
+def _airplay_pause():
+    """Radio takes the DAC: the AirPlay receiver stops (the phone sees it as gone)."""
+    run(["systemctl", "stop", AIRPLAY_UNIT], timeout=30)
+
+
+def _airplay_resume():
+    """Radio has stopped: the AirPlay receiver is started again when AirPlay is on."""
+    if feature_on("airplay"):
+        run(["systemctl", "start", AIRPLAY_UNIT], timeout=30)
+
+
 def stop_playback():
     """Stops the radio if it is playing. Used when radio is turned off in Settings."""
     with _lock:
         if _current():
             _stop_current()
+            _airplay_resume()
             return True
     return False
 
@@ -159,6 +174,7 @@ def post_play(req):
     with _lock:
         _stop_current()
         run(SOLOIST_CTL + ["pause"])  # ignore the answer: Spotify may already be paused
+        _airplay_pause()
         played = None
         from .volume import effective_level
         level = effective_level()
@@ -182,6 +198,7 @@ def post_play(req):
 def post_stop(req):
     with _lock:
         _stop_current()
+    _airplay_resume()
     return 200, {"playing": None}
 
 
@@ -208,6 +225,12 @@ def watch_sources(interval=2):
             now_playing = _spotify_playing() if spotify_on else False
             spotify_now = spotify_volume() if spotify_on else None
             radio_now = _mpv_get_volume() if _current() else None
+            # AirPlay takes the DAC: when an Apple device starts streaming, the radio stops
+            if _current() and feature_on("airplay") and airplay.playing():
+                with _lock:
+                    if _current():
+                        _stop_current()
+                        print("radio stopped: AirPlay started playing", flush=True)
             if was_playing is None:  # first pass: record only
                 was_playing, last_spotify, last_radio = now_playing, spotify_now, radio_now
                 if get_level() is None:

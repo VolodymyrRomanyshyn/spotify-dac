@@ -18,14 +18,35 @@
     document.querySelectorAll('[data-feature="spotify"]').forEach(function (el) { el.hidden = !on; });
   }
 
+  // ---- AirPlay: whether the receiver runs ----
+  async function refreshAirplayStatus() {
+    const el = $("airplay-status");
+    if (isOn($("toggle-airplay")) !== (loaded.AIRPLAY_ENABLED === "yes")) {
+      el.textContent = "change not saved";
+      el.className = "status warn";
+      return;
+    }
+    if (!isOn($("toggle-airplay"))) { el.textContent = "off"; el.className = "status off"; return; }
+    try {
+      await api("/api/airplay");
+      el.textContent = "enabled: turn it on or off on Home"; el.className = "status ok";
+    } catch (err) { el.textContent = "unknown"; el.className = "status off"; }
+  }
+
   // ---- Spotify: online status and the API key (set in a popup) ----
   function setKeyState(set) {
     const el = $("key-state");
     el.textContent = set ? "saved" : "not set";
     el.className = "status " + (set ? "ok" : "bad");
   }
+  // The status shows the saved state. While the switch differs from it, the change is not saved yet.
   async function refreshSpotifyStatus() {
     const el = $("spotify-status");
+    if (isOn($("toggle-spotify")) !== (loaded.SPOTIFY_ENABLED !== "no")) {
+      el.textContent = "change not saved";
+      el.className = "status warn";
+      return;
+    }
     if (!isOn($("toggle-spotify"))) {
       el.textContent = "off";
       el.className = "status off";
@@ -72,6 +93,7 @@
     $("APT_UPGRADE_AFTER_DAYS").value = loaded.APT_UPGRADE_AFTER_DAYS || "";
     setOn($("toggle-spotify"), loaded.SPOTIFY_ENABLED !== "no");
     setOn($("toggle-radio"), loaded.RADIO_ENABLED !== "no");
+    setOn($("toggle-airplay"), loaded.AIRPLAY_ENABLED === "yes");
     setKeyState(data.api_key_set);
     selectAccent(loaded.ACCENT_COLOR || "blue");
     showSpotifyFields();
@@ -113,6 +135,8 @@
     const radioOn = isOn($("toggle-radio"));
     if (spotifyOn !== (loaded.SPOTIFY_ENABLED !== "no")) body.SPOTIFY_ENABLED = spotifyOn ? "yes" : "no";
     if (radioOn !== (loaded.RADIO_ENABLED !== "no")) body.RADIO_ENABLED = radioOn ? "yes" : "no";
+    const airplayOn = isOn($("toggle-airplay"));
+    if (airplayOn !== (loaded.AIRPLAY_ENABLED === "yes")) body.AIRPLAY_ENABLED = airplayOn ? "yes" : "no";
     if (spotifyOn && $("DEVICE_NAME").value !== (loaded.DEVICE_NAME || "")) body.DEVICE_NAME = $("DEVICE_NAME").value;
     if ($("DEFAULT_VOLUME").value !== String(loaded.DEFAULT_VOLUME || "")) body.DEFAULT_VOLUME = $("DEFAULT_VOLUME").value;
     if (chosenAccent() !== (loaded.ACCENT_COLOR || "blue")) body.ACCENT_COLOR = chosenAccent();
@@ -247,6 +271,7 @@
     }).then(refreshSpotifyStatus).catch(function (err) { showError($("key-error"), err); });
   });
   $("toggle-radio").addEventListener("click", function () { setOn($("toggle-radio"), !isOn($("toggle-radio"))); });
+  $("toggle-airplay").addEventListener("click", function () { setOn($("toggle-airplay"), !isOn($("toggle-airplay"))); refreshAirplayStatus(); });
   $("fan_enabled").addEventListener("click", function () { setOn($("fan_enabled"), !isOn($("fan_enabled"))); showGpioFields(); });
   $("case").addEventListener("change", showGpioFields);
   document.querySelectorAll("#accent-swatches [data-name]").forEach(function (b) {
@@ -261,6 +286,8 @@
   loadConfig().catch(function (err) { showError($("general-status"), err); });
   loadHardware().catch(function (err) { showError($("gpio-status"), err); });
   refreshSpotifyStatus();
+  refreshAirplayStatus();
   setInterval(refreshSpotifyStatus, 15000);
+  setInterval(refreshAirplayStatus, 15000);
   checkCode();
 })();

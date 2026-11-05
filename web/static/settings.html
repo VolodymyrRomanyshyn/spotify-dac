@@ -21,9 +21,9 @@
         <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
       <nav id="menu" class="menu-list" hidden>
+        <a href="/">Home</a>
         <a data-feature="radio" href="/radio.html">Radio</a>
         <a href="/status.html">Status</a>
-        <a href="/">Home</a>
         <a href="/settings.html" class="active">Settings</a>
       </nav>
     </div>
@@ -54,6 +54,11 @@
       <div class="row-toggle">
         <span>Internet radio</span>
         <button id="toggle-radio" class="toggle-btn" type="button" aria-pressed="false"><span class="led" aria-hidden="true"></span><span class="state">Off</span></button>
+      </div>
+
+      <div class="row-toggle">
+        <span>AirPlay <span id="airplay-status" class="status"></span></span>
+        <button id="toggle-airplay" class="toggle-btn" type="button" aria-pressed="false"><span class="led" aria-hidden="true"></span><span class="state">Off</span></button>
       </div>
 
       <label class="field">

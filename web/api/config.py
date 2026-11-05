@@ -9,6 +9,7 @@ import os
 import re
 from pathlib import Path
 
+from . import airplay
 from .common import SOLOIST_USER, ApiError, feature_on, read_config, run, write_config
 
 SECRET_FILE = Path(os.environ.get("SPOTIFY_DAC_SECRET", "/etc/spotify-dac/soloist.env"))
@@ -59,6 +60,7 @@ def _yesno(value):
 EDITABLE = {
     "SPOTIFY_ENABLED": (_yesno, "yes or no"),
     "RADIO_ENABLED": (_yesno, "yes or no"),
+    "AIRPLAY_ENABLED": (_yesno, "yes or no"),
     "DEVICE_NAME": (_name, "1-32 characters: letters, digits, space, - _ +"),
     "SOLOIST_UPDATE_AFTER_DAYS": (_int_between(1, 89), "whole number 1-89"),
     "APT_UPGRADE_AFTER_DAYS": (_int_between(0, 365), "0 = every time updates run; 1-365 = at most once every N days"),
@@ -147,8 +149,9 @@ def post_config(req):
 
     spotify = updates.get("SPOTIFY_ENABLED", cfg.get("SPOTIFY_ENABLED", "yes"))
     radio = updates.get("RADIO_ENABLED", cfg.get("RADIO_ENABLED", "yes"))
-    if spotify == "no" and radio == "no":
-        raise ApiError(400, "Turn on Spotify or internet radio: at least one must stay on")
+    air = updates.get("AIRPLAY_ENABLED", cfg.get("AIRPLAY_ENABLED", "no"))
+    if spotify == "no" and radio == "no" and air == "no":
+        raise ApiError(400, "Turn on Spotify, internet radio or AirPlay: at least one must stay on")
 
     if updates:
         write_config(updates)
@@ -160,6 +163,8 @@ def post_config(req):
     if api_key is not None:
         _save_api_key(api_key)
         applied.append("API key saved")
+    if "AIRPLAY_ENABLED" in updates:
+        applied.append(airplay.set_enabled(air == "yes"))
     if "SPOTIFY_ENABLED" in updates:
         if spotify == "no":
             applied.append(_spotify_on(False))
@@ -187,5 +192,5 @@ def post_apply(req):
 
 
 def get_features(req):
-    """Which parts of the interface this device has: Spotify and internet radio."""
-    return 200, {"spotify": feature_on("spotify"), "radio": feature_on("radio")}
+    """Which sources this device has: Spotify, internet radio and AirPlay."""
+    return 200, {"spotify": feature_on("spotify"), "radio": feature_on("radio"), "airplay": feature_on("airplay")}

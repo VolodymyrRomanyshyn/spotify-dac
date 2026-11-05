@@ -78,4 +78,7 @@ def post_volume(req):
     applied = apply_to_spotify(value) if feature_on("spotify") else False
     from .radio import apply_to_radio  # local import: radio imports this module
     apply_to_radio(value)
+    if feature_on("airplay"):
+        from .airplay import set_volume as apply_to_airplay  # local import, same as radio
+        apply_to_airplay(value)
     return 200, {"percent": value, "spotify_applied": applied}

@@ -43,6 +43,7 @@ fi
 DEVICE_NAME="$(hostname)"
 SPOTIFY_ENABLED="yes"              # yes: Soloist (Spotify Connect) | no: radio only
 RADIO_ENABLED="yes"                # yes: internet radio on the web page | no: Spotify only
+AIRPLAY_ENABLED="no"               # yes: AirPlay receiver (shairport-sync) playing into the DAC
 ACCENT_COLOR="blue"                # colour of the web interface buttons (set on the Settings page)
 AUDIO_OUTPUT="usb"                 # usb | hat
 AUDIO_HAT_OVERLAY=""               # e.g. iqaudio-dacplus (only for AUDIO_OUTPUT=hat)
@@ -132,6 +133,7 @@ ask_questions() {
 
   SPOTIFY_ENABLED="$(ask_yesno "Play from the Spotify app (Spotify Connect, needs a Soloist API key)?" "$SPOTIFY_ENABLED")"
   RADIO_ENABLED="$(ask_yesno "Play internet radio (station list in the web interface)?" "$RADIO_ENABLED")"
+  AIRPLAY_ENABLED="$(ask_yesno "Play AirPlay from iPhone, iPad and Mac (the box appears as an AirPlay speaker)?" "$AIRPLAY_ENABLED")"
   if [ "$SPOTIFY_ENABLED" = yes ]; then
     DEVICE_NAME="$(ask_input "Name shown in the Spotify app (Spotify Connect device):" "$DEVICE_NAME")"
   else
@@ -242,7 +244,8 @@ validate() {
   case "$WEB_USE_PASSWORD" in yes|no) ;; *) die "WEB_USE_PASSWORD must be yes or no" ;; esac
   case "$SPOTIFY_ENABLED" in yes|no) ;; *) die "SPOTIFY_ENABLED must be yes or no" ;; esac
   case "$RADIO_ENABLED" in yes|no) ;; *) die "RADIO_ENABLED must be yes or no" ;; esac
-  [ "$SPOTIFY_ENABLED" = yes ] || [ "$RADIO_ENABLED" = yes ] || die "Turn on Spotify, radio or both"
+  case "$AIRPLAY_ENABLED" in yes|no) ;; *) die "AIRPLAY_ENABLED must be yes or no" ;; esac
+  [ "$SPOTIFY_ENABLED" = yes ] || [ "$RADIO_ENABLED" = yes ] || [ "$AIRPLAY_ENABLED" = yes ] || die "Turn on Spotify, radio, AirPlay or several of them"
   [ "$RADIO_ENABLED" = yes ] && [ "$WEB_UI" != yes ] && die "Internet radio needs the web interface (WEB_UI=yes)"
   [[ "$WEB_PORT" =~ ^[0-9]+$ ]] && [ "$WEB_PORT" -ge 1024 ] && [ "$WEB_PORT" -le 65535 ] || die "WEB_PORT must be 1024-65535"
   # no power switch to hook: updates can only run at boot
@@ -278,7 +281,7 @@ confirm() {
   local hw="USB DAC"; [ "$AUDIO_OUTPUT" = hat ] && hw="HAT ($AUDIO_HAT_OVERLAY)"
   local cs="none"; [ "$CASE" = nespi ] && cs="NESPi Case+ (power-off: $POWEROFF_MODE)"
   [ "$FAN_ENABLED" = yes ] && cs="$cs, fan on GPIO $FAN_PIN"
-  local features="Spotify $([ "$SPOTIFY_ENABLED" = yes ] && echo on || echo off), radio $([ "$RADIO_ENABLED" = yes ] && echo on || echo off)"
+  local features="Spotify $([ "$SPOTIFY_ENABLED" = yes ] && echo on || echo off), radio $([ "$RADIO_ENABLED" = yes ] && echo on || echo off), AirPlay $([ "$AIRPLAY_ENABLED" = yes ] && echo on || echo off)"
   whiptail --title "$WT_TITLE" --yesno "Install with these settings?
 
   Device name : $DEVICE_NAME
@@ -296,6 +299,7 @@ install_packages() {
   local pkgs=(curl ca-certificates alsa-utils openssl pipewire pipewire-pulse wireplumber dbus-user-session pulseaudio-utils libpulse0)
   [ "$RADIO_ENABLED" = yes ] && pkgs+=(mpv)
   [ "$WEB_UI" = yes ] && pkgs+=(python3)
+  [ "$AIRPLAY_ENABLED" = yes ] && pkgs+=(shairport-sync avahi-daemon)
   [ "$CASE" = nespi ] && pkgs+=(python3-libgpiod)
   apt-get update -q
   DEBIAN_FRONTEND=noninteractive apt-get install -y -q "${pkgs[@]}"
@@ -310,6 +314,7 @@ write_config() {
 DEVICE_NAME="$DEVICE_NAME"
 SPOTIFY_ENABLED="$SPOTIFY_ENABLED"
 RADIO_ENABLED="$RADIO_ENABLED"
+AIRPLAY_ENABLED="$AIRPLAY_ENABLED"
 ACCENT_COLOR="$ACCENT_COLOR"
 SOURCE_DIR="$REPO_DIR"
 AUDIO_OUTPUT="$AUDIO_OUTPUT"
@@ -387,6 +392,8 @@ install_files() {
   fi
   sed "s/@UID@/$SOLOIST_UID/g" "$REPO_DIR/files/systemd/spotify-dac-volume.service" > "$UNIT_DIR/spotify-dac-volume.service"
   local u
+  install -m 644 "$REPO_DIR/files/systemd/spotify-dac-airplay.service" "$UNIT_DIR/"
+  sed -i "s/@UID@/$SOLOIST_UID/g" "$UNIT_DIR/spotify-dac-airplay.service"
   for u in spotify-dac-boot-update spotify-dac-boot-apt nespi-power nespi-fan; do
     install -m 644 "$REPO_DIR/files/systemd/$u.service" "$UNIT_DIR/"
   done
@@ -527,6 +534,11 @@ configure_units() {
   # the fan runs with or without the case; it only needs FAN_PIN
   if [ "$FAN_ENABLED" = yes ]; then systemctl enable nespi-fan.service; systemctl restart nespi-fan.service
   else systemctl disable --now nespi-fan.service 2>/dev/null || true; fi
+
+  # the package starts its own receiver; ours (spotify-dac-airplay) runs as the soloist user
+  systemctl disable --now shairport-sync.service 2>/dev/null || true
+  # AirPlay is started from the Home page, never at boot
+  systemctl disable --now spotify-dac-airplay.service 2>/dev/null || true
 
   # PipeWire resets the DAC sink to 0.40 on every start; make it the default at 100% (bit-perfect)
   systemctl enable spotify-dac-volume.service

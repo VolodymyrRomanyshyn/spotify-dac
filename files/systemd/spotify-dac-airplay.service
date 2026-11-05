@@ -1,0 +1,17 @@
+[Unit]
+Description=AirPlay receiver (shairport-sync) playing into the DAC
+After=soloist.service avahi-daemon.service
+Wants=avahi-daemon.service
+
+[Service]
+Type=simple
+User=soloist
+EnvironmentFile=/etc/spotify-dac/config
+Environment=XDG_RUNTIME_DIR=/run/user/@UID@
+Environment=PULSE_SERVER=unix:/run/user/@UID@/pulse/native
+ExecStart=/bin/sh -c 'exec /usr/bin/shairport-sync -a "$DEVICE_NAME AirPlay" -o pa'
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

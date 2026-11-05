@@ -102,9 +102,10 @@ def write_config(updates):
     os.replace(tmp, CONFIG_FILE)
 
 
-FEATURE_KEYS = {"spotify": "SPOTIFY_ENABLED", "radio": "RADIO_ENABLED"}
+FEATURE_KEYS = {"spotify": "SPOTIFY_ENABLED", "radio": "RADIO_ENABLED", "airplay": "AIRPLAY_ENABLED"}
+FEATURE_DEFAULTS = {"spotify": "yes", "radio": "yes", "airplay": "no"}  # AirPlay is only on when chosen
 
 
 def feature_on(name):
-    """Whether Spotify or radio is turned on in the installer's choices (on when the key is missing)."""
-    return read_config().get(FEATURE_KEYS[name], "yes") != "no"
+    """Whether a source is turned on (the default applies when the setting is missing)."""
+    return read_config().get(FEATURE_KEYS[name], FEATURE_DEFAULTS[name]) == "yes"

@@ -83,6 +83,7 @@
 
     const soloist = s.soloist.version ? "" : null;
     const diskUsed = s.system.disk_used_percent || 0;
+    const cpuUse = s.system.cpu_percent || 0;
     const cardsList = [
       card("Services", s.services.some(x => x.enabled === "enabled" && x.active !== "active") ? "error" : "ok", services,
         s.services.filter(x => x.enabled === "enabled" && x.active !== "active").map(x => x.name + " is enabled but not running")
@@ -113,14 +114,26 @@
         s.power.flags && !s.power.flags.undervoltage_now && (s.power.flags.throttled_seen || s.power.flags.undervoltage_seen)
           ? "the Pi was throttled or short of power earlier (check the power supply)" : null,
       ].filter(Boolean)),
-      card("System", diskUsed > 90 ? "error" : diskUsed > 80 ? "warning" : "ok", [
+      card("System", diskUsed > 90 || cpuUse > 90 ? "error" : diskUsed > 80 || cpuUse > 80 ? "warning" : "ok", [
         row("Uptime", uptimeText(s.system.uptime_seconds)),
         row("Disk used", s.system.disk_used_percent === null ? "-" : s.system.disk_used_percent + " %"),
+        row("CPU use", s.system.cpu_percent === null ? "measuring" : s.system.cpu_percent + " %"),
+        row("Load 1 / 5 / 15 min", (s.system.load || []).join(" / ") || "-"),
         row("Addresses", s.system.addresses.join(", ") || "-"),
-      ], [
+      ].concat(Object.keys(s.system.network || {}).map(function (name) {
+        const n = s.system.network[name];
+        return row("Network " + name, "down " + n.rx_kbps + " KB/s, up " + n.tx_kbps + " KB/s");
+      })), [
         diskUsed > 90 ? "disk " + diskUsed + " % full: free space now" : null,
         diskUsed > 80 && diskUsed <= 90 ? "disk " + diskUsed + " % full (warning above 80 %)" : null,
+        cpuUse > 90 ? "CPU busy at " + cpuUse + " %" : null,
+        cpuUse > 80 && cpuUse <= 90 ? "CPU at " + cpuUse + " % (warning above 80 %)" : null,
       ].filter(Boolean)),
+      card("AirPlay", "ok", [
+        row("Allowed in Settings", yesNo(s.airplay.enabled)),
+        row("Receiver", s.airplay.active ? "on" : "off"),
+        row("Playing from an Apple device", s.airplay.active ? yesNo(s.airplay.playing) : "-"),
+      ]),
       card("Last update log", "ok", [
         s.last_update.length ? el("pre", "", s.last_update.join("\n")) : el("p", "muted", "No update log yet."),
       ]),

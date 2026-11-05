@@ -34,8 +34,9 @@
     <div id="banner" class="banner" hidden></div>
 
     <div class="switch" role="group" aria-label="Source">
-      <button type="button" id="src-spotify" data-feature="spotify"><span class="led" aria-hidden="true"></span>Spotify</button>
-      <button type="button" id="src-radio" data-feature="radio"><span class="led" aria-hidden="true"></span>Internet radio</button>
+      <button type="button" id="src-spotify" class="src-icon" data-feature="spotify" aria-label="Spotify" title="Spotify"><span class="led" aria-hidden="true"></span><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M7 9.5c3-1 7-.8 10 1M7.8 12.8c2.6-.8 5.8-.6 8.2.8M8.6 15.8c2-.6 4.4-.4 6.2.6"/></svg></button>
+      <button type="button" id="src-radio" class="src-icon" data-feature="radio" aria-label="Internet radio" title="Internet radio"><span class="led" aria-hidden="true"></span><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M7 8l10-4"/><circle cx="16" cy="14" r="2.5"/><path d="M6 12h4"/></svg></button>
+      <button type="button" id="src-airplay" class="src-icon" data-feature="airplay" aria-label="AirPlay" title="AirPlay"><span class="led" aria-hidden="true"></span><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H4.5A2.5 2.5 0 0 1 2 14.5v-9A2.5 2.5 0 0 1 4.5 3h15A2.5 2.5 0 0 1 22 5.5v9a2.5 2.5 0 0 1-2.5 2.5H19"/><path d="M12 15l5 6H7z" fill="currentColor"/></svg></button>
     </div>
 
     <section class="card now">

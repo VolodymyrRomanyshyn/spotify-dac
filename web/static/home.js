@@ -236,18 +236,12 @@
     b.setAttribute("aria-pressed", String(on));
     b.setAttribute("aria-label", label);
     b.title = label;
-    b.innerHTML = '<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v8"/><path d="M6.4 6.4a8 8 0 1 0 11.2 0"/></svg>';
+    b.innerHTML = '<svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 3v8"/><path d="M6.4 6.4a8 8 0 1 0 11.2 0"/></svg>';
     b.addEventListener("click", function () { onClick().catch(fail); });
     return b;
   }
   // an empty slot the same size as the Spotify prev and next buttons, so the on/off button sits in the middle
   function ghost() { return el("span", "ctl icon ghost"); }
-  // the radio's on/off: lit while a station plays; "on" starts the last station again
-  function radioToggle(playing, resume) {
-    return powerButton(playing, playing ? "Turn radio off" : "Turn radio on", function () {
-      return playing ? api("/api/radio/stop", { method: "POST" }).then(refreshFast) : playStation(resume);
-    });
-  }
   function drawRadio(radio, station) {
     title.textContent = station ? station.name : "Internet radio";
     subtitle.textContent = radio.playing ? radioSubtitle(radio.title, station) : "Not playing";
@@ -271,7 +265,11 @@
     const resume = !radio.playing && station ? station.id : null;
     setControls("radio:" + (radio.playing ? "playing" : "idle:" + (resume || "")), [
       ghost(),
-      radio.playing || resume ? radioToggle(!!radio.playing, resume) : el("p", "muted", "Choose a station below."),
+      radio.playing
+        ? iconButton("stop", "Stop", function () { return api("/api/radio/stop", { method: "POST" }).then(refreshFast); }, "main")
+        : resume
+          ? iconButton("play", "Play", function () { return playStation(resume); }, "main")
+          : el("p", "muted", "Choose a station below."),
       ghost(),
     ]);
     progressCard.hidden = true;

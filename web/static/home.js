@@ -229,17 +229,19 @@
     const words = (name || "Radio").split(/\s+/).filter(Boolean);
     return words.slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join("");
   }
-  // on/off button in the same place and size as the Spotify play button, with an LED in the corner
+  // on/off button: the same circle as the Spotify play button, green when on and red when off
   function powerButton(on, label, onClick) {
-    const b = el("button", "ctl icon power" + (on ? " main" : ""));
+    const b = el("button", "ctl icon main power " + (on ? "on" : "off"));
     b.type = "button";
     b.setAttribute("aria-pressed", String(on));
     b.setAttribute("aria-label", label);
     b.title = label;
-    b.innerHTML = '<span class="led" aria-hidden="true"></span><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v8"/><path d="M6.4 6.4a8 8 0 1 0 11.2 0"/></svg>';
+    b.innerHTML = '<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v8"/><path d="M6.4 6.4a8 8 0 1 0 11.2 0"/></svg>';
     b.addEventListener("click", function () { onClick().catch(fail); });
     return b;
   }
+  // an empty slot the same size as the Spotify prev and next buttons, so the on/off button sits in the middle
+  function ghost() { return el("span", "ctl icon ghost"); }
   // the radio's on/off: lit while a station plays; "on" starts the last station again
   function radioToggle(playing, resume) {
     return powerButton(playing, playing ? "Turn radio off" : "Turn radio on", function () {
@@ -268,7 +270,9 @@
     // stopped: the last station can be played again from here
     const resume = !radio.playing && station ? station.id : null;
     setControls("radio:" + (radio.playing ? "playing" : "idle:" + (resume || "")), [
-      radio.playing || resume ? radioToggle(!!radio.playing, resume) : el("p", "muted", "Choose a station below.")
+      ghost(),
+      radio.playing || resume ? radioToggle(!!radio.playing, resume) : el("p", "muted", "Choose a station below."),
+      ghost(),
     ]);
     progressCard.hidden = true;
   }
@@ -289,9 +293,11 @@
     const on = !!(air && air.active);
     const allowed = !!(air && air.enabled);
     setControls("airplay:" + on + allowed, [
+      ghost(),
       powerButton(on, on ? "Turn AirPlay off" : "Turn AirPlay on", function () {
         return api("/api/airplay", { method: "POST", body: { on: !on } }).then(refreshFast);
       }),
+      ghost(),
     ]);
     progressCard.hidden = true;
   }

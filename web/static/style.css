@@ -134,11 +134,11 @@ pre { white-space: pre-wrap; word-break: break-word; font-size: 13px; color: var
 
 /* ---- home page ---- */
 .switch {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin: 0 auto 16px; max-width: 480px;
+  display: flex; gap: 0; margin: 0 auto 16px; max-width: 480px;
   border: 1px solid var(--line); border-radius: 999px; overflow: hidden; background: var(--panel);
 }
 .switch button {
-  border: 0; border-radius: 0; padding: 12px 10px; background: transparent; color: var(--muted); font-weight: 600;
+  flex: 1 1 0; border: 0; border-radius: 0; padding: 12px 10px; background: transparent; color: var(--muted); font-weight: 600;
 }
 .switch button.selected { background: var(--accent); color: #fff; }
 :root[data-theme="dark"] .switch button.selected { color: #0b1020; }

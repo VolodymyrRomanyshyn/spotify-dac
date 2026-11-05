@@ -26,6 +26,22 @@ def playing():
     return any("shairport" in block.lower() and "Corked: no" in block for block in out.split("Sink Input #")[1:])
 
 
+def set_volume(percent):
+    """Sets the volume of the AirPlay stream in the soloist session. True when a stream was found."""
+    uid = pwd.getpwnam(SOLOIST_USER).pw_uid
+    env = ["runuser", "-u", SOLOIST_USER, "--", "env", f"XDG_RUNTIME_DIR=/run/user/{uid}"]
+    rc, out, _ = run(env + ["pactl", "list", "sink-inputs"], timeout=10)
+    if rc != 0:
+        return False
+    changed = False
+    for block in out.split("Sink Input #")[1:]:
+        index = block.split("\n", 1)[0].strip()
+        if index.isdigit() and "shairport" in block.lower():
+            rc2, _, _ = run(env + ["pactl", "set-sink-input-volume", index, f"{int(percent)}%"], timeout=10)
+            changed = changed or rc2 == 0
+    return changed
+
+
 def set_enabled(on):
     """Starts the receiver and enables it at boot, or stops it and keeps it off."""
     if on:

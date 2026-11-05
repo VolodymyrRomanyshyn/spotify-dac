@@ -10,7 +10,7 @@ import re
 from pathlib import Path
 
 from . import airplay
-from .common import SOLOIST_USER, ApiError, feature_on, read_config, run, write_config
+from .common import SOLOIST_USER, ApiError, feature_on, installed, read_config, run, write_config
 
 SECRET_FILE = Path(os.environ.get("SPOTIFY_DAC_SECRET", "/etc/spotify-dac/soloist.env"))
 NAME = re.compile(r"^[A-Za-z0-9 _+\-]{1,32}$")
@@ -146,6 +146,9 @@ def post_config(req):
             errors[key] = hint
     if errors:
         raise ApiError(400, "; ".join(f"{k}: {v}" for k, v in errors.items()))
+    for key, source in (("SPOTIFY_ENABLED", "spotify"), ("RADIO_ENABLED", "radio"), ("AIRPLAY_ENABLED", "airplay")):
+        if updates.get(key) == "yes" and not installed(source):
+            raise ApiError(409, f"{source} is not installed on this device: run sudo bash install.sh to add it")
 
     spotify = updates.get("SPOTIFY_ENABLED", cfg.get("SPOTIFY_ENABLED", "yes"))
     radio = updates.get("RADIO_ENABLED", cfg.get("RADIO_ENABLED", "yes"))
@@ -192,5 +195,8 @@ def post_apply(req):
 
 
 def get_features(req):
-    """Which sources this device has: Spotify, internet radio and AirPlay."""
-    return 200, {"spotify": feature_on("spotify"), "radio": feature_on("radio"), "airplay": feature_on("airplay")}
+    """Which sources this device has: Spotify, internet radio and AirPlay (on and installed), and what is installed."""
+    return 200, {
+        "spotify": feature_on("spotify"), "radio": feature_on("radio"), "airplay": feature_on("airplay"),
+        "installed": {name: installed(name) for name in ("spotify", "radio", "airplay")},
+    }

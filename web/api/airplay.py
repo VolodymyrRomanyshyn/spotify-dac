@@ -5,7 +5,7 @@ receiver. The receiver is never started at boot: the user turns it on from Home.
 """
 import pwd
 
-from .common import SOLOIST_CTL, SOLOIST_USER, ApiError, read_config, run
+from .common import SOLOIST_CTL, SOLOIST_USER, ApiError, installed, read_config, run
 
 UNIT = "spotify-dac-airplay.service"
 
@@ -62,6 +62,7 @@ def get_airplay(req):
     cfg = read_config()
     active = is_active()
     return 200, {
+        "installed": installed("airplay"),
         "enabled": cfg.get("AIRPLAY_ENABLED") == "yes",
         "active": active,
         "playing": playing() if active else False,

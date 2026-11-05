@@ -35,11 +35,11 @@
     <section class="card">
       <h2>General</h2>
 
-      <div class="row-toggle">
+      <div class="row-toggle" data-installed="spotify">
         <span>Spotify <span id="spotify-status" class="status"></span></span>
         <button id="toggle-spotify" class="toggle-btn" type="button" aria-pressed="false"><span class="led" aria-hidden="true"></span><span class="state">Off</span></button>
       </div>
-      <div id="spotify-fields" class="form" hidden>
+      <div id="spotify-fields" class="form" data-installed="spotify" hidden>
         <label class="field">
           <span>Device name (shown in the Spotify app)</span>
           <input id="DEVICE_NAME" type="text" maxlength="32" autocomplete="off">
@@ -51,12 +51,12 @@
         </div>
       </div>
 
-      <div class="row-toggle">
+      <div class="row-toggle" data-installed="radio">
         <span>Internet radio</span>
         <button id="toggle-radio" class="toggle-btn" type="button" aria-pressed="false"><span class="led" aria-hidden="true"></span><span class="state">Off</span></button>
       </div>
 
-      <div class="row-toggle">
+      <div class="row-toggle" data-installed="airplay">
         <span>AirPlay <span id="airplay-status" class="status"></span></span>
         <button id="toggle-airplay" class="toggle-btn" type="button" aria-pressed="false"><span class="led" aria-hidden="true"></span><span class="state">Off</span></button>
       </div>

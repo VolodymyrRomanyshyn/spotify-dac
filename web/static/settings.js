@@ -12,9 +12,11 @@
     button.setAttribute("aria-pressed", String(on));
     button.querySelector(".state").textContent = on ? "On" : "Off";
   }
+  // a source that is not installed never shows its fields (see data-installed in settings.html)
   function showSpotifyFields() {
     const on = isOn($("toggle-spotify"));
-    $("spotify-fields").hidden = !on;
+    const installed = !(window.features && window.features.installed && window.features.installed.spotify === false);
+    $("spotify-fields").hidden = !on || !installed;
     document.querySelectorAll('[data-feature="spotify"]').forEach(function (el) { el.hidden = !on; });
   }
 

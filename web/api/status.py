@@ -8,7 +8,7 @@ import time
 from pathlib import Path
 
 from . import airplay
-from .common import SOLOIST_CTL, SOLOIST_USER, read_config, run
+from .common import SOLOIST_CTL, SOLOIST_USER, installed, read_config, run
 
 SERVICES = ["soloist", "nespi-power", "nespi-fan", "spotify-dac-volume", "spotify-dac-web"]
 UPDATE_LOG = Path("/var/log/spotify-dac-update.log")
@@ -223,6 +223,7 @@ def get_status(req):
         "power": power,
         "system": _system(),
         "last_update": _last_update(),
-        "airplay": {"enabled": read_config().get("AIRPLAY_ENABLED") == "yes", "active": airplay.is_active(),
+        "airplay": {"installed": installed("airplay"), "enabled": read_config().get("AIRPLAY_ENABLED") == "yes",
+                    "active": airplay.is_active(),
                     "playing": airplay.playing() if airplay.is_active() else False},
     }

@@ -80,6 +80,11 @@ window.featuresReady = (async function () {
   document.querySelectorAll("[data-feature]").forEach(function (el) {
     el.hidden = !window.features[el.getAttribute("data-feature")];
   });
+  // controls for a source that is not installed on this device are hidden
+  const installed = window.features.installed || {};
+  document.querySelectorAll("[data-installed]").forEach(function (el) {
+    el.hidden = installed[el.getAttribute("data-installed")] === false;
+  });
   const needs = document.body.getAttribute("data-needs");
   if (needs && !window.features[needs]) window.location.replace("/");
 })();

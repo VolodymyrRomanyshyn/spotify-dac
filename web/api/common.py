@@ -2,6 +2,7 @@
 import json
 import os
 import re
+import shutil
 import subprocess
 import tempfile
 from pathlib import Path
@@ -106,6 +107,19 @@ FEATURE_KEYS = {"spotify": "SPOTIFY_ENABLED", "radio": "RADIO_ENABLED", "airplay
 FEATURE_DEFAULTS = {"spotify": "yes", "radio": "yes", "airplay": "no"}  # AirPlay is only on when chosen
 
 
+# A source is only offered when the installer put its parts on this device.
+INSTALLED_CHECKS = {
+    "spotify": lambda: Path("/usr/local/bin/soloist").exists() and Path("/etc/systemd/system/soloist.service").exists(),
+    "radio": lambda: shutil.which("mpv") is not None and Path("/opt/spotify-dac/radio").is_dir(),
+    "airplay": lambda: shutil.which("shairport-sync") is not None and Path("/etc/systemd/system/spotify-dac-airplay.service").exists(),
+}
+
+
+def installed(name):
+    """Whether the installer put this source's parts on the device."""
+    return INSTALLED_CHECKS[name]()
+
+
 def feature_on(name):
-    """Whether a source is turned on (the default applies when the setting is missing)."""
-    return read_config().get(FEATURE_KEYS[name], FEATURE_DEFAULTS[name]) == "yes"
+    """Whether a source is installed and turned on (the default applies when the setting is missing)."""
+    return installed(name) and read_config().get(FEATURE_KEYS[name], FEATURE_DEFAULTS[name]) == "yes"

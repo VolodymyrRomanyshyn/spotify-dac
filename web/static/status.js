@@ -129,16 +129,16 @@
         cpuUse > 90 ? "CPU busy at " + cpuUse + " %" : null,
         cpuUse > 80 && cpuUse <= 90 ? "CPU at " + cpuUse + " % (warning above 80 %)" : null,
       ].filter(Boolean)),
-      card("AirPlay", "ok", [
+      s.airplay.installed ? card("AirPlay", "ok", [
         row("Allowed in Settings", yesNo(s.airplay.enabled)),
         row("Receiver", s.airplay.active ? "on" : "off"),
         row("Playing from an Apple device", s.airplay.active ? yesNo(s.airplay.playing) : "-"),
-      ]),
+      ]) : null,
       card("Last update log", "ok", [
         s.last_update.length ? el("pre", "", s.last_update.join("\n")) : el("p", "muted", "No update log yet."),
       ]),
     ];
-    cards.replaceChildren(...cardsList);
+    cards.replaceChildren(...cardsList.filter(Boolean));
     void soloist;
   }
 

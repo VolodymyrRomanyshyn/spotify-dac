@@ -315,7 +315,7 @@ dialog.modal h2 { margin-top: 0; }
 /* source buttons as logos: icon and LED only */
 .switch button.src-icon { min-width: 96px; padding: 10px 16px; }
 
-/* on/off power buttons in the controls row: the play button's size; green when on, red when off */
-.ctl.power.on { background: #1f8f4e; border-color: #1f8f4e; color: #fff; }
-.ctl.power.off { background: #c53030; border-color: #c53030; color: #fff; }
+/* on/off power buttons: the accent colour as the circle; the power symbol is green when on, red when off */
+.ctl.main.power.on { background: var(--accent); border-color: var(--accent); color: #3ddc84; }
+.ctl.main.power.off { background: var(--accent); border-color: var(--accent); color: #ff7b7b; }
 .ctl.ghost { visibility: hidden; }

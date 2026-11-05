@@ -29,7 +29,7 @@
     if (!isOn($("toggle-airplay"))) { el.textContent = "off"; el.className = "status off"; return; }
     try {
       await api("/api/airplay");
-      el.textContent = "shown on Home"; el.className = "status ok";
+      el.textContent = "enabled: turn it on or off on Home"; el.className = "status ok";
     } catch (err) { el.textContent = "unknown"; el.className = "status off"; }
   }
 

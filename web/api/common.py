@@ -102,7 +102,7 @@ def write_config(updates):
     os.replace(tmp, CONFIG_FILE)
 
 
-FEATURE_KEYS = {"spotify": "SPOTIFY_ENABLED", "radio": "RADIO_ENABLED"}
+FEATURE_KEYS = {"spotify": "SPOTIFY_ENABLED", "radio": "RADIO_ENABLED", "airplay": "AIRPLAY_ENABLED"}
 
 
 def feature_on(name):

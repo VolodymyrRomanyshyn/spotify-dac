@@ -3,9 +3,11 @@
   const FAST_MS = 2000;     // now playing and volume
   const SLOW_MS = 30000;    // DAC status line (it runs several commands on the Pi)
   const $ = (id) => document.getElementById(id);
-  const srcSpotify = $("src-spotify"), srcRadio = $("src-radio");
+  const srcSpotify = $("src-spotify"), srcRadio = $("src-radio"), srcAirplay = $("src-airplay");
+  const SOURCES = ["spotify", "radio", "airplay"];
+  const sourceButtons = { spotify: srcSpotify, radio: srcRadio, airplay: srcAirplay };
   const switchGroup = document.querySelector(".switch");
-  let features = { spotify: true, radio: true };  // from /api/features (see common.js)
+  let features = { spotify: true, radio: true, airplay: false };  // from /api/features (see common.js)
   const title = $("title"), subtitle = $("subtitle"), cover = $("cover"), controls = $("controls");
   const progress = $("progress"), elapsedText = $("elapsed"), remainingText = $("remaining");
   const progressCard = $("progress-card");
@@ -13,7 +15,7 @@
   const banner = $("banner"), statusLine = $("status-line");
   const stationsCard = $("stations-card"), stationsBox = $("stations");
 
-  let source = null;            // "spotify" or "radio", set by the user or on first load
+  let source = null;            // "spotify", "radio" or "airplay", set by the user or on first load
   let stations = [];
   // last station played from this browser (kept across reloads; the page works without storage)
   let lastStation = (function () { try { return localStorage.getItem("lastStation"); } catch (e) { return null; } })();
@@ -60,26 +62,29 @@
     return b;
   }
 
-  // ---- features: with only one of Spotify and radio, that one is the only source ----
+  // ---- features: with only one source on, that one is the only source ----
+  function enabledSources() { return SOURCES.filter(function (k) { return features[k]; }); }
   function applyFeatures() {
     features = window.features;
-    switchGroup.hidden = !(features.spotify && features.radio);
-    if (!features.spotify) setSource("radio");
-    else if (!features.radio) setSource("spotify");
+    const on = enabledSources();
+    switchGroup.hidden = on.length < 2;
+    if (on.length === 1) setSource(on[0]);
   }
-  // On a fresh load: Spotify while it plays, otherwise the source used last, otherwise what plays.
-  function defaultSource(radioPlaying, spotifyPlaying) {
-    if (!features.spotify) return "radio";
-    if (!features.radio) return "spotify";
+  // On a fresh load: Spotify or AirPlay while it plays, otherwise the source used last, otherwise radio or Spotify.
+  function defaultSource(radioPlaying, spotifyPlaying, airplayPlaying) {
+    const on = enabledSources();
+    if (on.length === 1) return on[0];
     if (spotifyPlaying) return "spotify";
+    if (airplayPlaying) return "airplay";
     const last = lastSourceChoice();
-    if (last) return last;
-    return radioPlaying ? "radio" : "spotify";
+    if (last && features[last]) return last;
+    if (radioPlaying && features.radio) return "radio";
+    return features.spotify ? "spotify" : "radio";
   }
   function lastSourceChoice() {
     try {
       const value = localStorage.getItem("source");
-      return value === "radio" || value === "spotify" ? value : null;
+      return SOURCES.indexOf(value) >= 0 ? value : null;
     } catch (e) { return null; }
   }
 
@@ -87,13 +92,18 @@
   function setSource(choice) {
     source = choice;
     try { localStorage.setItem("source", choice); } catch (e) { /* private mode: nothing to keep */ }
-    srcSpotify.classList.toggle("selected", choice === "spotify");
-    srcRadio.classList.toggle("selected", choice === "radio");
-    srcSpotify.setAttribute("aria-pressed", String(choice === "spotify"));
-    srcRadio.setAttribute("aria-pressed", String(choice === "radio"));
+    SOURCES.forEach(function (k) {
+      sourceButtons[k].classList.toggle("selected", choice === k);
+      sourceButtons[k].setAttribute("aria-pressed", String(choice === k));
+    });
     stationsCard.hidden = choice !== "radio";
     progressCard.hidden = choice !== "spotify";
   }
+  srcAirplay.addEventListener("click", function () {
+    // shows the AirPlay state; nothing is started or stopped here
+    setSource("airplay");
+    refreshFast();
+  });
   srcSpotify.addEventListener("click", function () {
     // only changes what the page shows; playback changes only when the user presses a control
     setSource("spotify");
@@ -250,6 +260,23 @@
     progressCard.hidden = true;
   }
 
+  // ---- AirPlay: an Apple device streams to the DAC; the page only shows the state ----
+  const AIRPLAY_ICON = '<svg viewBox="0 0 24 24" width="72" height="72" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 17H4.5A2.5 2.5 0 0 1 2 14.5v-9A2.5 2.5 0 0 1 4.5 3h15A2.5 2.5 0 0 1 22 5.5v9a2.5 2.5 0 0 1-2.5 2.5H19"/><path d="M12 15l5 6H7z" fill="currentColor"/></svg>';
+  function drawAirplay(air) {
+    title.textContent = air && air.name ? air.name : "AirPlay";
+    subtitle.textContent = !air ? "Not reachable"
+      : !air.enabled ? "Off"
+      : !air.active ? "Receiver is not running"
+      : air.playing ? "Playing from an Apple device"
+      : "Ready: choose this speaker on your iPhone, iPad or Mac";
+    cover.style.backgroundImage = "";
+    cover.classList.remove("initials", "empty");
+    cover.innerHTML = AIRPLAY_ICON;
+    cover.classList.add("radio-icon");
+    setControls("airplay:" + (air && air.playing), []);
+    progressCard.hidden = true;
+  }
+
   // ---- volume: one level for both sources ----
   function drawVolume(percent) {
     volume.value = percent;
@@ -286,18 +313,23 @@
   // ---- fast refresh: what plays, and the volume ----
   async function refreshFast() {
     try {
-      const [radio, now, volumeNow] = await Promise.all([
+      const [radio, now, volumeNow, air] = await Promise.all([
         features.radio ? api("/api/radio/now") : Promise.resolve({ playing: null }),
         features.spotify ? api("/api/spotify/now").catch(function () { return null; }) : Promise.resolve(null),
         api("/api/volume"),
+        features.airplay ? api("/api/airplay").catch(function () { return null; }) : Promise.resolve(null),
       ]);
       spotify = now;
       // the LEDs light up while their source is playing
       srcSpotify.classList.toggle("live", !!(now && now.status === "playing"));
       srcRadio.classList.toggle("live", !!radio.playing);
+      srcAirplay.classList.toggle("live", !!(air && air.playing));
       if (now) { spotifyPosition = now.position_ms; spotifyAt = Date.now(); }
-      if (source === null) setSource(defaultSource(radio.playing, !!(now && now.status === "playing")));  // first load only
-      if (source === "radio") {
+      const spotifyPlaying = !!(now && now.status === "playing"), airplayPlaying = !!(air && air.playing);
+      if (source === null) setSource(defaultSource(radio.playing, spotifyPlaying, airplayPlaying));  // first load only
+      if (source === "airplay") {
+        drawAirplay(air);
+      } else if (source === "radio") {
         drawRadio(radio, stations.find(function (x) { return x.id === (radio.playing || lastStation); }) || null);
       } else if (now) {
         drawSpotify(now);

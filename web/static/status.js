@@ -121,6 +121,10 @@
         diskUsed > 90 ? "disk " + diskUsed + " % full: free space now" : null,
         diskUsed > 80 && diskUsed <= 90 ? "disk " + diskUsed + " % full (warning above 80 %)" : null,
       ].filter(Boolean)),
+      card("AirPlay", !s.airplay.enabled ? "ok" : s.airplay.active ? "ok" : "error", [
+        row("Receiver", !s.airplay.enabled ? "off" : s.airplay.active ? "running" : "not running"),
+        row("Playing from an Apple device", s.airplay.enabled ? yesNo(s.airplay.playing) : "-"),
+      ], [s.airplay.enabled && !s.airplay.active ? "AirPlay receiver is not running: journalctl -u spotify-dac-airplay" : null].filter(Boolean)),
       card("Last update log", "ok", [
         s.last_update.length ? el("pre", "", s.last_update.join("\n")) : el("p", "muted", "No update log yet."),
       ]),

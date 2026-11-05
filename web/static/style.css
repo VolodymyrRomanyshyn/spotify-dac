@@ -312,3 +312,6 @@ dialog.modal h2 { margin-top: 0; }
 .reason.warning { color: #f5b041; }
 .reason.error { color: #ff7b7b; }
 
+/* source buttons as logos: icon and LED only */
+.switch button.src-icon { min-width: 96px; padding: 10px 16px; }
+

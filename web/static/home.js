@@ -229,18 +229,22 @@
     const words = (name || "Radio").split(/\s+/).filter(Boolean);
     return words.slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join("");
   }
-  // the radio's on/off button, with an LED: lit while a station plays; "on" starts the last station again
-  function radioToggle(playing, resume) {
-    const b = el("button", "toggle-btn");
+  // on/off button in the same place and size as the Spotify play button, with an LED in the corner
+  function powerButton(on, label, onClick) {
+    const b = el("button", "ctl icon power" + (on ? " main" : ""));
     b.type = "button";
-    b.setAttribute("aria-pressed", String(playing));
-    b.setAttribute("aria-label", playing ? "Turn radio off" : "Turn radio on");
-    b.append(el("span", "led"), el("span", "state", playing ? "On" : "Off"));
-    b.addEventListener("click", function () {
-      const action = playing ? api("/api/radio/stop", { method: "POST" }).then(refreshFast) : playStation(resume);
-      action.catch(fail);
-    });
+    b.setAttribute("aria-pressed", String(on));
+    b.setAttribute("aria-label", label);
+    b.title = label;
+    b.innerHTML = '<span class="led" aria-hidden="true"></span><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v8"/><path d="M6.4 6.4a8 8 0 1 0 11.2 0"/></svg>';
+    b.addEventListener("click", function () { onClick().catch(fail); });
     return b;
+  }
+  // the radio's on/off: lit while a station plays; "on" starts the last station again
+  function radioToggle(playing, resume) {
+    return powerButton(playing, playing ? "Turn radio off" : "Turn radio on", function () {
+      return playing ? api("/api/radio/stop", { method: "POST" }).then(refreshFast) : playStation(resume);
+    });
   }
   function drawRadio(radio, station) {
     title.textContent = station ? station.name : "Internet radio";
@@ -285,9 +289,9 @@
     const on = !!(air && air.active);
     const allowed = !!(air && air.enabled);
     setControls("airplay:" + on + allowed, [
-      button(on ? "Turn off" : "Turn on", function () {
+      powerButton(on, on ? "Turn AirPlay off" : "Turn AirPlay on", function () {
         return api("/api/airplay", { method: "POST", body: { on: !on } }).then(refreshFast);
-      }, on ? "" : "main"),
+      }),
     ]);
     progressCard.hidden = true;
   }

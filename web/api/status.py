@@ -8,9 +8,9 @@ import time
 from pathlib import Path
 
 from . import airplay
-from .common import SOLOIST_CTL, SOLOIST_USER, run
+from .common import SOLOIST_CTL, SOLOIST_USER, read_config, run
 
-SERVICES = ["soloist", "nespi-power", "nespi-fan", "spotify-dac-volume", "spotify-dac-web", "spotify-dac-airplay"]
+SERVICES = ["soloist", "nespi-power", "nespi-fan", "spotify-dac-volume", "spotify-dac-web"]
 UPDATE_LOG = Path("/var/log/spotify-dac-update.log")
 THERMAL = Path("/sys/class/thermal/thermal_zone0/temp")
 
@@ -200,7 +200,6 @@ def _last_update():
 
 def get_status(req):
     services = [_service(name) for name in SERVICES] + [_session_service(n) for n in SESSION_SERVICES]
-    air_enabled, air_active = airplay.service_state()
     problems = [s["name"] for s in services if s["enabled"] == "enabled" and s["active"] != "active"]
     power = _power()
     warnings = []
@@ -224,6 +223,6 @@ def get_status(req):
         "power": power,
         "system": _system(),
         "last_update": _last_update(),
-        "airplay": {"enabled": air_enabled == "enabled", "active": air_active == "active",
-                    "playing": airplay.playing() if air_active == "active" else False},
+        "airplay": {"enabled": read_config().get("AIRPLAY_ENABLED") == "yes", "active": airplay.is_active(),
+                    "playing": airplay.playing() if airplay.is_active() else False},
     }

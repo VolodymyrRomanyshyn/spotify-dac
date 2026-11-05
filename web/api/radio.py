@@ -71,18 +71,11 @@ def _airplay_pause():
     run(["systemctl", "stop", AIRPLAY_UNIT], timeout=30)
 
 
-def _airplay_resume():
-    """Radio has stopped: the AirPlay receiver is started again when AirPlay is on."""
-    if feature_on("airplay"):
-        run(["systemctl", "start", AIRPLAY_UNIT], timeout=30)
-
-
 def stop_playback():
     """Stops the radio if it is playing. Used when radio is turned off in Settings."""
     with _lock:
         if _current():
             _stop_current()
-            _airplay_resume()
             return True
     return False
 
@@ -198,7 +191,6 @@ def post_play(req):
 def post_stop(req):
     with _lock:
         _stop_current()
-    _airplay_resume()
     return 200, {"playing": None}
 
 
@@ -238,6 +230,7 @@ def watch_sources(interval=2):
                 continue
             with _lock:
                 if now_playing and not was_playing:
+                    _airplay_pause()  # Spotify takes the DAC: AirPlay turns off
                     if _current():
                         _stop_current()
                         print("radio stopped: Spotify started playing", flush=True)

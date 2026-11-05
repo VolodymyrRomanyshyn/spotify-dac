@@ -28,9 +28,8 @@
     }
     if (!isOn($("toggle-airplay"))) { el.textContent = "off"; el.className = "status off"; return; }
     try {
-      const air = await api("/api/airplay");
-      if (air.active) { el.textContent = "running"; el.className = "status ok"; }
-      else { el.textContent = "not running"; el.className = "status bad"; }
+      await api("/api/airplay");
+      el.textContent = "shown on Home"; el.className = "status ok";
     } catch (err) { el.textContent = "unknown"; el.className = "status off"; }
   }
 

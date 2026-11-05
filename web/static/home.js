@@ -265,15 +265,21 @@
   function drawAirplay(air) {
     title.textContent = air && air.name ? air.name : "AirPlay";
     subtitle.textContent = !air ? "Not reachable"
-      : !air.enabled ? "Off"
-      : !air.active ? "Receiver is not running"
+      : !air.enabled ? "Not allowed: turn AirPlay on in Settings"
       : air.playing ? "Playing from an Apple device"
-      : "Ready: choose this speaker on your iPhone, iPad or Mac";
+      : air.active ? "On: choose this speaker on your iPhone, iPad or Mac"
+      : "Off";
     cover.style.backgroundImage = "";
     cover.classList.remove("initials", "empty");
     cover.innerHTML = AIRPLAY_ICON;
     cover.classList.add("radio-icon");
-    setControls("airplay:" + (air && air.playing), []);
+    const on = !!(air && air.active);
+    const allowed = !!(air && air.enabled);
+    setControls("airplay:" + on + allowed, [
+      button(on ? "Turn off" : "Turn on", function () {
+        return api("/api/airplay", { method: "POST", body: { on: !on } }).then(refreshFast);
+      }, on ? "" : "main"),
+    ]);
     progressCard.hidden = true;
   }
 
@@ -323,7 +329,7 @@
       // the LEDs light up while their source is playing
       srcSpotify.classList.toggle("live", !!(now && now.status === "playing"));
       srcRadio.classList.toggle("live", !!radio.playing);
-      srcAirplay.classList.toggle("live", !!(air && air.playing));
+      srcAirplay.classList.toggle("live", !!(air && air.active));
       if (now) { spotifyPosition = now.position_ms; spotifyAt = Date.now(); }
       const spotifyPlaying = !!(now && now.status === "playing"), airplayPlaying = !!(air && air.playing);
       if (source === null) setSource(defaultSource(radio.playing, spotifyPlaying, airplayPlaying));  // first load only

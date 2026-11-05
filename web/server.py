@@ -48,6 +48,7 @@ ROUTES = {
     ("GET", "/api/device"): config.get_device,
     ("GET", "/api/features"): config.get_features,
     ("GET", "/api/airplay"): airplay.get_airplay,
+    ("POST", "/api/airplay"): airplay.post_airplay,
     ("GET", "/api/hardware"): hardware.get_hardware,
     ("POST", "/api/hardware"): hardware.post_hardware,
     ("GET", "/api/code/update"): update.get_update,

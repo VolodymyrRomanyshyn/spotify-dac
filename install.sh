@@ -537,8 +537,8 @@ configure_units() {
 
   # the package starts its own receiver; ours (spotify-dac-airplay) runs as the soloist user
   systemctl disable --now shairport-sync.service 2>/dev/null || true
-  if [ "$AIRPLAY_ENABLED" = yes ]; then systemctl enable spotify-dac-airplay.service; systemctl restart spotify-dac-airplay.service
-  else systemctl disable --now spotify-dac-airplay.service 2>/dev/null || true; fi
+  # AirPlay is started from the Home page, never at boot
+  systemctl disable --now spotify-dac-airplay.service 2>/dev/null || true
 
   # PipeWire resets the DAC sink to 0.40 on every start; make it the default at 100% (bit-perfect)
   systemctl enable spotify-dac-volume.service

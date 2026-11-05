@@ -21,6 +21,11 @@
   // ---- AirPlay: whether the receiver runs ----
   async function refreshAirplayStatus() {
     const el = $("airplay-status");
+    if (isOn($("toggle-airplay")) !== (loaded.AIRPLAY_ENABLED === "yes")) {
+      el.textContent = "change not saved";
+      el.className = "status warn";
+      return;
+    }
     if (!isOn($("toggle-airplay"))) { el.textContent = "off"; el.className = "status off"; return; }
     try {
       const air = await api("/api/airplay");
@@ -35,8 +40,14 @@
     el.textContent = set ? "saved" : "not set";
     el.className = "status " + (set ? "ok" : "bad");
   }
+  // The status shows the saved state. While the switch differs from it, the change is not saved yet.
   async function refreshSpotifyStatus() {
     const el = $("spotify-status");
+    if (isOn($("toggle-spotify")) !== (loaded.SPOTIFY_ENABLED !== "no")) {
+      el.textContent = "change not saved";
+      el.className = "status warn";
+      return;
+    }
     if (!isOn($("toggle-spotify"))) {
       el.textContent = "off";
       el.className = "status off";

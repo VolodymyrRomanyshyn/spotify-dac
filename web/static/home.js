@@ -229,6 +229,19 @@
     const words = (name || "Radio").split(/\s+/).filter(Boolean);
     return words.slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join("");
   }
+  // the radio's on/off button, with an LED: lit while a station plays; "on" starts the last station again
+  function radioToggle(playing, resume) {
+    const b = el("button", "toggle-btn");
+    b.type = "button";
+    b.setAttribute("aria-pressed", String(playing));
+    b.setAttribute("aria-label", playing ? "Turn radio off" : "Turn radio on");
+    b.append(el("span", "led"), el("span", "state", playing ? "On" : "Off"));
+    b.addEventListener("click", function () {
+      const action = playing ? api("/api/radio/stop", { method: "POST" }).then(refreshFast) : playStation(resume);
+      action.catch(fail);
+    });
+    return b;
+  }
   function drawRadio(radio, station) {
     title.textContent = station ? station.name : "Internet radio";
     subtitle.textContent = radio.playing ? radioSubtitle(radio.title, station) : "Not playing";
@@ -251,11 +264,7 @@
     // stopped: the last station can be played again from here
     const resume = !radio.playing && station ? station.id : null;
     setControls("radio:" + (radio.playing ? "playing" : "idle:" + (resume || "")), [
-      radio.playing
-        ? iconButton("stop", "Stop", function () { return api("/api/radio/stop", { method: "POST" }).then(refreshFast); }, "main")
-        : resume
-          ? iconButton("play", "Play", function () { return playStation(resume).catch(fail); }, "main")
-          : el("p", "muted", "Choose a station below.")
+      radio.playing || resume ? radioToggle(!!radio.playing, resume) : el("p", "muted", "Choose a station below.")
     ]);
     progressCard.hidden = true;
   }

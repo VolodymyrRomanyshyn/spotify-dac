@@ -7,6 +7,8 @@ DEVICE_NAME="Living Room"
 # (the station list lives in the web interface, so radio needs WEB_UI="yes").
 SPOTIFY_ENABLED="yes"
 RADIO_ENABLED="yes"
+# AirPlay receiver (shairport-sync). Off by default; the Home page starts and stops it, never at boot.
+AIRPLAY_ENABLED="no"
 
 # Sound card: usb = USB DAC (Topping E30 ...), hat = I2S/S-PDIF HAT (set the overlay)
 AUDIO_OUTPUT="usb"
@@ -16,7 +18,8 @@ AUDIO_HAT_OVERLAY=""                # iqaudio-dacplus | hifiberry-dacplus (also 
 # the GPIO pins, so CASE and FAN_ENABLED are forced off for any HAT.
 CASE="nespi"
 FAN_ENABLED="yes"
-POWEROFF_MODE="hardcut"             # hardcut (proven) | graceful (experimental)
+# yes: the power switch and buttons work (safe shutdown) | no: the case stays powered, switch ignored
+SAFE_SHUTDOWN="yes"
 
 # Updates (NESPi only): poweroff | boot | none (only when the build expired)
 # Without the case this is always "boot" - there is no power switch to hook.
@@ -24,6 +27,15 @@ UPDATE_TRIGGER="poweroff"
 SOLOIST_UPDATE_AFTER_DAYS="45"      # 1-89, builds expire after 90 days
 APT_UPGRADE="yes"
 APT_UPGRADE_AFTER_DAYS="0"          # 0 = every time the update runs
+
+# Shared volume used until a level is first set (0-100)
+DEFAULT_VOLUME="25"
+
+# Web interface: HTTPS on WEB_PORT, for the Home, Radio, Status and Settings pages
+WEB_UI="yes"
+WEB_PORT="8443"
+WEB_USE_PASSWORD="yes"              # no: anyone on your network can change the settings
+WEB_PASSWORD=""                     # read from this file only; the web UI stores a hash
 
 # From https://developer.spotify.com (Soloist API key, needs Spotify Premium)
 SOLOIST_API_KEY=""

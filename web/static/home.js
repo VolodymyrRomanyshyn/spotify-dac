@@ -24,13 +24,7 @@
   let spotifyAt = 0;            // when spotifyPosition was taken
   let volumeTimer = null, volumeDirty = false, seeking = false;
 
-  function el(tag, className, text) {
-    const node = document.createElement(tag);
-    if (className) node.className = className;
-    if (text !== undefined && text !== null) node.textContent = text;
-    return node;
-  }
-  function showError(message) { banner.textContent = message; banner.hidden = false; }
+  const showError = (message) => setBanner(banner, message);
   function clearError() { banner.hidden = true; }
   function fail(err) { showError(err.message); }
   function formatTime(ms) {
@@ -123,12 +117,6 @@
 
   // ---- stations ----
   // the whole row is the button: tap a station to play it
-  function stationThumb(s) {
-    const thumb = el("span", "thumb");
-    if (s.logo) thumb.style.backgroundImage = 'url("' + s.logo + '")';
-    else thumb.textContent = initials(s.name);
-    return thumb;
-  }
   // Rebuilding the rows on every poll makes them flash under a finger, so they are rebuilt
   // only when what they show changes.
   let stationsKey = null, controlsKey = null;
@@ -224,10 +212,6 @@
       if (last && title.toLowerCase() === last.toLowerCase()) return "Live";
     }
     return title;
-  }
-  function initials(name) {
-    const words = (name || "Radio").split(/\s+/).filter(Boolean);
-    return words.slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join("");
   }
   // on/off button: the same circle as the Spotify play button, green when on and red when off
   function powerButton(on, label, onClick) {
@@ -378,11 +362,9 @@
     } catch (err) { /* shown on the next refresh */ }
   }
 
-  themeInit();
   window.featuresReady.then(applyFeatures).then(loadStations).then(refreshFast);
   refreshStatus();
   setInterval(refreshFast, FAST_MS);
   setInterval(refreshStatus, SLOW_MS);
 
-  function themeInit() { /* the theme is set up in common.js */ }
 })();

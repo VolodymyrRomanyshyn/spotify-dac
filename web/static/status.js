@@ -10,12 +10,6 @@
   const updated = document.getElementById("updated");
 
   // ---- helpers ----
-  function el(tag, className, text) {
-    const node = document.createElement(tag);
-    if (className) node.className = className;
-    if (text !== undefined && text !== null) node.textContent = text;
-    return node;
-  }
   function row(label, value) {
     const r = el("div", "row");
     r.append(el("span", "", label), el("span", "", value === null || value === undefined || value === "" ? "-" : String(value)));

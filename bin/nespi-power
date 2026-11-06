@@ -2,10 +2,10 @@
 """RetroFlag NESPi Case+ power/reset/LED controller (libgpiod v2 API).
 
 Power switch OFF  -> LED blinks, run dac-update (when UPDATE_TRIGGER=poweroff), then:
-  POWEROFF_MODE=hardcut  (default, proven): stop soloist, sync, remount all
+  POWEROFF_MODE=hardcut  (the mode the installer uses): stop soloist, sync, remount all
                           filesystems read-only, then drive POWER_EN low -> case cuts power.
-  POWEROFF_MODE=graceful (experimental):    systemctl poweroff; the kernel gpio-poweroff
-                          overlay drives POWER_EN low at the very end of shutdown.
+  POWEROFF_MODE=graceful (no longer offered by the installer): systemctl poweroff; the kernel
+                          gpio-poweroff overlay drives POWER_EN low at the very end of shutdown.
 Reset button      -> LED blinks fast for 5s, then reboot.
 """
 import os

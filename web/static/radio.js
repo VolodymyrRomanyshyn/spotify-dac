@@ -9,13 +9,7 @@
   let editingIndex = -1;     // -1 = adding
   let searchTimer = null;
 
-  function el(tag, className, text) {
-    const node = document.createElement(tag);
-    if (className) node.className = className;
-    if (text !== undefined && text !== null) node.textContent = text;
-    return node;
-  }
-  function showError(message) { banner.textContent = message; banner.hidden = false; }
+  const showError = (message) => setBanner(banner, message);
   function clearError() { banner.hidden = true; }
   function fail(err) { showError(err.message); }
   function iconButton(label, onClick, extra) {
@@ -94,13 +88,6 @@
     list.splice(index, 1);
     return save(list);
   }
-  // logo thumbnail for a station or catalog entry; initials when it has no logo
-  function thumb(s) {
-    const box = el("span", "thumb");
-    if (s.logo) box.style.backgroundImage = 'url("' + s.logo + '")';
-    else box.textContent = s.name.split(/\s+/).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join("");
-    return box;
-  }
   let stationsKey = null;
   function drawStations() {
     const key = JSON.stringify([stations, playing]);
@@ -114,7 +101,7 @@
       info.setAttribute("aria-pressed", String(isPlaying));
       const info2 = el("div", "info");
       info2.append(el("span", "name", s.name), el("span", "muted small genre", s.genre || ""));
-      info.append(thumb(s), info2);
+      info.append(stationThumb(s), info2);
       if (isPlaying) info.append(el("span", "badge", "Playing"));
       info.addEventListener("click", function () { play(s).catch(fail); });
       const actions = el("div", "row-actions");
@@ -178,7 +165,7 @@
       const row = el("div", "station");
       const info = el("div", "info");
       info.append(el("span", "name", r.name), el("span", "muted small genre", r.description || r.source || ""));
-      row.append(thumb(r), info);
+      row.append(stationThumb(r), info);
       if (r.added) {
         row.append(el("span", "badge", "Added"));
       } else {

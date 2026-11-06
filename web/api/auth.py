@@ -40,8 +40,11 @@ def check_password(password, stored):
         return False
     if scheme != "scrypt":
         return False
-    digest = hashlib.scrypt(password.encode("utf-8"), salt=bytes.fromhex(salt_hex),
-                            n=16384, r=8, p=1, dklen=32)
+    try:
+        salt = bytes.fromhex(salt_hex)
+    except ValueError:
+        return False  # a damaged stored hash fails the login; it must not crash the server
+    digest = hashlib.scrypt(password.encode("utf-8"), salt=salt, n=16384, r=8, p=1, dklen=32)
     return hmac.compare_digest(digest.hex(), digest_hex)
 
 

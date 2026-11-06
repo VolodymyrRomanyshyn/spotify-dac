@@ -5,7 +5,7 @@ receiver. The receiver is never started at boot: the user turns it on from Home.
 """
 import pwd
 
-from .common import SOLOIST_CTL, SOLOIST_USER, ApiError, installed, read_config, run
+from .common import systemctl, SOLOIST_CTL, SOLOIST_USER, ApiError, installed, read_config, run
 
 UNIT = "spotify-dac-airplay.service"
 
@@ -54,8 +54,8 @@ def set_enabled(on):
     """Settings: AirPlay allowed or not. Not allowed also stops the receiver."""
     if on:
         return "AirPlay allowed: turn it on from Home"
-    run(["systemctl", "stop", UNIT], timeout=60)
-    return "AirPlay off"
+    ok, detail = systemctl("stop", UNIT)
+    return "AirPlay off" if ok else f"AirPlay did not stop: {detail}"
 
 
 def get_airplay(req):
@@ -81,7 +81,11 @@ def post_airplay(req):
         from .radio import stop_playback  # local import: radio imports this module
         stop_playback()
         run(SOLOIST_CTL + ["pause"], timeout=10)  # Spotify pauses; it may already be paused
-        run(["systemctl", "start", UNIT], timeout=60)
+        ok, detail = systemctl("start", UNIT)
+        if not ok:
+            raise ApiError(502, f"AirPlay did not start: {detail}")
     else:
-        run(["systemctl", "stop", UNIT], timeout=60)
+        ok, detail = systemctl("stop", UNIT)
+        if not ok:
+            raise ApiError(502, f"AirPlay did not stop: {detail}")
     return 200, {"active": is_active()}

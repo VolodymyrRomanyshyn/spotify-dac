@@ -10,11 +10,11 @@ import re
 from pathlib import Path
 
 from . import airplay
-from .common import SOLOIST_USER, ApiError, feature_on, installed, read_config, run, write_config
+from .common import systemctl, SOLOIST_USER, ApiError, feature_on, installed, read_config, run, write_config
 
 SECRET_FILE = Path(os.environ.get("SPOTIFY_DAC_SECRET", "/etc/spotify-dac/soloist.env"))
-NAME = re.compile(r"^[A-Za-z0-9 _+\-]{1,32}$")
-KEY = re.compile(r'^[^\s"\\$`]{8,200}$')
+NAME = re.compile(r"[A-Za-z0-9 _+\-]{1,32}")
+KEY = re.compile(r'[^\s"\\$`]{8,200}')
 # button colours: name -> (light theme, dark theme)
 ACCENTS = {
     "blue": ("#2f6fed", "#7aa7ff"),
@@ -40,7 +40,7 @@ def _int_between(low, high):
 
 
 def _name(value):
-    if not isinstance(value, str) or not NAME.match(value):
+    if not isinstance(value, str) or not NAME.fullmatch(value):
         raise ValueError
     return value
 
@@ -82,15 +82,20 @@ def api_key_set():
 
 
 def _save_api_key(key):
-    """Writes the key the way the installer does: readable by root and the soloist group only."""
+    """Writes the key the way the installer does: readable by root and the soloist group only.
+    The owner and mode are set before the key is written, so it is never readable by others."""
     SECRET_FILE.parent.mkdir(parents=True, exist_ok=True)
     tmp = SECRET_FILE.with_name(SECRET_FILE.name + ".tmp")
-    tmp.write_text(f'SOLOIST_API_KEY="{key}"\n', encoding="utf-8")
-    os.chmod(tmp, 0o640)
+    tmp.unlink(missing_ok=True)  # a leftover file would keep its old permissions
     try:
-        os.chown(tmp, 0, grp.getgrnam(SOLOIST_USER).gr_gid)
+        gid = grp.getgrnam(SOLOIST_USER).gr_gid
     except KeyError:
-        os.chown(tmp, 0, 0)
+        gid = 0
+    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o640)
+    with os.fdopen(fd, "w", encoding="utf-8") as handle:
+        if os.geteuid() == 0:  # only root can change the owner; the service runs as root
+            os.fchown(handle.fileno(), 0, gid)
+        handle.write(f'SOLOIST_API_KEY="{key}"\n')
     os.replace(tmp, SECRET_FILE)
 
 
@@ -110,14 +115,13 @@ def get_device(req):
 
 
 def _spotify_on(on):
-    """Starts Soloist and enables it at boot, or stops it and keeps it off."""
+    """Starts Soloist and enables it at boot, or stops it and keeps it off. Failures are returned as text."""
     if on:
-        run(["systemctl", "enable", "--now", "soloist.service"], timeout=60)
-        return "Spotify on"
-    run(["systemctl", "disable", "--now", "soloist.service"], timeout=60)
-    run(["systemctl", "disable", "spotify-dac-boot-update.service"], timeout=60)
-    rc, out, _ = run(["systemctl", "is-active", "soloist.service"], timeout=10)
-    return "Spotify off" if out.strip() != "active" else "Spotify is still running: check the Soloist service"
+        ok, detail = systemctl("enable", "--now", "soloist.service")
+        return "Spotify on" if ok else f"Spotify did not start: {detail}"
+    ok, detail = systemctl("disable", "--now", "soloist.service")
+    systemctl("disable", "spotify-dac-boot-update.service")
+    return "Spotify off" if ok else f"Spotify did not stop: {detail}"
 
 
 def post_config(req):
@@ -132,7 +136,7 @@ def post_config(req):
         if key == "SOLOIST_API_KEY":
             if isinstance(value, str) and value.strip() == "":
                 continue  # an empty field keeps the stored key
-            if isinstance(value, str) and KEY.match(value.strip()):
+            if isinstance(value, str) and KEY.fullmatch(value.strip()):
                 api_key = value.strip()
             else:
                 errors[key] = "8-200 characters, no spaces or quotes"
@@ -176,8 +180,8 @@ def post_config(req):
         else:
             applied.append("Spotify on: add the API key to start it")
     elif spotify == "yes" and ("DEVICE_NAME" in updates or api_key is not None) and api_key_set():
-        run(["systemctl", "restart", "soloist.service"], timeout=60)
-        applied.append("Spotify restarted")
+        ok, detail = systemctl("restart", "soloist.service")
+        applied.append("Spotify restarted" if ok else f"Spotify restart failed: {detail}")
     return 200, {"saved": sorted(list(updates) + (["SOLOIST_API_KEY"] if api_key else [])), "applied": applied}
 
 

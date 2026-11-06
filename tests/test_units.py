@@ -81,5 +81,11 @@ class PasswordTests(unittest.TestCase):
         self.assertFalse(auth.check_password("pw", "garbage"))
 
 
+class RadioImportTests(unittest.TestCase):
+    def test_radio_module_imports_without_the_soloist_user(self):
+        from api import radio
+        self.assertIn("spotify-dac-mpv.sock", str(radio._mpv_socket()))
+
+
 if __name__ == "__main__":
     unittest.main()

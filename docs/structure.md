@@ -140,7 +140,7 @@ Every plugin has one manifest. The installer and the web UI read it, so neither 
 | `files/pipewire/`, `files/wireplumber/`, `files/networkmanager/` | `core/pipewire/`, `core/wireplumber/`, `core/networkmanager/` |
 | `rpi/` (old librespot scripts) | not moved; kept out of this repo's layout |
 | `docs/` | unchanged, plus `structure.md` and `web-ui/` |
-| (new) `web/`, `radio/`, `plugins/README.md` | created |
+| (new) `web/`, `radio/` | created |
 
 ## Open questions
 

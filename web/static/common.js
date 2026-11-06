@@ -96,10 +96,10 @@ function el(tag, className, text) {
   if (text !== undefined && text !== null) node.textContent = text;
   return node;
 }
-// Shows a message in a page's banner element; an empty message hides it.
+// Shows a message in a page's banner element (the same as the pages had before).
 function setBanner(banner, message) {
-  banner.textContent = message || "";
-  banner.hidden = !message;
+  banner.textContent = message;
+  banner.hidden = false;
 }
 // Two letters for a station without a logo: the first letter of up to two words.
 function initials(name) {

@@ -24,7 +24,7 @@
   let spotifyAt = 0;            // when spotifyPosition was taken
   let volumeTimer = null, volumeDirty = false, seeking = false;
 
-  const showError = (message) => showBanner(banner, message);
+  const showError = (message) => setBanner(banner, message);
   function clearError() { banner.hidden = true; }
   function fail(err) { showError(err.message); }
   function formatTime(ms) {

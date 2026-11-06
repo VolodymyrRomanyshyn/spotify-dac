@@ -97,7 +97,7 @@ function el(tag, className, text) {
   return node;
 }
 // Shows a message in a page's banner element; an empty message hides it.
-function showBanner(banner, message) {
+function setBanner(banner, message) {
   banner.textContent = message || "";
   banner.hidden = !message;
 }

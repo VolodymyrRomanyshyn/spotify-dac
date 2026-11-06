@@ -4,6 +4,7 @@ import stat
 import sys
 import tempfile
 import unittest
+import unittest.mock
 from pathlib import Path
 
 # the config and secret files live in a temporary folder during the tests
@@ -79,6 +80,42 @@ class PasswordTests(unittest.TestCase):
     def test_damaged_salt_fails_cleanly(self):
         self.assertFalse(auth.check_password("pw", "scrypt$zz$00"))
         self.assertFalse(auth.check_password("pw", "garbage"))
+
+
+class RadioImportTests(unittest.TestCase):
+    def test_radio_module_imports_without_the_soloist_user(self):
+        from api import radio
+        self.assertIn("spotify-dac-mpv.sock", str(radio._mpv_socket()))
+
+
+class WatcherLogTests(unittest.TestCase):
+    def test_repeating_error_logs_one_traceback_then_one_line(self):
+        import contextlib
+        import io
+        from api import radio
+
+        class Stop(BaseException):  # not an Exception, so the watcher's own handler cannot catch it
+            pass
+
+        sleeps = []
+
+        def fake_sleep(_):
+            sleeps.append(1)
+            if len(sleeps) > 3:
+                raise Stop()
+
+        def failing_check():
+            raise RuntimeError("soloist did not answer")
+
+        out, err = io.StringIO(), io.StringIO()
+        with unittest.mock.patch.object(radio.time, "sleep", fake_sleep), \
+                unittest.mock.patch.object(radio, "feature_on", lambda name: name == "spotify"), \
+                unittest.mock.patch.object(radio, "_spotify_playing", failing_check), \
+                contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            with self.assertRaises(Stop):
+                radio.watch_sources(interval=0)
+        self.assertEqual(err.getvalue().count("Traceback"), 1)
+        self.assertEqual(out.getvalue().count("watcher: same error again"), 2)
 
 
 if __name__ == "__main__":

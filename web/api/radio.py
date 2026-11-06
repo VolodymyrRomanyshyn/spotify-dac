@@ -13,6 +13,7 @@ import socket
 import subprocess
 import threading
 import time
+import traceback
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -25,8 +26,17 @@ STATIONS_FILE = Path(os.environ.get("SPOTIFY_DAC_RADIO", "/etc/spotify-dac/radio
 DEFAULT_STATIONS = Path(__file__).resolve().parents[2] / "radio" / "stations.default.json"
 STATE_FILE = Path(os.environ.get("SPOTIFY_DAC_RADIO_STATE", "/run/spotify-dac-radio.json"))
 # mpv runs as the soloist user, so its control socket lives in that user's runtime folder
-MPV_SOCKET = Path(f"/run/user/{pwd.getpwnam(SOLOIST_USER).pw_uid}/spotify-dac-mpv.sock")
 _lock = threading.Lock()
+
+
+def _mpv_socket():
+    """mpv runs as the soloist user, so its control socket lives in that user's runtime folder.
+    Looked up when it is needed, so this module imports on any machine."""
+    try:
+        uid = pwd.getpwnam(SOLOIST_USER).pw_uid
+    except KeyError:
+        return Path("/run/user/none/spotify-dac-mpv.sock")  # no soloist user: nothing can be playing
+    return Path(f"/run/user/{uid}/spotify-dac-mpv.sock")
 
 
 def load_stations():
@@ -63,7 +73,7 @@ def _stop_current():
         except OSError:
             pass
     STATE_FILE.unlink(missing_ok=True)
-    MPV_SOCKET.unlink(missing_ok=True)
+    _mpv_socket().unlink(missing_ok=True)
 
 
 def _airplay_pause():
@@ -84,12 +94,12 @@ def stop_playback():
 
 def _mpv_property(name):
     """Read one property from the running mpv over its IPC socket. None when not available."""
-    if not MPV_SOCKET.exists():
+    if not _mpv_socket().exists():
         return None
     try:
         with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as sock:
             sock.settimeout(2)
-            sock.connect(str(MPV_SOCKET))
+            sock.connect(str(_mpv_socket()))
             sock.sendall(json.dumps({"command": ["get_property", name]}).encode() + b"\n")
             reply = sock.makefile("rb").readline()
         answer = json.loads(reply)
@@ -100,12 +110,12 @@ def _mpv_property(name):
 
 def _mpv_set_volume(percent):
     """Set mpv's volume over its IPC socket. Returns False when mpv is not reachable."""
-    if not MPV_SOCKET.exists():
+    if not _mpv_socket().exists():
         return False
     try:
         with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as sock:
             sock.settimeout(2)
-            sock.connect(str(MPV_SOCKET))
+            sock.connect(str(_mpv_socket()))
             sock.sendall(json.dumps({"command": ["set_property", "volume", percent]}).encode() + b"\n")
             return json.loads(sock.makefile("rb").readline()).get("error") == "success"
     except (OSError, ValueError):
@@ -148,7 +158,7 @@ def _start_mpv(mpv, url, user, level):
     env = f"XDG_RUNTIME_DIR=/run/user/{user.pw_uid}"
     # the shared level is given at start, so the stream never plays at mpv's default volume
     argv = ["runuser", "-u", SOLOIST_USER, "--", "env", env, mpv, "--no-video", "--really-quiet",
-            "--ao=pipewire", f"--volume={level}", f"--input-ipc-server={MPV_SOCKET}", url]
+            "--ao=pipewire", f"--volume={level}", f"--input-ipc-server={_mpv_socket()}", url]
     return subprocess.Popen(argv, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                             stderr=subprocess.DEVNULL, start_new_session=True)
 
@@ -212,6 +222,7 @@ def watch_sources(interval=2):
     was_playing = None
     last_spotify = None
     last_radio = None
+    last_error = None  # the message of the last failed pass, so a repeating error is logged once
     while True:
         time.sleep(interval)
         try:
@@ -246,8 +257,14 @@ def watch_sources(interval=2):
                     if spotify_now is not None and spotify_now != radio_now:
                         apply_to_spotify(radio_now)
             was_playing, last_spotify, last_radio = now_playing, spotify_now, radio_now
-        except Exception:  # the watcher must never stop the server
-            pass
+            last_error = None
+        except Exception as err:  # the watcher must never stop the server, but its errors go to the journal
+            message = f"{type(err).__name__}: {err}"
+            if message == last_error:
+                print("watcher: same error again", flush=True)  # the full traceback was logged before
+            else:
+                traceback.print_exc()
+                last_error = message
 
 
 CATALOG_DIR = Path(os.environ.get("SPOTIFY_DAC_CATALOG", DEFAULT_STATIONS.parent))

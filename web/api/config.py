@@ -30,8 +30,8 @@ APPLY_SERVICES = {"soloist", "spotify-dac-volume"}
 
 def _int_between(low, high):
     def check(value):
-        if isinstance(value, bool):
-            raise ValueError
+        if isinstance(value, bool) or (isinstance(value, float) and not value.is_integer()):
+            raise ValueError  # only whole numbers: 2.5 is not stored as 2
         number = int(value)
         if not low <= number <= high:
             raise ValueError

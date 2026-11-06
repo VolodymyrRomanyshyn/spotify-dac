@@ -21,6 +21,7 @@ volume=$(setting DEFAULT_VOLUME)
 
 echo "== 1. a failed Soloist restart is reported, not shown as success"
 if [ -e "$UNIT" ]; then
+  boot_setting=$(systemctl is-enabled soloist.service 2>/dev/null)   # masking clears it: put it back afterwards
   mv "$UNIT" "$UNIT.keep"             # systemd only masks a unit when no unit file of that name is in the way
   systemctl mask soloist.service >/dev/null 2>&1
   out=$(post "{\"DEVICE_NAME\":\"$name\"}" /api/config)
@@ -29,8 +30,11 @@ if [ -e "$UNIT" ]; then
   systemctl unmask soloist.service >/dev/null 2>&1
   mv "$UNIT.keep" "$UNIT"
   systemctl daemon-reload
+  [ "$boot_setting" = enabled ] && systemctl enable soloist.service >/dev/null 2>&1
   systemctl restart soloist.service; sleep 3
   systemctl is-active soloist.service | grep -q "^active$" && ok "Soloist running again" || bad "Soloist not running after restore"
+  [ "$(systemctl is-enabled soloist.service 2>/dev/null)" = "$boot_setting" ] \
+    && ok "Soloist start at boot restored ($boot_setting)" || bad "Soloist start at boot not restored"
 else
   bad "unit file $UNIT not found: test 1 skipped"
 fi

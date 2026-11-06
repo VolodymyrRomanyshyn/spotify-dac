@@ -9,13 +9,7 @@
   let editingIndex = -1;     // -1 = adding
   let searchTimer = null;
 
-  function el(tag, className, text) {
-    const node = document.createElement(tag);
-    if (className) node.className = className;
-    if (text !== undefined && text !== null) node.textContent = text;
-    return node;
-  }
-  function showError(message) { banner.textContent = message; banner.hidden = false; }
+  const showError = (message) => showBanner(banner, message);
   function clearError() { banner.hidden = true; }
   function fail(err) { showError(err.message); }
   function iconButton(label, onClick, extra) {

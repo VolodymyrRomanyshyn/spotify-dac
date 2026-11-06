@@ -3,7 +3,8 @@
 Turns a Raspberry Pi into a zero-maintenance Spotify Connect streamer using
 Spotify's official headless client, [Spotify Soloist](https://developer.spotify.com/documentation/soloist).
 
-- Spotify Connect, internet radio, or both: the installer asks which ones to turn on
+- Spotify Connect, internet radio, AirPlay, or any mix: the installer asks which ones to turn on
+- Web interface on your network (HTTPS, optional password): Home, Radio, Status and Settings
 - USB DAC (Topping E30, ...) or a HAT: IQaudIO DAC+, HiFiBerry DAC/DAC+/Digi+, PiFi DAC+/Digi+
 - Optional RetroFlag NESPi Case+ support (USB DAC only): power switch, reset button, LED, GPIO fan
 - Self-updating: Soloist builds expire after 90 days, so updates run when you
@@ -75,9 +76,6 @@ after a normal shutdown the case's buttons end up in the wrong state, and their 
 2. Soloist is stopped, `sync`, then all filesystems are remounted **read-only** (sysrq `u`)
 3. GPIO4 is pulled low -> the case cuts power. The SD card is read-only by then, so it can't be corrupted.
 
-`POWEROFF_MODE=graceful` (experimental) instead runs a full `systemctl poweroff` and
-lets the kernel `gpio-poweroff` overlay pull GPIO4 low at the very end.
-
 Reset button: the LED blinks fast for 5 s, then the Pi reboots.
 
 ### GPIO pins (BCM)
@@ -111,7 +109,23 @@ soloist ctl -w 127.0.0.1:9090 now   # now playing
 ```
 
 Settings live in `/etc/spotify-dac/config`. The API key is in
-`/etc/spotify-dac/soloist.env`, mode 640. To change anything, re-run the installer.
+`/etc/spotify-dac/soloist.env`, mode 640. Most settings can be changed on the web
+interface's Settings page; the sound card, case and boot changes need the installer again.
+
+## Web interface
+
+The installer turns it on (`WEB_UI`, default yes) and serves it over HTTPS on port 8443
+(`WEB_PORT`). Open `https://<hostname>.local:8443`; the browser warns about the
+self-signed certificate once. With `WEB_USE_PASSWORD=yes` (default) the installer asks for a password,
+stored as a salted hash. Pages: **Home** (sources, volume, AirPlay on/off, radio), **Radio**
+(station list), **Status** (services, CPU, temperature, last update) and **Settings**.
+
+## AirPlay
+
+With `AIRPLAY_ENABLED=yes` the installer adds an AirPlay receiver (shairport-sync, discovered
+over Avahi) that plays into the same DAC. It is allowed in Settings and started from Home;
+it is never started at boot. Starting AirPlay stops radio and pauses Spotify, and the other
+way round.
 
 ## Uninstall
 

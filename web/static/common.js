@@ -89,6 +89,31 @@ window.featuresReady = (async function () {
   if (needs && !window.features[needs]) window.location.replace("/");
 })();
 
+// Small DOM helpers shared by the pages.
+function el(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined && text !== null) node.textContent = text;
+  return node;
+}
+// Shows a message in a page's banner element; an empty message hides it.
+function showBanner(banner, message) {
+  banner.textContent = message || "";
+  banner.hidden = !message;
+}
+// Two letters for a station without a logo: the first letter of up to two words.
+function initials(name) {
+  const words = (name || "Radio").split(/\s+/).filter(Boolean);
+  return words.slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join("");
+}
+// The round thumbnail of a station: its logo, or its initials.
+function stationThumb(s) {
+  const thumb = el("span", "thumb");
+  if (s.logo) thumb.style.backgroundImage = 'url("' + s.logo + '")';
+  else thumb.textContent = initials(s.name);
+  return thumb;
+}
+
 // Calls the JSON API. Resolves with the "data" part, rejects with a readable message.
 async function api(path, options) {
   const opts = Object.assign({ cache: "no-store", credentials: "same-origin" }, options || {});

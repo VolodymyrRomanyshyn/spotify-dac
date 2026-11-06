@@ -1,4 +1,6 @@
 """Shared helpers for the web API: errors, requests, commands and the config file."""
+import contextlib
+import fcntl
 import json
 import os
 import re
@@ -78,29 +80,54 @@ def read_config():
     return values
 
 
+_UNSAFE_VALUE = re.compile(r'["\\$`\r\n]')  # the config file is read by bash: no quotes, $, backticks or newlines
+
+
+@contextlib.contextmanager
+def _config_lock():
+    """Two saves at once must not overwrite each other: one lock around each read-change-write."""
+    lock_path = CONFIG_FILE.with_name(CONFIG_FILE.name + ".lock")
+    with open(lock_path, "a") as handle:
+        fcntl.flock(handle, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(handle, fcntl.LOCK_UN)
+
+
 def write_config(updates):
-    """Set the given keys in the config file, keeping every other line. Written atomically."""
-    try:
-        lines = CONFIG_FILE.read_text(encoding="utf-8").splitlines()
-    except OSError:
-        lines = []
-    seen = set()
-    out = []
-    for line in lines:
-        match = _CONFIG_LINE.match(line.strip())
-        if match and match.group(1) in updates:
-            out.append(f'{match.group(1)}="{updates[match.group(1)]}"')
-            seen.add(match.group(1))
-        else:
-            out.append(line)
+    """Set the given keys in the config file, keeping every other line. Written atomically, under a lock."""
     for key, value in updates.items():
-        if key not in seen:
-            out.append(f'{key}="{value}"')
-    fd, tmp = tempfile.mkstemp(dir=str(CONFIG_FILE.parent), prefix=".config-")
-    with os.fdopen(fd, "w", encoding="utf-8") as handle:
-        handle.write("\n".join(out) + "\n")
-    os.chmod(tmp, 0o644)
-    os.replace(tmp, CONFIG_FILE)
+        if _UNSAFE_VALUE.search(str(value)):
+            raise ApiError(400, f"{key} has characters the config file cannot hold")
+    with _config_lock():
+        try:
+            lines = CONFIG_FILE.read_text(encoding="utf-8").splitlines()
+        except OSError:
+            lines = []
+        seen = set()
+        out = []
+        for line in lines:
+            match = _CONFIG_LINE.match(line.strip())
+            if match and match.group(1) in updates:
+                out.append(f'{match.group(1)}="{updates[match.group(1)]}"')
+                seen.add(match.group(1))
+            else:
+                out.append(line)
+        for key, value in updates.items():
+            if key not in seen:
+                out.append(f'{key}="{value}"')
+        fd, tmp = tempfile.mkstemp(dir=str(CONFIG_FILE.parent), prefix=".config-")
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write("\n".join(out) + "\n")
+        os.chmod(tmp, 0o644)
+        os.replace(tmp, CONFIG_FILE)
+
+
+def systemctl(*args, timeout=60):
+    """Runs systemctl. Returns (True, "") on success, or (False, what systemctl said)."""
+    rc, out, err = run(["systemctl", *args], timeout=timeout)
+    return rc == 0, (err or out).strip() or f"exit code {rc}"
 
 
 FEATURE_KEYS = {"spotify": "SPOTIFY_ENABLED", "radio": "RADIO_ENABLED", "airplay": "AIRPLAY_ENABLED"}

@@ -64,8 +64,16 @@ def post_update(req):
     head = _git(source, "rev-parse", "--short", "HEAD")
     # the same files the installer copies; the station list in /etc is not touched
     shutil.copytree(Path(source) / "web", WEB_DIR, dirs_exist_ok=True)
-    shutil.rmtree(RADIO_DIR, ignore_errors=True)
-    shutil.copytree(Path(source) / "radio", RADIO_DIR)
+    # copy the new catalogs beside the old ones; a failed copy leaves the current catalogs untouched
+    radio_new = RADIO_DIR.with_name(RADIO_DIR.name + ".new")
+    radio_old = RADIO_DIR.with_name(RADIO_DIR.name + ".old")
+    shutil.rmtree(radio_new, ignore_errors=True)
+    shutil.copytree(Path(source) / "radio", radio_new)
+    shutil.rmtree(radio_old, ignore_errors=True)
+    if RADIO_DIR.exists():
+        RADIO_DIR.rename(radio_old)
+    radio_new.rename(RADIO_DIR)
+    shutil.rmtree(radio_old, ignore_errors=True)
     # restart after this answer has been sent, or the request would cut itself off
     subprocess.Popen(
         ["sh", "-c", "sleep 2; systemctl restart spotify-dac-web"],

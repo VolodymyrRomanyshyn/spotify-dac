@@ -17,3 +17,6 @@ __pycache__/
 
 # personal notes with device credentials; never commit
 settings.md
+
+# local test scripts and results: kept on this machine, never committed
+local-tests/

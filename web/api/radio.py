@@ -17,7 +17,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 from . import airplay
-from .common import SOLOIST_CTL, SOLOIST_USER, ApiError, feature_on, run
+from .common import systemctl, SOLOIST_CTL, SOLOIST_USER, ApiError, feature_on, run
 
 AIRPLAY_UNIT = "spotify-dac-airplay.service"
 
@@ -68,7 +68,9 @@ def _stop_current():
 
 def _airplay_pause():
     """Radio takes the DAC: the AirPlay receiver stops (the phone sees it as gone)."""
-    run(["systemctl", "stop", AIRPLAY_UNIT], timeout=30)
+    ok, detail = systemctl("stop", AIRPLAY_UNIT, timeout=30)
+    if not ok:
+        print(f"AirPlay did not stop when radio started: {detail}", flush=True)
 
 
 def stop_playback():

@@ -3,7 +3,7 @@
 Saved to /etc/spotify-dac/config and applied by restarting the service that uses them. The
 power-enable pin is not editable here: it is written into the boot config by the installer.
 """
-from .common import ApiError, read_config, run, write_config
+from .common import systemctl, ApiError, read_config, run, write_config
 
 HAT_PINS = {2, 3, 18, 19, 20, 21}
 DEFAULT_PINS = {"POWER_PIN": 3, "RESET_PIN": 2, "LED_PIN": 14, "FAN_PIN": 21}
@@ -42,6 +42,18 @@ def _pin_value(value, label):
     if not 0 <= number <= 27:
         raise ApiError(400, f"{label}: whole GPIO number 0-27")
     return number
+
+
+def _apply_unit(restarted, name, on):
+    """Starts (enables and restarts) or stops (disables) a case service. Failures are reported in the answer."""
+    if on:
+        ok, detail = systemctl("enable", f"{name}.service", timeout=30)
+        if ok:
+            ok, detail = systemctl("restart", f"{name}.service", timeout=30)
+        restarted.append(name if ok else f"{name} failed: {detail}")
+    else:
+        ok, detail = systemctl("disable", "--now", f"{name}.service", timeout=30)
+        restarted.append(f"{name} stopped" if ok else f"{name} did not stop: {detail}")
 
 
 def post_hardware(req):
@@ -90,19 +102,7 @@ def post_hardware(req):
     changed = {key for key in updates if cfg.get(key) != updates[key]}
     restarted = []
     if changed & {"FAN_ENABLED", "FAN_PIN"}:
-        if merged.get("FAN_ENABLED") == "yes":
-            run(["systemctl", "enable", "nespi-fan.service"], timeout=30)
-            run(["systemctl", "restart", "nespi-fan.service"], timeout=30)
-            restarted.append("nespi-fan")
-        else:
-            run(["systemctl", "disable", "--now", "nespi-fan.service"], timeout=30)
-            restarted.append("nespi-fan stopped")
+        _apply_unit(restarted, "nespi-fan", merged.get("FAN_ENABLED") == "yes")
     if changed & {"CASE", "POWER_PIN", "RESET_PIN", "LED_PIN", "POWEROFF_MODE"}:
-        if merged.get("CASE") == "nespi":
-            run(["systemctl", "enable", "nespi-power.service"], timeout=30)
-            run(["systemctl", "restart", "nespi-power.service"], timeout=30)
-            restarted.append("nespi-power")
-        else:
-            run(["systemctl", "disable", "--now", "nespi-power.service"], timeout=30)
-            restarted.append("nespi-power stopped")
+        _apply_unit(restarted, "nespi-power", merged.get("CASE") == "nespi")
     return 200, {"saved": sorted(updates), "restarted": restarted}

@@ -222,6 +222,7 @@ def watch_sources(interval=2):
     was_playing = None
     last_spotify = None
     last_radio = None
+    last_error = None  # the message of the last failed pass, so a repeating error is logged once
     while True:
         time.sleep(interval)
         try:
@@ -256,8 +257,14 @@ def watch_sources(interval=2):
                     if spotify_now is not None and spotify_now != radio_now:
                         apply_to_spotify(radio_now)
             was_playing, last_spotify, last_radio = now_playing, spotify_now, radio_now
-        except Exception:  # the watcher must never stop the server, but its errors go to the journal
-            traceback.print_exc()
+            last_error = None
+        except Exception as err:  # the watcher must never stop the server, but its errors go to the journal
+            message = f"{type(err).__name__}: {err}"
+            if message == last_error:
+                print("watcher: same error again", flush=True)  # the full traceback was logged before
+            else:
+                traceback.print_exc()
+                last_error = message
 
 
 CATALOG_DIR = Path(os.environ.get("SPOTIFY_DAC_CATALOG", DEFAULT_STATIONS.parent))

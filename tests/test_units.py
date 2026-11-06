@@ -1,6 +1,7 @@
 """Unit tests for the web API checks and the config file writer. No Pi needed: python3 -m unittest discover -s tests"""
 import json
 import os
+import shutil
 import stat
 import subprocess
 import sys
@@ -87,7 +88,6 @@ class PasswordTests(unittest.TestCase):
 
 class RadioImportTests(unittest.TestCase):
     def test_radio_module_imports_without_the_soloist_user(self):
-        from api import radio
         self.assertIn("spotify-dac-mpv.sock", str(radio._mpv_socket()))
 
 
@@ -223,13 +223,13 @@ class BootConfigTests(unittest.TestCase):
     LIB = Path(__file__).resolve().parents[1] / "lib" / "common.sh"
 
     def setUp(self):
-        import shutil
         if not shutil.which("sha256sum") or not shutil.which("bash"):
             self.skipTest("needs sha256sum and bash")
         probe = subprocess.run(["sed", "--version"], capture_output=True, text=True)
         if probe.returncode != 0:
             self.skipTest("needs GNU sed")
         self.tmp = tempfile.mkdtemp(prefix="dac-boot-")
+        self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
         self.cfg = Path(self.tmp) / "config.txt"
         self.cfg.write_text("[pi4]\narm_boost=1\n", encoding="utf-8")
 

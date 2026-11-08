@@ -92,9 +92,6 @@
   async function loadConfig() {
     const data = await api("/api/config");
     loaded = data.values;
-    configLoaded = true;
-    refreshSpotifyStatus();
-    refreshAirplayStatus();
     $("DEVICE_NAME").value = loaded.DEVICE_NAME || "";
     $("DEFAULT_VOLUME").value = loaded.DEFAULT_VOLUME || "";
     $("SOLOIST_UPDATE_AFTER_DAYS").value = loaded.SOLOIST_UPDATE_AFTER_DAYS || "";
@@ -109,6 +106,10 @@
       const key = hint.getAttribute("data-hint");
       if (data.editable[key]) hint.textContent = data.editable[key];
     });
+    // only now do the switches show the saved state, so the status can be compared with it
+    configLoaded = true;
+    refreshSpotifyStatus();
+    refreshAirplayStatus();
   }
 
   async function loadHardware() {

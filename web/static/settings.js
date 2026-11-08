@@ -2,6 +2,7 @@
 (function () {
   const $ = function (id) { return document.getElementById(id); };
   let loaded = {};          // settings as saved on the device
+  let configLoaded = false; // true once the saved settings have arrived
   let hardware = null;      // GPIO settings as saved on the device
 
   function showError(target, err) { target.textContent = err.message || String(err); }
@@ -22,6 +23,7 @@
 
   // ---- AirPlay: whether the receiver runs ----
   async function refreshAirplayStatus() {
+    if (!configLoaded) return;  // the saved settings are not known yet: show nothing rather than "change not saved"
     const el = $("airplay-status");
     if (isOn($("toggle-airplay")) !== (loaded.AIRPLAY_ENABLED === "yes")) {
       el.textContent = "change not saved";
@@ -43,6 +45,7 @@
   }
   // The status shows the saved state. While the switch differs from it, the change is not saved yet.
   async function refreshSpotifyStatus() {
+    if (!configLoaded) return;  // the saved settings are not known yet: show nothing rather than "change not saved"
     const el = $("spotify-status");
     if (isOn($("toggle-spotify")) !== (loaded.SPOTIFY_ENABLED !== "no")) {
       el.textContent = "change not saved";
@@ -103,6 +106,10 @@
       const key = hint.getAttribute("data-hint");
       if (data.editable[key]) hint.textContent = data.editable[key];
     });
+    // only now do the switches show the saved state, so the status can be compared with it
+    configLoaded = true;
+    refreshSpotifyStatus();
+    refreshAirplayStatus();
   }
 
   async function loadHardware() {
@@ -287,8 +294,6 @@
 
   loadConfig().catch(function (err) { showError($("general-status"), err); });
   loadHardware().catch(function (err) { showError($("gpio-status"), err); });
-  refreshSpotifyStatus();
-  refreshAirplayStatus();
   setInterval(refreshSpotifyStatus, 15000);
   setInterval(refreshAirplayStatus, 15000);
   checkCode();

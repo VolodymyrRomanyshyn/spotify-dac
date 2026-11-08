@@ -36,6 +36,9 @@
 }
 
 * { box-sizing: border-box; }
+/* keep the scrollbar space on every page, so the content does not shift sideways between pages */
+html { scrollbar-gutter: stable; }
+
 body {
   margin: 0;
   background: var(--bg);

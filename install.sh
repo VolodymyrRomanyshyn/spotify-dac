@@ -65,6 +65,9 @@ WEB_UI="yes"                      # web interface (HTTPS) on WEB_PORT
 WEB_PORT="8443"
 WEB_USE_PASSWORD="yes"            # no: anyone on the LAN can open the config page
 WEB_PASSWORD=""                   # only read from an answers file; the web UI stores a hash
+HOTSPOT_ENABLED="no"              # yes: start a Wi-Fi hotspot "device" when there is no network (and by holding reset 5 s)
+HOTSPOT_FALLBACK_SECONDS="60"     # 60-300: seconds without any network before the hotspot starts
+HOTSPOT_PASSWORD=""               # 8-63 characters; only read from an answers file or the question
 HOLD_SECONDS="1"; SYNC_SECONDS="3"; ENABLE_RESET="yes"
 FAN_PIN="21"; FAN_TEMP_ON="75"; FAN_TEMP_OFF="55"; FAN_STARTUP_SECONDS="5"; FAN_POLL_SECONDS="5"
 SOLOIST_API_KEY=""
@@ -215,6 +218,14 @@ ask_questions() {
     fi
   fi
 
+  HOTSPOT_ENABLED="$(ask_yesno "Start a Wi-Fi hotspot called \"device\" when the box has no network?\n(join it on a phone, pick your Wi-Fi, done. Also started by holding the reset button for 5 seconds.)" "$HOTSPOT_ENABLED")"
+  if [ "$HOTSPOT_ENABLED" = yes ]; then
+    HOTSPOT_FALLBACK_SECONDS="$(ask_input "Seconds without a network before the hotspot starts (60-300):" "$HOTSPOT_FALLBACK_SECONDS")"
+    local hotpw
+    hotpw="$(ask_password "Hotspot password (8 to 63 characters).\n\nLeave empty to keep the stored one.")"
+    if [ -n "$hotpw" ]; then HOTSPOT_PASSWORD="$hotpw"; fi
+  fi
+
   if [ "$SPOTIFY_ENABLED" = yes ]; then
     local key
     if [ -n "$SOLOIST_API_KEY" ]; then
@@ -248,6 +259,12 @@ validate() {
   [ "$SPOTIFY_ENABLED" = yes ] || [ "$RADIO_ENABLED" = yes ] || [ "$AIRPLAY_ENABLED" = yes ] || die "Turn on Spotify, radio, AirPlay or several of them"
   [ "$RADIO_ENABLED" = yes ] && [ "$WEB_UI" != yes ] && die "Internet radio needs the web interface (WEB_UI=yes)"
   [[ "$WEB_PORT" =~ ^[0-9]+$ ]] && [ "$WEB_PORT" -ge 1024 ] && [ "$WEB_PORT" -le 65535 ] || die "WEB_PORT must be 1024-65535"
+  case "$HOTSPOT_ENABLED" in yes|no) ;; *) die "HOTSPOT_ENABLED must be yes or no" ;; esac
+  [[ "$HOTSPOT_FALLBACK_SECONDS" =~ ^[0-9]+$ ]] && [ "$HOTSPOT_FALLBACK_SECONDS" -ge 60 ] && [ "$HOTSPOT_FALLBACK_SECONDS" -le 300 ] || die "HOTSPOT_FALLBACK_SECONDS must be 60-300"
+  if [ "$HOTSPOT_ENABLED" = yes ]; then
+    [ "${#HOTSPOT_PASSWORD}" -ge 8 ] && [ "${#HOTSPOT_PASSWORD}" -le 63 ] || die "The hotspot password must be 8 to 63 characters"
+    case "$HOTSPOT_PASSWORD" in *[\"\\\$\`]*) die "The hotspot password may not contain quotes, backslashes, \$ or backticks" ;; esac
+  fi
   # no power switch to hook: updates can only run at boot
   [ "$SAFE_SHUTDOWN" = no ] && UPDATE_TRIGGER=boot
   if [ "$CASE" = nespi ]; then
@@ -333,6 +350,8 @@ WIFI_POWERSAVE_OFF="$WIFI_POWERSAVE_OFF"
 GPIO_CHIP="$GPIO_CHIP"
 SAFE_SHUTDOWN="$SAFE_SHUTDOWN"
 DEFAULT_VOLUME="$DEFAULT_VOLUME"
+HOTSPOT_ENABLED="$HOTSPOT_ENABLED"
+HOTSPOT_FALLBACK_SECONDS="$HOTSPOT_FALLBACK_SECONDS"
 WEB_UI="$WEB_UI"
 WEB_PORT="$WEB_PORT"
 POWER_PIN="$POWER_PIN"
@@ -397,6 +416,19 @@ install_files() {
   for u in spotify-dac-boot-update spotify-dac-boot-apt nespi-power nespi-fan; do
     install -m 644 "$REPO_DIR/files/systemd/$u.service" "$UNIT_DIR/"
   done
+  install -m 755 "$REPO_DIR/bin/dac-netwatch" "$SBIN_DIR/"
+  install -m 644 "$REPO_DIR/files/systemd/spotify-dac-netwatch.service" "$UNIT_DIR/"
+  if [ "$HOTSPOT_ENABLED" = yes ]; then
+    if [ -n "$HOTSPOT_PASSWORD" ] || [ ! -f "$CONF_DIR/hotspot.env" ]; then
+      [ -n "$HOTSPOT_PASSWORD" ] || die "the hotspot needs a password: answer the question"
+      umask 077
+      printf 'HOTSPOT_PASSWORD="%s"\n' "$HOTSPOT_PASSWORD" > "$CONF_DIR/hotspot.env"
+      umask 022
+    fi
+  else
+    rm -f "$CONF_DIR/hotspot.env"
+  fi
+  HOTSPOT_PASSWORD=""
 
   install -D -m 644 "$REPO_DIR/files/pipewire/50-spotify-dac.conf" /etc/pipewire/pipewire.conf.d/50-spotify-dac.conf
   install -D -m 644 "$REPO_DIR/files/wireplumber/50-spotify-dac.conf" /etc/wireplumber/wireplumber.conf.d/50-spotify-dac.conf
@@ -542,6 +574,10 @@ configure_units() {
 
   # PipeWire resets the DAC sink to 0.40 on every start; make it the default at 100% (bit-perfect)
   systemctl enable spotify-dac-volume.service
+
+  # the network watcher starts the device hotspot when there is no network (only when the user chose it)
+  if [ "$HOTSPOT_ENABLED" = yes ]; then systemctl enable --now spotify-dac-netwatch.service
+  else systemctl disable --now spotify-dac-netwatch.service 2>/dev/null || true; fi
 }
 
 install_soloist() {

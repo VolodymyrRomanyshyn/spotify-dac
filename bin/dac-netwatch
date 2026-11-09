@@ -1,0 +1,50 @@
+#!/usr/bin/env python3
+"""Network watcher: starts the device hotspot when there is no network, stops it when one comes back.
+
+Runs as a service (spotify-dac-netwatch). The rules are in web/api/wifi.py (Watcher), tested there.
+"""
+import os
+import sys
+import time
+import traceback
+
+WEB_DIR = os.environ.get("SPOTIFY_DAC_WEB", "/opt/spotify-dac/web")
+CONFIG = os.environ.get("SPOTIFY_DAC_CONFIG", "/etc/spotify-dac/config")
+TICK_SECONDS = 5
+
+sys.path.insert(0, WEB_DIR)
+from api import wifi  # noqa: E402
+
+
+def fallback_seconds():
+    """HOTSPOT_FALLBACK_SECONDS from the config, 60 to 300; the default when missing or out of range."""
+    try:
+        with open(CONFIG, encoding="utf-8") as handle:
+            for line in handle:
+                if line.startswith("HOTSPOT_FALLBACK_SECONDS="):
+                    value = int(line.split("=", 1)[1].strip().strip('"'))
+                    if wifi.valid_fallback(value):
+                        return value
+    except (OSError, ValueError):
+        pass
+    return wifi.FALLBACK_DEFAULT
+
+
+def main():
+    service = wifi.WifiService(wifi.NmcliWifi(), fallback_seconds())
+    watcher = wifi.Watcher(service, fallback_seconds=fallback_seconds())
+    last_error = None
+    while True:
+        try:
+            watcher.tick()
+            last_error = None
+        except Exception as err:  # the watcher must keep running; log each new kind of error once
+            message = f"{type(err).__name__}: {err}"
+            if message != last_error:
+                traceback.print_exc()
+                last_error = message
+        time.sleep(TICK_SECONDS)
+
+
+if __name__ == "__main__":
+    main()

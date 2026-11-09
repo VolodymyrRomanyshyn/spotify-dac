@@ -129,6 +129,50 @@ def _split_escaped(line):
     return fields
 
 
+HOTSPOT_CON = "device-hotspot"       # the connection NetworkManager makes for the hotspot
+DNS_CAPTIVE_CONF = "/etc/NetworkManager/dnsmasq-shared.d/dac-captive.conf"
+HOTSPOT_PASSWORD_FILE = "/etc/spotify-dac/hotspot.env"
+
+
+def ethernet_connected(text):
+    """True when an ethernet device is connected. Input: `nmcli -t -f DEVICE,TYPE,STATE device`."""
+    for line in text.splitlines():
+        fields = _split_escaped(line)
+        if len(fields) >= 3 and fields[1] == "ethernet" and fields[2].startswith("connected"):
+            return True
+    return False
+
+
+def active_wifi_name(text):
+    """The name of the active Wi-Fi connection, or None. Input: `nmcli -t -f NAME,TYPE,DEVICE connection show --active`."""
+    for line in text.splitlines():
+        fields = _split_escaped(line)
+        if len(fields) >= 3 and fields[1] == "802-11-wireless" and fields[2] not in ("", "--"):
+            return fields[0]
+    return None
+
+
+def saved_wifi_names(text):
+    """Saved Wi-Fi connection names, without the hotspot. Input: `nmcli -t -f NAME,TYPE connection show`."""
+    names = []
+    for line in text.splitlines():
+        fields = _split_escaped(line)
+        if len(fields) >= 2 and fields[1] == "802-11-wireless" and fields[0] != HOTSPOT_CON:
+            names.append(fields[0])
+    return names
+
+
+def hotspot_command(password):
+    """The nmcli command that starts the device hotspot. NetworkManager runs the DHCP and DNS for it."""
+    return ["device", "wifi", "hotspot", "ifname", "wlan0", "con-name", HOTSPOT_CON,
+            "ssid", HOTSPOT_NAME, "password", password]
+
+
+def captive_dns_conf():
+    """dnsmasq setting: every name resolves to the hotspot address, so any web address opens the setup page."""
+    return "address=/#/10.42.0.1\n"
+
+
 class NmcliWifi:
     """The real backend on the Pi, through NetworkManager's nmcli. Not tested on a Pi yet."""
 
@@ -157,10 +201,42 @@ class NmcliWifi:
         self._run(["connection", "delete", name])
 
     def start_hotspot(self):
-        self._run(["device", "wifi", "hotspot", "ifname", "wlan0", "ssid", HOTSPOT_NAME])
+        password = read_hotspot_password()
+        if not password:
+            return False
+        rc, _ = self._run(hotspot_command(password))
+        return rc == 0
 
     def stop_hotspot(self):
-        self._run(["connection", "down", "Hotspot"])
+        self._run(["connection", "down", HOTSPOT_CON])
+
+    # state the watcher reads
+    @property
+    def ethernet(self):
+        rc, out = self._run(["-t", "-f", "DEVICE,TYPE,STATE", "device"])
+        return rc == 0 and ethernet_connected(out)
+
+    @property
+    def current(self):
+        rc, out = self._run(["-t", "-f", "NAME,TYPE,DEVICE", "connection", "show", "--active"])
+        return active_wifi_name(out) if rc == 0 else None
+
+    @property
+    def hotspot(self):
+        rc, out = self._run(["-t", "-f", "NAME", "connection", "show", "--active"])
+        return rc == 0 and HOTSPOT_CON in out.splitlines()
+
+    @property
+    def saved(self):
+        """Saved Wi-Fi networks with their passwords, for the retry. Read as root."""
+        rc, out = self._run(["-t", "-f", "NAME,TYPE", "connection", "show"])
+        if rc != 0:
+            return {}
+        result = {}
+        for name in saved_wifi_names(out):
+            rc, psk = self._run(["-s", "-g", "802-11-wireless-security.psk", "connection", "show", name])
+            result[name] = psk if rc == 0 and psk else None
+        return result
 
 
 # ---------- the service: what the web API does ----------
@@ -295,6 +371,18 @@ def post_save(req):
 
 def post_forget(req):
     return 200, _service.forget(req.json().get("name", ""))
+
+
+def read_hotspot_password(path=HOTSPOT_PASSWORD_FILE):
+    """The hotspot password from the root-only file written by the installer, or None."""
+    try:
+        with open(path, encoding="utf-8") as handle:
+            for line in handle:
+                if line.startswith("HOTSPOT_PASSWORD="):
+                    return line.split("=", 1)[1].strip().strip('"')
+    except OSError:
+        return None
+    return None
 
 
 def parse_fallback(value):

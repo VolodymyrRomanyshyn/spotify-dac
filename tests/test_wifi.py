@@ -1,6 +1,7 @@
 """Tests for the Wi-Fi settings backend, with a fake Wi-Fi (no Pi needed): python3 -m unittest discover -s tests"""
 import os
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -200,6 +201,39 @@ class WatcherTests(unittest.TestCase):
         watcher.tick()
         self.assertFalse(backend.hotspot)
         self.assertEqual(backend.current, "Office")
+
+
+class NmcliOutputTests(unittest.TestCase):
+    def test_ethernet_is_connected_only_when_up(self):
+        up = "eth0:ethernet:connected:netplan-eth0\nwlan0:wifi:connected:Home\n"
+        down = "eth0:ethernet:unavailable:--\nwlan0:wifi:connected:Home\n"
+        self.assertTrue(wifi.ethernet_connected(up))
+        self.assertFalse(wifi.ethernet_connected(down))
+
+    def test_active_wifi_name(self):
+        text = "netplan-wlan0-home:802-11-wireless:wlan0\nlo:loopback:lo\n"
+        self.assertEqual(wifi.active_wifi_name(text), "netplan-wlan0-home")
+        self.assertIsNone(wifi.active_wifi_name("eth0:802-3-ethernet:eth0\n"))
+
+    def test_saved_wifi_names_skip_the_hotspot_and_other_types(self):
+        text = "Home-WiFi:802-11-wireless\ndevice-hotspot:802-11-wireless\nwired:802-3-ethernet\n"
+        self.assertEqual(wifi.saved_wifi_names(text), ["Home-WiFi"])
+
+    def test_hotspot_command_uses_the_device_name_and_no_shell(self):
+        argv = wifi.hotspot_command("right-password")
+        self.assertIn("device", argv)
+        self.assertEqual(argv[argv.index("password") + 1], "right-password")
+        self.assertTrue(all(isinstance(part, str) for part in argv))
+
+    def test_captive_dns_sends_every_name_to_the_hotspot(self):
+        self.assertEqual(wifi.captive_dns_conf().strip(), "address=/#/10.42.0.1")
+
+    def test_hotspot_password_is_read_from_the_root_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "hotspot.env"
+            path.write_text('HOTSPOT_PASSWORD="hot-spot-pass"\n', encoding="utf-8")
+            self.assertEqual(wifi.read_hotspot_password(str(path)), "hot-spot-pass")
+            self.assertIsNone(wifi.read_hotspot_password(str(Path(tmp) / "missing")))
 
 
 if __name__ == "__main__":

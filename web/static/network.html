@@ -32,7 +32,7 @@
   </header>
 
   <main class="settings">
-    <!-- prototype: shows the mock data only; the real page reads the Pi -->
+    <!-- prototype: shows the sample data only; the real page reads the Pi -->
     <p id="prototype-note" class="muted">Prototype: sample data, nothing is changed on a Pi.</p>
 
     <div id="hotspot-banner" class="card" hidden>
@@ -48,31 +48,6 @@
         <span id="current-type" class="status"></span>
       </div>
       <p id="current-note" class="muted"></p>
-    </section>
-
-    <!-- ===== Add a network ===== -->
-    <section class="card">
-      <h2>Add a network</h2>
-      <form id="add-form" class="form">
-        <label class="field">
-          <span>Network name</span>
-          <input id="ssid" type="text" maxlength="32" autocomplete="off" list="saved-networks" placeholder="Pick a saved network or type">
-          <datalist id="saved-networks"></datalist>
-        </label>
-        <label class="field">
-          <span>Password</span>
-          <input id="password" type="password" minlength="8" maxlength="63" autocomplete="off">
-          <small class="muted">8 to 63 characters. Leave empty for an open network.</small>
-        </label>
-        <label class="check">
-          <input id="show-password" type="checkbox">
-          <span>Show password</span>
-        </label>
-      </form>
-      <div class="actions">
-        <button id="connect" class="ctl main" type="button">Connect</button>
-        <span id="connect-status" class="muted" role="status"></span>
-      </div>
     </section>
 
     <!-- ===== Nearby networks ===== -->
@@ -91,6 +66,28 @@
       <ul id="saved" class="commits"></ul>
     </section>
   </main>
+
+  <!-- Save a nearby network: asks for the password when it is secured -->
+  <dialog id="save-dialog" class="modal" aria-labelledby="save-title">
+    <h2 id="save-title">Save network</h2>
+    <form id="save-form" class="form" method="dialog">
+      <p id="save-name" class="muted"></p>
+      <label id="save-password-field" class="field">
+        <span>Password</span>
+        <input id="save-password" type="password" minlength="8" maxlength="63" autocomplete="off">
+        <small class="muted">8 to 63 characters.</small>
+      </label>
+      <label class="check">
+        <input id="save-show" type="checkbox">
+        <span>Show password</span>
+      </label>
+      <p id="save-error" class="status bad" role="status"></p>
+      <div class="actions">
+        <button id="save-cancel" type="button">Cancel</button>
+        <button id="save-submit" class="ctl main" type="submit">Save</button>
+      </div>
+    </form>
+  </dialog>
 
   <script src="common.js"></script>
   <script src="network.js"></script>

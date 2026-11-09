@@ -330,12 +330,11 @@ dialog.modal h2 { margin-top: 0; }
 .ctl.ghost { visibility: hidden; }
 
 /* Wi-Fi page: nearby networks, one row per network in aligned columns */
-.nearby-row-btn { display: grid; grid-template-columns: minmax(0, 1fr) 72px 56px 56px; align-items: center; gap: 8px;
-  width: 100%; background: transparent; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px;
-  color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.nearby-row { display: grid; grid-template-columns: minmax(0, 1fr) 72px 56px 72px; align-items: center; gap: 8px;
+  list-style: none; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; }
 .nearby-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nearby-muted { color: var(--muted); font-size: 13px; }
-.nearby-saved { text-align: right; }
+.nearby-action { justify-self: end; }
 .signal { display: inline-flex; align-items: flex-end; gap: 2px; height: 14px; justify-self: end; }
 .signal i { display: block; width: 4px; border-radius: 1px; background: var(--line); }
 .signal i:nth-child(1) { height: 4px; }

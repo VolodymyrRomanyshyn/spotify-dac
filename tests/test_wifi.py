@@ -277,5 +277,51 @@ class CaptiveRoutingTests(unittest.TestCase):
         self.assertEqual(self.captive.decide("DELETE", "/api/network"), ("redirect", "http://10.42.0.1/network.html"))
 
 
+class PriorityAndSwitchTests(unittest.TestCase):
+    def service(self, current=None):
+        backend = wifi.FakeWifi(nearby=NEARBY, saved={"Home-WiFi": "home-pass12", "Office": "office-pass"}, current=current)
+        return wifi.WifiService(backend)
+
+    def test_move_up_makes_a_network_preferred(self):
+        svc = self.service()
+        svc.move("Office", "up")
+        self.assertEqual(list(svc.backend.saved), ["Office", "Home-WiFi"])
+
+    def test_move_down_lowers_a_network(self):
+        svc = self.service()
+        svc.move("Home-WiFi", "down")
+        self.assertEqual(list(svc.backend.saved), ["Office", "Home-WiFi"])
+
+    def test_move_at_the_edge_changes_nothing(self):
+        svc = self.service()
+        svc.move("Home-WiFi", "up")
+        self.assertEqual(list(svc.backend.saved), ["Home-WiFi", "Office"])
+
+    def test_move_rejects_bad_direction_and_unknown_network(self):
+        svc = self.service()
+        with self.assertRaises(ApiError):
+            svc.move("Office", "sideways")
+        with self.assertRaises(ApiError):
+            svc.move("Nope", "up")
+
+    def test_switch_joins_the_chosen_saved_network(self):
+        svc = self.service(current="Home-WiFi")
+        result = svc.switch("Office")
+        self.assertTrue(result["ok"])
+        self.assertEqual(svc.backend.current, "Office")
+
+    def test_switch_goes_back_when_the_network_refuses(self):
+        svc = self.service(current="Home-WiFi")
+        svc.backend.saved["Office"] = "wrong-password"
+        result = svc.switch("Office")
+        self.assertFalse(result["ok"])
+        self.assertEqual(svc.backend.current, "Home-WiFi")
+
+    def test_switch_refuses_unsaved_networks(self):
+        svc = self.service()
+        with self.assertRaises(ApiError):
+            svc.switch("Cafe Free")
+
+
 if __name__ == "__main__":
     unittest.main()

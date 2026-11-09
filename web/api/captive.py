@@ -24,6 +24,8 @@ API_ROUTES = {
     ("GET", "/api/network"): wifi.get_network,
     ("POST", "/api/network/scan"): wifi.post_scan,
     ("POST", "/api/network/save"): wifi.post_save,
+    ("POST", "/api/network/move"): wifi.post_move,
+    ("POST", "/api/network/switch"): wifi.post_switch,
     ("POST", "/api/network/forget"): wifi.post_forget,
 }
 

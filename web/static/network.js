@@ -77,6 +77,7 @@
     });
   }
 
+  // saved networks, highest priority first: the Pi prefers the top one when it is in range
   function drawSaved() {
     const list = $("saved");
     list.replaceChildren();
@@ -84,15 +85,29 @@
       list.append(el("li", "muted", "No saved networks yet. Use Save next to a network above."));
       return;
     }
-    state.saved.forEach(function (name) {
-      const row = el("li", "row-toggle");
-      row.append(el("span", "", name));
-      const forget = el("button", "ctl small", "Forget");
-      forget.type = "button";
-      forget.addEventListener("click", function () { forgetNetwork(name); });
-      row.append(forget);
+    state.saved.forEach(function (name, index) {
+      const row = el("li", "saved-row");
+      row.append(el("span", "saved-order", String(index + 1)));
+      row.append(el("span", "saved-name", name));
+      if (index === 0) row.append(el("span", "badge", "first"));
+      const actions = el("span", "saved-actions");
+      actions.append(
+        smallButton("Up", index === 0, function () { moveNetwork(name, "up"); }),
+        smallButton("Down", index === state.saved.length - 1, function () { moveNetwork(name, "down"); }),
+        smallButton("Connect", state.current === name, function () { switchNetwork(name); }),
+        smallButton("Forget", false, function () { forgetNetwork(name); })
+      );
+      row.append(actions);
       list.append(row);
     });
+  }
+
+  function smallButton(label, disabled, onClick) {
+    const button = el("button", "ctl small", label);
+    button.type = "button";
+    button.disabled = disabled;
+    button.addEventListener("click", onClick);
+    return button;
   }
 
   function draw() {
@@ -134,6 +149,32 @@
       $("scan-status").textContent = err.message;
     } finally {
       $("scan").disabled = false;
+    }
+  }
+
+  async function moveNetwork(name, direction) {
+    try {
+      const data = await api("/api/network/move", { body: { name: name, direction: direction } });
+      state.saved = data.saved;
+      drawSaved();
+    } catch (err) {
+      $("scan-status").className = "status bad";
+      $("scan-status").textContent = err.message;
+    }
+  }
+
+  async function switchNetwork(name) {
+    $("scan-status").className = "muted";
+    $("scan-status").textContent = "Connecting to " + name + "...";
+    try {
+      const result = await api("/api/network/switch", { body: { name: name } });
+      $("scan-status").className = "status ok";
+      $("scan-status").textContent = "Connected to " + result.current + ".";
+      await load();
+    } catch (err) {
+      $("scan-status").className = "status bad";
+      $("scan-status").textContent = err.message;
+      await load();
     }
   }
 

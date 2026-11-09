@@ -345,3 +345,9 @@ dialog.modal h2 { margin-top: 0; }
 .signal i:nth-child(3) { height: 10px; }
 .signal i:nth-child(4) { height: 14px; }
 .signal i.on { background: var(--text); }
+
+/* Wi-Fi page: saved networks with priority order */
+.saved-row { display: flex; align-items: center; gap: 8px; list-style: none; padding: 6px 0; flex-wrap: wrap; }
+.saved-order { color: var(--muted); font-size: 13px; width: 18px; }
+.saved-name { font-weight: 600; flex: 1; min-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.saved-actions { display: flex; gap: 6px; flex-wrap: wrap; }

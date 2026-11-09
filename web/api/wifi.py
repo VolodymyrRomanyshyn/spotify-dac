@@ -77,6 +77,16 @@ class FakeWifi:
         self.calls.append("disconnect")
         self.current = None
 
+    def move(self, name, delta):
+        """Moves a saved network up (delta -1) or down (delta 1) in the priority order."""
+        self.calls.append(("move", name, delta))
+        items = list(self.saved.items())
+        index = [k for k, _ in items].index(name)
+        target = index + delta
+        if 0 <= target < len(items):
+            items[index], items[target] = items[target], items[index]
+        self.saved = dict(items)
+
     def forget(self, name):
         self.calls.append(("forget", name))
         self.saved.pop(name, None)
@@ -246,15 +256,33 @@ class NmcliWifi:
 
     @property
     def saved(self):
-        """Saved Wi-Fi networks with their passwords, for the retry. Read as root."""
+        """Saved Wi-Fi networks with their passwords, highest priority first. Read as root."""
         rc, out = self._run(["-t", "-f", "NAME,TYPE", "connection", "show"])
         if rc != 0:
             return {}
-        result = {}
+        found = []
         for connection in saved_wifi_names(out):
             rc, psk = self._run(["-s", "-g", "802-11-wireless-security.psk", "connection", "show", connection])
-            result[self._ssid(connection)] = psk if rc == 0 and psk else None
-        return result
+            rc2, prio = self._run(["-g", "connection.autoconnect-priority", "connection", "show", connection])
+            priority = int(prio) if rc2 == 0 and prio.lstrip("-").isdigit() else 0
+            found.append((-priority, self._ssid(connection), psk if rc == 0 and psk else None))
+        found.sort(key=lambda item: item[0])
+        return {ssid: psk for _, ssid, psk in found}
+
+    def move(self, name, delta):
+        """Swaps the priority of a saved network with its neighbour, and writes the new priorities to NetworkManager."""
+        order = list(self.saved.keys())
+        if name not in order:
+            return
+        index = order.index(name)
+        target = index + delta
+        if not 0 <= target < len(order):
+            return
+        order[index], order[target] = order[target], order[index]
+        for position, ssid in enumerate(order):
+            connection = self._connection_for(ssid)
+            if connection:
+                self._run(["connection", "modify", connection, "connection.autoconnect-priority", str(100 - 10 * position)])
 
 
 # ---------- the service: what the web API does ----------
@@ -314,6 +342,29 @@ class WifiService:
             "current": self.backend.current,
             "hotspot": self.backend.hotspot,
         }
+
+    def move(self, name, direction):
+        """Priority: "up" makes a saved network more preferred, "down" less preferred."""
+        if direction not in ("up", "down"):
+            raise ApiError(400, "direction must be up or down")
+        if name not in self.backend.saved:
+            raise ApiError(404, "That network is not saved")
+        self.backend.move(name, -1 if direction == "up" else 1)
+        return {"saved": list(self.backend.saved)}
+
+    def switch(self, name):
+        """Connects now to a saved network. If its password is not accepted, goes back to the previous one."""
+        if name not in self.backend.saved:
+            raise ApiError(404, "That network is not saved")
+        previous = self.backend.current
+        if self.backend.connect(name, self.backend.saved[name]):
+            if self.backend.hotspot:
+                self.backend.stop_hotspot()
+            return {"ok": True, "current": name}
+        if previous and previous != name:
+            self.backend.connect(previous, self.backend.saved.get(previous))
+        return {"ok": False, "current": self.backend.current,
+                "error": "Could not connect to " + name + ". Still on " + (self.backend.current or "nothing") + "."}
 
     def forget(self, name):
         if not valid_name(name):
@@ -389,6 +440,16 @@ def post_save(req):
 
 def post_forget(req):
     return 200, _service.forget(req.json().get("name", ""))
+
+
+def post_move(req):
+    body = req.json()
+    return 200, _service.move(body.get("name", ""), body.get("direction", ""))
+
+
+def post_switch(req):
+    result = _service.switch(req.json().get("name", ""))
+    return (200 if result["ok"] else 422), result
 
 
 def read_hotspot_password(path=HOTSPOT_PASSWORD_FILE):

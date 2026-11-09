@@ -329,13 +329,14 @@ dialog.modal h2 { margin-top: 0; }
 .ctl.main.power.off { background: var(--accent); border-color: var(--accent); color: #ff7b7b; }
 .ctl.ghost { visibility: hidden; }
 
-/* Wi-Fi page: nearby networks */
-.nearby-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
-.nearby-net { flex: 1; min-width: 0; display: flex; justify-content: space-between; align-items: center; gap: 12px;
-  background: transparent; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; color: var(--text); font: inherit; cursor: pointer; }
+/* Wi-Fi page: nearby networks, one row per network in aligned columns */
+.nearby-row-btn { display: grid; grid-template-columns: minmax(0, 1fr) 72px 56px 56px; align-items: center; gap: 8px;
+  width: 100%; background: transparent; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px;
+  color: var(--text); font: inherit; text-align: left; cursor: pointer; }
 .nearby-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.nearby-meta { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-.signal { display: inline-flex; align-items: flex-end; gap: 2px; height: 14px; }
+.nearby-muted { color: var(--muted); font-size: 13px; }
+.nearby-saved { text-align: right; }
+.signal { display: inline-flex; align-items: flex-end; gap: 2px; height: 14px; justify-self: end; }
 .signal i { display: block; width: 4px; border-radius: 1px; background: var(--line); }
 .signal i:nth-child(1) { height: 4px; }
 .signal i:nth-child(2) { height: 7px; }

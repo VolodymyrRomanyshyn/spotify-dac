@@ -67,20 +67,21 @@
     const list = $("nearby");
     list.replaceChildren();
     state.nearby.forEach(function (net) {
-      const row = el("li", "nearby-row");
-      const pick = el("button", "nearby-net");
+      const row = el("li", "");
+      const pick = el("button", "nearby-row-btn");
       pick.type = "button";
-      pick.append(el("span", "nearby-name", net.name));
-      const meta = el("span", "nearby-meta");
-      meta.append(el("span", "muted small", net.secure ? "secured" : "open"), signalBars(net.signal));
-      pick.append(meta);
+      pick.append(
+        el("span", "nearby-name", net.name),
+        el("span", "nearby-muted", net.secure ? "secured" : "open"),
+        signalBars(net.signal),
+        el("span", "nearby-muted nearby-saved", state.saved.indexOf(net.name) !== -1 ? "saved" : "")
+      );
       pick.addEventListener("click", function () {
         $("ssid").value = net.name;
         $("password").value = "";
         $("password").focus();
       });
       row.append(pick);
-      if (state.saved.indexOf(net.name) !== -1) row.append(el("span", "badge", "saved"));
       list.append(row);
     });
   }

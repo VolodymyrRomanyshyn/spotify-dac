@@ -256,5 +256,26 @@ class ResetButtonTests(unittest.TestCase):
         self.assertEqual(self.rb.LED_HOTSPOT_ON, [(0.1, 0.1), (0.1, 0.7)])
 
 
+class CaptiveRoutingTests(unittest.TestCase):
+    def setUp(self):
+        from api import captive
+        self.captive = captive
+
+    def test_setup_page_and_its_files_are_served(self):
+        self.assertEqual(self.captive.decide("GET", "/"), ("file", "/network.html"))
+        self.assertEqual(self.captive.decide("GET", "/network.html"), ("file", "/network.html"))
+        self.assertEqual(self.captive.decide("GET", "/style.css"), ("file", "/style.css"))
+
+    def test_wifi_api_is_served(self):
+        self.assertEqual(self.captive.decide("POST", "/api/network/save"), ("api", None))
+        self.assertEqual(self.captive.decide("GET", "/api/network"), ("api", None))
+
+    def test_anything_else_redirects_to_the_setup_page(self):
+        self.assertEqual(self.captive.decide("GET", "/settings.html"), ("redirect", "http://10.42.0.1/network.html"))
+        self.assertEqual(self.captive.decide("GET", "/hotspot-detect.html"), ("redirect", "http://10.42.0.1/network.html"))
+        self.assertEqual(self.captive.decide("GET", "/api/status"), ("redirect", "http://10.42.0.1/network.html"))
+        self.assertEqual(self.captive.decide("DELETE", "/api/network"), ("redirect", "http://10.42.0.1/network.html"))
+
+
 if __name__ == "__main__":
     unittest.main()

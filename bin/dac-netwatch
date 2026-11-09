@@ -13,7 +13,7 @@ CONFIG = os.environ.get("SPOTIFY_DAC_CONFIG", "/etc/spotify-dac/config")
 TICK_SECONDS = 5
 
 sys.path.insert(0, WEB_DIR)
-from api import wifi  # noqa: E402
+from api import captive, wifi  # noqa: E402
 
 
 def fallback_seconds():
@@ -33,10 +33,16 @@ def fallback_seconds():
 def main():
     service = wifi.WifiService(wifi.NmcliWifi(), fallback_seconds())
     watcher = wifi.Watcher(service, fallback_seconds=fallback_seconds())
+    setup_page = captive.CaptiveServer()
     last_error = None
     while True:
         try:
             watcher.tick()
+            # port 80 (the setup page) is open only while the hotspot is on; it retries until the address is up
+            if service.backend.hotspot:
+                setup_page.start()
+            else:
+                setup_page.stop()
             last_error = None
         except Exception as err:  # the watcher must keep running; log each new kind of error once
             message = f"{type(err).__name__}: {err}"

@@ -236,5 +236,25 @@ class NmcliOutputTests(unittest.TestCase):
             self.assertIsNone(wifi.read_hotspot_password(str(Path(tmp) / "missing")))
 
 
+class ResetButtonTests(unittest.TestCase):
+    def setUp(self):
+        from api import resetbutton
+        self.rb = resetbutton
+
+    def test_quick_press_reboots_on_release(self):
+        self.assertEqual(self.rb.reset_action(0.3, still_held=False), "reboot")
+        self.assertEqual(self.rb.reset_action(4.9, still_held=False), "reboot")
+
+    def test_hold_is_waiting_until_five_seconds_then_starts_the_hotspot(self):
+        self.assertEqual(self.rb.reset_action(4.9, still_held=True), "wait")
+        self.assertEqual(self.rb.reset_action(5.0, still_held=True), "hotspot")
+
+    def test_releasing_after_five_seconds_does_not_reboot(self):
+        self.assertEqual(self.rb.reset_action(6.0, still_held=False), "none")
+
+    def test_hotspot_led_is_two_flashes_and_a_pause(self):
+        self.assertEqual(self.rb.LED_HOTSPOT_ON, [(0.1, 0.1), (0.1, 0.7)])
+
+
 if __name__ == "__main__":
     unittest.main()

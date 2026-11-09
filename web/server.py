@@ -22,7 +22,7 @@ from urllib.parse import parse_qs, urlsplit
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
-from api import airplay, auth, config, hardware, radio, spotify, status, update, volume  # noqa: E402
+from api import airplay, auth, config, hardware, radio, spotify, status, update, volume, wifi  # noqa: E402
 from api.common import MAX_BODY, ApiError, Request, feature_on  # noqa: E402
 
 STATIC = HERE / "static"
@@ -46,6 +46,10 @@ ROUTES = {
     ("GET", "/api/volume"): volume.get_volume,
     ("POST", "/api/volume"): volume.post_volume,
     ("GET", "/api/device"): config.get_device,
+    ("GET", "/api/network"): wifi.get_network,
+    ("POST", "/api/network/scan"): wifi.post_scan,
+    ("POST", "/api/network/save"): wifi.post_save,
+    ("POST", "/api/network/forget"): wifi.post_forget,
     ("GET", "/api/features"): config.get_features,
     ("GET", "/api/airplay"): airplay.get_airplay,
     ("POST", "/api/airplay"): airplay.post_airplay,

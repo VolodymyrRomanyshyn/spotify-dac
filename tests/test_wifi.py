@@ -1,0 +1,158 @@
+"""Tests for the Wi-Fi settings backend, with a fake Wi-Fi (no Pi needed): python3 -m unittest discover -s tests"""
+import os
+import sys
+import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "web"))
+os.environ.setdefault("SPOTIFY_DAC_CONFIG", "/nonexistent/config-for-tests")
+
+from api import wifi  # noqa: E402
+from api.common import ApiError  # noqa: E402
+
+NEARBY = [
+    {"name": "Home-WiFi", "signal": 82, "secure": True},
+    {"name": "Cafe Free", "signal": 40, "secure": False},
+    {"name": "Office", "signal": 30, "secure": True},
+]
+
+
+class ModeRuleTests(unittest.TestCase):
+    def test_ethernet_wins_over_wifi_and_hotspot(self):
+        self.assertEqual(wifi.next_mode(True, True, 999, 60), "ethernet")
+
+    def test_wifi_when_no_cable(self):
+        self.assertEqual(wifi.next_mode(False, True, 999, 60), "wifi")
+
+    def test_hotspot_only_after_the_fallback_time(self):
+        self.assertEqual(wifi.next_mode(False, False, 59, 60), "none")
+        self.assertEqual(wifi.next_mode(False, False, 60, 60), "hotspot")
+        self.assertEqual(wifi.next_mode(False, False, 200, 300), "none")
+
+    def test_fallback_limits(self):
+        self.assertTrue(wifi.valid_fallback(60))
+        self.assertTrue(wifi.valid_fallback(300))
+        self.assertFalse(wifi.valid_fallback(59))
+        self.assertFalse(wifi.valid_fallback(301))
+        self.assertFalse(wifi.valid_fallback(True))
+        self.assertEqual(wifi.parse_fallback("120"), 120)
+        with self.assertRaises(ApiError):
+            wifi.parse_fallback("10")
+
+
+class InputRuleTests(unittest.TestCase):
+    def test_names(self):
+        self.assertTrue(wifi.valid_name("Home-WiFi"))
+        self.assertFalse(wifi.valid_name(""))
+        self.assertFalse(wifi.valid_name("   "))
+        self.assertFalse(wifi.valid_name("x" * 33))
+
+    def test_passwords_are_8_to_63(self):
+        self.assertFalse(wifi.valid_password("1234567"))
+        self.assertTrue(wifi.valid_password("12345678"))
+        self.assertTrue(wifi.valid_password("x" * 63))
+        self.assertFalse(wifi.valid_password("x" * 64))
+
+
+class ScanParsingTests(unittest.TestCase):
+    def test_parses_and_sorts_by_signal(self):
+        text = "Home-WiFi:82:WPA2\nCafe Free:40:\nOffice:30:WPA2\n"
+        networks = wifi.parse_scan(text)
+        self.assertEqual([n["name"] for n in networks], ["Home-WiFi", "Cafe Free", "Office"])
+        self.assertTrue(networks[0]["secure"])
+        self.assertFalse(networks[1]["secure"])
+
+    def test_escaped_colon_in_a_name(self):
+        networks = wifi.parse_scan("Cafe\\:Net:55:WPA2\n")
+        self.assertEqual(networks[0]["name"], "Cafe:Net")
+
+    def test_keeps_the_strongest_copy_of_a_duplicate_name(self):
+        networks = wifi.parse_scan("Home:20:WPA2\nHome:70:WPA2\n")
+        self.assertEqual(len(networks), 1)
+        self.assertEqual(networks[0]["signal"], 70)
+
+    def test_skips_bad_lines(self):
+        self.assertEqual(wifi.parse_scan("\n:50:WPA2\nName:abc:WPA2\n"), [])
+
+
+class SaveTests(unittest.TestCase):
+    def service(self, **kwargs):
+        return wifi.WifiService(wifi.FakeWifi(nearby=NEARBY, **kwargs))
+
+    def test_right_password_joins_and_stops_the_hotspot(self):
+        svc = self.service(current=None)
+        svc.backend.hotspot = True
+        result = svc.save("Home-WiFi", "right-password")
+        self.assertTrue(result["ok"])
+        self.assertEqual(svc.backend.current, "Home-WiFi")
+        self.assertFalse(svc.backend.hotspot)
+        self.assertIn("Home-WiFi", svc.backend.saved)
+
+    def test_wrong_password_from_wifi_goes_back_to_the_previous_network(self):
+        svc = self.service(current="Office", saved={"Office": "office-pass"})
+        result = svc.save("Home-WiFi", "wrong-password")
+        self.assertFalse(result["ok"])
+        self.assertEqual(svc.backend.current, "Office")
+        self.assertFalse(svc.backend.hotspot)
+        self.assertNotIn("Home-WiFi", svc.backend.saved)
+
+    def test_wrong_password_with_no_network_starts_the_hotspot(self):
+        svc = self.service(current=None)
+        result = svc.save("Home-WiFi", "wrong-password")
+        self.assertFalse(result["ok"])
+        self.assertTrue(svc.backend.hotspot)
+        self.assertIsNone(svc.backend.current)
+
+    def test_open_network_needs_no_password(self):
+        svc = self.service(current=None)
+        result = svc.save("Cafe Free", None)
+        self.assertTrue(result["ok"])
+        self.assertEqual(svc.backend.current, "Cafe Free")
+
+    def test_secured_network_needs_a_valid_password(self):
+        svc = self.service(current=None)
+        with self.assertRaises(ApiError):
+            svc.save("Home-WiFi", "short")
+        with self.assertRaises(ApiError):
+            svc.save("Home-WiFi", None)
+
+    def test_unknown_network_is_refused(self):
+        svc = self.service(current=None)
+        with self.assertRaises(ApiError) as caught:
+            svc.save("Not Around", "12345678")
+        self.assertEqual(caught.exception.args[0], "That network is not in the list. Scan again.")
+
+    def test_bad_name_is_refused(self):
+        svc = self.service(current=None)
+        with self.assertRaises(ApiError):
+            svc.save("", "12345678")
+
+
+class ForgetAndStateTests(unittest.TestCase):
+    def test_forget_removes_a_saved_network(self):
+        svc = wifi.WifiService(wifi.FakeWifi(saved={"Office": "office-pass"}))
+        svc.forget("Office")
+        self.assertNotIn("Office", svc.backend.saved)
+
+    def test_forget_refuses_an_unknown_network(self):
+        svc = wifi.WifiService(wifi.FakeWifi())
+        with self.assertRaises(ApiError):
+            svc.forget("Nope")
+
+    def test_state_reports_the_mode(self):
+        self.assertEqual(wifi.WifiService(wifi.FakeWifi(ethernet=True)).state()["mode"], "ethernet")
+        self.assertEqual(wifi.WifiService(wifi.FakeWifi(current="Office")).state()["mode"], "wifi")
+        self.assertEqual(wifi.WifiService(wifi.FakeWifi()).state()["mode"], "none")
+        svc = wifi.WifiService(wifi.FakeWifi())
+        svc.backend.hotspot = True
+        self.assertEqual(svc.state()["mode"], "hotspot")
+
+    def test_nearby_marks_saved_networks(self):
+        svc = wifi.WifiService(wifi.FakeWifi(nearby=NEARBY, saved={"Office": "office-pass"}))
+        marks = {n["name"]: n["saved"] for n in svc.nearby()}
+        self.assertTrue(marks["Office"])
+        self.assertFalse(marks["Home-WiFi"])
+
+
+if __name__ == "__main__":
+    unittest.main()

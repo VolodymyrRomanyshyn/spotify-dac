@@ -86,6 +86,13 @@
   }
 
   function drawSaved() {
+    const options = $("saved-networks");
+    options.replaceChildren();
+    state.saved.forEach(function (name) {
+      const option = el("option", "", name);
+      option.value = name;
+      options.append(option);
+    });
     const list = $("saved");
     list.replaceChildren();
     state.saved.forEach(function (name) {

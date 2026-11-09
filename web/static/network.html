@@ -56,7 +56,8 @@
       <form id="add-form" class="form">
         <label class="field">
           <span>Network name</span>
-          <input id="ssid" type="text" maxlength="32" autocomplete="off" placeholder="Choose from the list below or type">
+          <input id="ssid" type="text" maxlength="32" autocomplete="off" list="saved-networks" placeholder="Pick a saved network or type">
+          <datalist id="saved-networks"></datalist>
         </label>
         <label class="field">
           <span>Password</span>

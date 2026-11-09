@@ -26,9 +26,13 @@
     return node;
   }
 
-  function bars(signal) {
+  // signal strength as four bars (filled up to the level)
+  function signalBars(signal) {
     const level = signal >= 70 ? 4 : signal >= 50 ? 3 : signal >= 30 ? 2 : 1;
-    return "▁▃▅▇".slice(0, level) + "·".repeat(4 - level);
+    const box = el("span", "signal");
+    box.setAttribute("aria-label", "signal " + level + " of 4");
+    for (let i = 1; i <= 4; i++) box.append(el("i", i <= level ? "on" : ""));
+    return box;
   }
 
   function drawCurrent() {
@@ -63,16 +67,20 @@
     const list = $("nearby");
     list.replaceChildren();
     state.nearby.forEach(function (net) {
-      const row = el("li", "row-toggle");
-      const info = el("button", "ctl small", net.name + "  " + bars(net.signal) + (net.secure ? "  lock" : "  open"));
-      info.type = "button";
-      info.addEventListener("click", function () {
+      const row = el("li", "nearby-row");
+      const pick = el("button", "nearby-net");
+      pick.type = "button";
+      pick.append(el("span", "nearby-name", net.name));
+      const meta = el("span", "nearby-meta");
+      meta.append(el("span", "muted small", net.secure ? "secured" : "open"), signalBars(net.signal));
+      pick.append(meta);
+      pick.addEventListener("click", function () {
         $("ssid").value = net.name;
         $("password").value = "";
         $("password").focus();
       });
-      row.append(info);
-      if (state.saved.indexOf(net.name) !== -1) row.append(el("span", "status ok", "saved"));
+      row.append(pick);
+      if (state.saved.indexOf(net.name) !== -1) row.append(el("span", "badge", "saved"));
       list.append(row);
     });
   }

@@ -307,12 +307,96 @@ class NmcliWifi:
                 self._run(["connection", "modify", connection, "connection.autoconnect-priority", str(100 - 10 * position)])
 
 
+# ---------- hotspot settings store ----------
+
+class FileStore:
+    """Where the hotspot settings live on the Pi: HOTSPOT_ENABLED in the config, the password in hotspot.env."""
+
+    def get_allowed(self):
+        try:
+            with open(CONFIG_FILE, encoding="utf-8") as handle:
+                for line in handle:
+                    if line.startswith("HOTSPOT_ENABLED="):
+                        return line.split("=", 1)[1].strip().strip('"') == "yes"
+        except OSError:
+            pass
+        return False
+
+    def set_allowed(self, on):
+        from .common import write_config
+        write_config({"HOTSPOT_ENABLED": "yes" if on else "no"})
+
+    def has_password(self):
+        return read_hotspot_password() is not None
+
+    def set_password(self, password):
+        import os as _os
+        path = HOTSPOT_PASSWORD_FILE
+        _os.makedirs(_os.path.dirname(path), exist_ok=True)
+        fd = _os.open(path, _os.O_WRONLY | _os.O_CREAT | _os.O_TRUNC, 0o600)
+        with _os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write('HOTSPOT_PASSWORD="%s"\n' % password)
+
+    def request_start(self):
+        """Asks dac-netwatch to start the hotspot (it is the process that owns the hotspot)."""
+        with open(HOTSPOT_REQUEST_FILE, "w", encoding="utf-8") as handle:
+            handle.write("1\n")
+
+
+HOTSPOT_REQUEST_FILE = "/run/spotify-dac-hotspot-request"
+
+
 # ---------- the service: what the web API does ----------
 
 class WifiService:
-    def __init__(self, backend, fallback_seconds=FALLBACK_DEFAULT):
+    def __init__(self, backend, fallback_seconds=FALLBACK_DEFAULT, store=None):
         self.backend = backend
         self.fallback_seconds = fallback_seconds
+        self.store = store  # None: no stored settings, the hotspot is allowed (used by the tests)
+
+    def allowed(self):
+        return True if self.store is None else self.store.get_allowed()
+
+    def hotspot_status(self):
+        has_password = True if self.store is None else self.store.has_password()
+        return {"allowed": self.allowed(), "has_password": has_password,
+                "on": self.backend.hotspot, "name": hotspot_name()}
+
+    def set_hotspot_allowed(self, on):
+        """Allow or forbid the hotspot. Forbidding it also stops it. Allowing it needs a password first."""
+        if self.store is None:
+            raise ApiError(409, "Hotspot settings are not stored on this device")
+        if on and not self.store.has_password():
+            raise ApiError(409, "Set a hotspot password first")
+        self.store.set_allowed(on)
+        if not on and self.backend.hotspot:
+            self.backend.stop_hotspot()
+        return self.hotspot_status()
+
+    def set_hotspot_on(self, on):
+        """Turn the hotspot on now (it starts within a few seconds) or off now."""
+        if not on:
+            if self.backend.hotspot:
+                self.backend.stop_hotspot()
+            return self.hotspot_status()
+        if self.store is None or not self.store.get_allowed():
+            raise ApiError(409, "Allow the hotspot first")
+        if not self.store.has_password():
+            raise ApiError(409, "Set a hotspot password first")
+        self.store.request_start()
+        return self.hotspot_status()
+
+    def set_hotspot_password(self, password):
+        """Changes the hotspot password. If the hotspot is on, it is restarted with the new one."""
+        if not valid_password(password):
+            raise ApiError(400, "Password must be 8 to 63 characters")
+        if self.store is None:
+            raise ApiError(409, "Hotspot settings are not stored on this device")
+        self.store.set_password(password)
+        if self.backend.hotspot:
+            self.backend.stop_hotspot()
+            self.store.request_start()
+        return self.hotspot_status()
 
     def state(self):
         if self.backend.ethernet:
@@ -327,7 +411,7 @@ class WifiService:
             "mode": mode,
             "current": self.backend.current,
             "ethernet": self.backend.ethernet,
-            "hotspot": {"on": self.backend.hotspot, "name": hotspot_name()},
+            "hotspot": self.hotspot_status(),
             "saved": sorted(self.backend.saved),
         }
 
@@ -415,6 +499,12 @@ class Watcher:
     def tick(self):
         backend = self.service.backend
         now = self.clock()
+        if not self.service.allowed():
+            if backend.hotspot:
+                backend.stop_hotspot()
+            self.forced = False
+            self.offline_since = None
+            return "disabled"
         online = backend.ethernet or backend.current is not None
         if online:
             self.offline_since = None
@@ -446,7 +536,7 @@ class Watcher:
 
 
 # the service used by the web server; tests create their own with FakeWifi
-_service = WifiService(NmcliWifi())
+_service = WifiService(NmcliWifi(), store=FileStore())
 
 
 def get_network(req):
@@ -470,6 +560,18 @@ def post_forget(req):
 def post_move(req):
     body = req.json()
     return 200, _service.move(body.get("name", ""), body.get("direction", ""))
+
+
+def post_hotspot(req):
+    return 200, _service.set_hotspot_on(bool(req.json().get("on")))
+
+
+def post_hotspot_allowed(req):
+    return 200, _service.set_hotspot_allowed(bool(req.json().get("allowed")))
+
+
+def post_hotspot_password(req):
+    return 200, _service.set_hotspot_password(req.json().get("password", ""))
 
 
 def post_switch(req):

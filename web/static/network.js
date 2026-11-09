@@ -23,6 +23,21 @@
     return box;
   }
 
+  // hotspot card: allowed or not, on or off, and the password
+  function drawHotspot() {
+    const h = state.hotspot;
+    $("hotspot-allowed").checked = !!h.allowed;
+    let text;
+    if (!h.allowed) text = "Disabled. Tick \"Allow the hotspot\" to use it.";
+    else if (h.on) text = "On: join \"" + h.name + "\" on your phone.";
+    else text = "Off. It starts by itself when there is no network, or with the button.";
+    $("hotspot-status").textContent = text;
+    $("hotspot-toggle").textContent = h.on ? "Turn off hotspot" : "Turn on hotspot";
+    $("hotspot-toggle").disabled = !h.allowed;
+    $("hotspot-password").disabled = !h.allowed;
+    $("hotspot-password-save").disabled = !h.allowed;
+  }
+
   function drawCurrent() {
     $("hotspot-banner").hidden = !state.hotspot.on;
     $("hotspot-name").textContent = state.hotspot.name || "device";
@@ -131,6 +146,7 @@
   }
 
   function draw() {
+    drawHotspot();
     drawCurrent();
     drawNearby();
     drawPriority();
@@ -219,6 +235,51 @@
     }
   }
 
+  function hotspotMessage(text, bad) {
+    $("hotspot-message").className = bad ? "status bad" : "muted";
+    $("hotspot-message").textContent = text;
+  }
+
+  async function setAllowed(allowed) {
+    try {
+      const data = await api("/api/network/hotspot-allowed", { body: { allowed: allowed } });
+      state.hotspot = data;
+      hotspotMessage(allowed ? "Hotspot allowed." : "Hotspot disabled. It is off and will not start.", false);
+      draw();
+    } catch (err) {
+      hotspotMessage(err.message, true);
+      await load();
+    }
+  }
+
+  async function toggleHotspot() {
+    const turnOn = !state.hotspot.on;
+    try {
+      await api("/api/network/hotspot", { body: { on: turnOn } });
+      hotspotMessage(turnOn ? "Starting the hotspot. Give it about 10 seconds." : "Hotspot off.", false);
+      setTimeout(load, turnOn ? 8000 : 0);
+    } catch (err) {
+      hotspotMessage(err.message, true);
+    }
+  }
+
+  async function changeHotspotPassword() {
+    const password = $("hotspot-password").value;
+    if (password.length < 8 || password.length > 63) {
+      hotspotMessage("Password must be 8 to 63 characters.", true);
+      return;
+    }
+    try {
+      const data = await api("/api/network/hotspot-password", { body: { password: password } });
+      $("hotspot-password").value = "";
+      state.hotspot = data;
+      hotspotMessage("Password changed. It is used the next time the hotspot starts.", false);
+      draw();
+    } catch (err) {
+      hotspotMessage(err.message, true);
+    }
+  }
+
   // ---- Save dialog ----
   function openSave(net) {
     pending = net;
@@ -276,6 +337,9 @@
   $("save-cancel").addEventListener("click", closeSave);
   $("save-form").addEventListener("submit", submitSave);
   $("scan").addEventListener("click", scan);
+  $("hotspot-allowed").addEventListener("change", function () { setAllowed(this.checked); });
+  $("hotspot-toggle").addEventListener("click", toggleHotspot);
+  $("hotspot-password-save").addEventListener("click", changeHotspotPassword);
 
   // the saved list is shown right away; the nearby list needs a scan
   load().then(scan);

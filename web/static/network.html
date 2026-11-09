@@ -48,6 +48,30 @@
       <p id="current-note" class="muted"></p>
     </section>
 
+    <!-- ===== Hotspot ===== -->
+    <section class="card" id="hotspot-card">
+      <h2>Hotspot</h2>
+      <p id="hotspot-status" class="muted"></p>
+      <label class="check">
+        <input id="hotspot-allowed" type="checkbox">
+        <span>Allow the hotspot</span>
+      </label>
+      <div class="actions">
+        <button id="hotspot-toggle" class="ctl" type="button">Turn on hotspot</button>
+      </div>
+      <form id="hotspot-password-form" class="form">
+        <label class="field">
+          <span>New hotspot password</span>
+          <input id="hotspot-password" type="password" minlength="8" maxlength="63" autocomplete="off">
+          <small class="muted">8 to 63 characters. It is used the next time the hotspot starts.</small>
+        </label>
+        <div class="actions">
+          <button id="hotspot-password-save" class="ctl" type="button">Change password</button>
+        </div>
+      </form>
+      <p id="hotspot-message" class="muted" role="status"></p>
+    </section>
+
     <!-- ===== Wi-Fi priority ===== -->
     <section class="card">
       <h2>Wi-Fi priority</h2>

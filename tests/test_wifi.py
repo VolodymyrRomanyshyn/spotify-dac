@@ -155,6 +155,95 @@ class ForgetAndStateTests(unittest.TestCase):
         self.assertFalse(marks["Home-WiFi"])
 
 
+class FakeStore:
+    def __init__(self, allowed=True, password="stored-pass1"):
+        self.allowed = allowed
+        self.password = password
+        self.requests = 0
+
+    def get_allowed(self):
+        return self.allowed
+
+    def set_allowed(self, on):
+        self.allowed = on
+
+    def has_password(self):
+        return self.password is not None
+
+    def set_password(self, password):
+        self.password = password
+
+    def request_start(self):
+        self.requests += 1
+
+
+class HotspotSettingsTests(unittest.TestCase):
+    def service(self, allowed=True, password="stored-pass1"):
+        backend = wifi.FakeWifi(nearby=NEARBY)
+        store = FakeStore(allowed=allowed, password=password)
+        return wifi.WifiService(backend, store=store), store
+
+    def test_turning_on_needs_allowed_and_a_password(self):
+        svc, store = self.service(allowed=False)
+        with self.assertRaises(ApiError):
+            svc.set_hotspot_on(True)
+        svc2, _ = self.service(allowed=True, password=None)
+        with self.assertRaises(ApiError):
+            svc2.set_hotspot_on(True)
+
+    def test_turning_on_asks_the_watcher_to_start_it(self):
+        svc, store = self.service()
+        svc.set_hotspot_on(True)
+        self.assertEqual(store.requests, 1)
+
+    def test_turning_off_stops_it_now(self):
+        svc, _ = self.service()
+        svc.backend.hotspot = True
+        svc.set_hotspot_on(False)
+        self.assertFalse(svc.backend.hotspot)
+
+    def test_forbidding_the_hotspot_stops_it(self):
+        svc, store = self.service()
+        svc.backend.hotspot = True
+        svc.set_hotspot_allowed(False)
+        self.assertFalse(store.allowed)
+        self.assertFalse(svc.backend.hotspot)
+
+    def test_allowing_needs_a_password(self):
+        svc, store = self.service(allowed=False, password=None)
+        with self.assertRaises(ApiError):
+            svc.set_hotspot_allowed(True)
+        self.assertFalse(store.allowed)
+
+    def test_password_must_be_8_to_63(self):
+        svc, _ = self.service()
+        with self.assertRaises(ApiError):
+            svc.set_hotspot_password("short")
+        svc.set_hotspot_password("new-password-1")
+        self.assertEqual(svc.store.password, "new-password-1")
+
+    def test_changing_the_password_restarts_a_running_hotspot(self):
+        svc, store = self.service()
+        svc.backend.hotspot = True
+        svc.set_hotspot_password("new-password-1")
+        self.assertEqual(store.requests, 1)
+
+    def test_state_reports_allowed_and_password(self):
+        svc, _ = self.service(allowed=False)
+        status = svc.state()["hotspot"]
+        self.assertFalse(status["allowed"])
+        self.assertTrue(status["has_password"])
+
+    def test_watcher_never_starts_a_disallowed_hotspot(self):
+        svc, store = self.service(allowed=False)
+        clock = {"now": 1000.0}
+        watcher = wifi.Watcher(svc, fallback_seconds=60, clock=lambda: clock["now"])
+        watcher.tick()
+        clock["now"] += 600
+        self.assertEqual(watcher.tick(), "disabled")
+        self.assertFalse(svc.backend.hotspot)
+
+
 class WatcherTests(unittest.TestCase):
     def make(self, **kwargs):
         clock = {"now": 1000.0}

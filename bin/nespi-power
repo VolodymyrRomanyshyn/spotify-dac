@@ -163,6 +163,7 @@ class Controller:
 
     def power_off(self) -> None:
         self.led.blink(0.5)
+        stop_playback()  # only once the switch has been held long enough to mean a real power off
         if self.update_on_poweroff:
             log("Running updates before power off")
             run_cmd([UPDATER, "--trigger", "poweroff"], timeout=self.update_timeout)
@@ -229,7 +230,6 @@ class Controller:
                     power_since = time.monotonic()
                     log("Power switch OFF detected")
                     self.led.blink(0.2)
-                    stop_playback()
                 elif time.monotonic() - power_since >= self.hold_seconds:
                     self.power_off()
                     power_since = None

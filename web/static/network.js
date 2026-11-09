@@ -77,9 +77,9 @@
     });
   }
 
-  // saved networks, highest priority first: the Pi prefers the top one when it is in range
-  function drawSaved() {
-    const list = $("saved");
+  // priority order: the Pi joins the first one it can see
+  function drawPriority() {
+    const list = $("priority");
     list.replaceChildren();
     if (state.saved.length === 0) {
       list.append(el("li", "muted", "No saved networks yet. Use Save next to a network above."));
@@ -93,8 +93,28 @@
       const actions = el("span", "saved-actions");
       actions.append(
         smallButton("Up", index === 0, function () { moveNetwork(name, "up"); }),
-        smallButton("Down", index === state.saved.length - 1, function () { moveNetwork(name, "down"); }),
-        smallButton("Connect", state.current === name, function () { switchNetwork(name); }),
+        smallButton("Down", index === state.saved.length - 1, function () { moveNetwork(name, "down"); })
+      );
+      row.append(actions);
+      list.append(row);
+    });
+  }
+
+  // saved networks: connect now, or forget
+  function drawSaved() {
+    const list = $("saved");
+    list.replaceChildren();
+    if (state.saved.length === 0) {
+      list.append(el("li", "muted", "Nothing saved."));
+      return;
+    }
+    state.saved.forEach(function (name) {
+      const row = el("li", "saved-row");
+      row.append(el("span", "saved-name", name));
+      if (name === state.current) row.append(el("span", "badge", "connected"));
+      const actions = el("span", "saved-actions");
+      actions.append(
+        smallButton("Connect", name === state.current, function () { switchNetwork(name); }),
         smallButton("Forget", false, function () { forgetNetwork(name); })
       );
       row.append(actions);
@@ -113,6 +133,7 @@
   function draw() {
     drawCurrent();
     drawNearby();
+    drawPriority();
     drawSaved();
   }
 
@@ -152,14 +173,24 @@
     }
   }
 
+  // the list changes at once; the Pi confirms the order in the background
   async function moveNetwork(name, direction) {
+    const index = state.saved.indexOf(name);
+    const target = direction === "up" ? index - 1 : index + 1;
+    if (target < 0 || target >= state.saved.length) return;
+    const order = state.saved.slice();
+    order[index] = order[target];
+    order[target] = name;
+    state.saved = order;
+    draw();
     try {
       const data = await api("/api/network/move", { body: { name: name, direction: direction } });
       state.saved = data.saved;
-      drawSaved();
+      drawPriority();
     } catch (err) {
       $("scan-status").className = "status bad";
       $("scan-status").textContent = err.message;
+      await load();
     }
   }
 

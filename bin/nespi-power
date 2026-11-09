@@ -10,7 +10,9 @@ Reset button      -> quick press (released before 5s): LED blinks, then reboot.
                      Hold for 5s: LED goes solid and the device hotspot is requested
                      (dac-netwatch starts it when it sees HOTSPOT_REQUEST_FILE).
 """
+import json
 import os
+import signal
 import subprocess
 import sys
 import threading
@@ -22,6 +24,8 @@ from gpiod.line import Bias, Direction, Edge, Value
 
 LOG_PREFIX = "[nespi-power]"
 UPDATER = "/usr/local/sbin/dac-update"
+SOLOIST_CTL = ["soloist", "ctl", "-w", "127.0.0.1:9090"]
+RADIO_STATE = "/run/spotify-dac-radio.json"
 
 
 def env_int(name: str, default: int) -> int:
@@ -37,6 +41,22 @@ def env_str(name: str, default: str) -> str:
 
 def log(message: str) -> None:
     print(f"{LOG_PREFIX} {message}", flush=True)
+
+
+def stop_playback() -> None:
+    """Stops every source at once, so the music stops when the switch goes off, not after the update."""
+    log("Power switch off: stopping playback before anything else")
+    run_cmd(SOLOIST_CTL + ["pause"], timeout=5)  # Spotify
+    try:  # internet radio: the mpv process started by the web interface
+        with open(RADIO_STATE, encoding="utf-8") as handle:
+            os.kill(json.load(handle)["pid"], signal.SIGTERM)
+    except (OSError, KeyError, ValueError):
+        pass
+    try:
+        os.remove(RADIO_STATE)
+    except OSError:
+        pass
+    run_cmd(["systemctl", "stop", "spotify-dac-airplay.service"], timeout=20)  # AirPlay
 
 
 def run_cmd(cmd: list[str], timeout: int | None = None) -> None:
@@ -209,6 +229,7 @@ class Controller:
                     power_since = time.monotonic()
                     log("Power switch OFF detected")
                     self.led.blink(0.2)
+                    stop_playback()
                 elif time.monotonic() - power_since >= self.hold_seconds:
                     self.power_off()
                     power_since = None

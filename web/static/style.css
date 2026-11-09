@@ -311,7 +311,7 @@ dialog.modal h2 { margin-top: 0; }
 /* a checkbox with its label, left-aligned, for small options such as "Show password" */
 .check { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; color: var(--muted); }
 .check input { appearance: none; -webkit-appearance: none; width: 18px; height: 18px; margin: 0; flex-shrink: 0;
-  border: 2px solid var(--muted); border-radius: 4px; background: #ffffff; cursor: pointer; display: grid; place-content: center; }
+  border: 2px solid var(--muted); border-radius: 4px; background: var(--bg); cursor: pointer; display: grid; place-content: center; }
 .check input:checked { background: var(--accent-light); border-color: var(--accent-light); }
 .check input:checked::after { content: ""; width: 5px; height: 9px; border: solid #ffffff; border-width: 0 2px 2px 0; transform: rotate(45deg); margin-top: -2px; }
 .form label.check { flex-direction: row; justify-self: start; align-items: center; }

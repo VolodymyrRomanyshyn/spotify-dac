@@ -118,6 +118,7 @@
     $("save-title").textContent = "Save " + net.name;
     $("save-name").textContent = net.secure ? "Enter the password for this network." : "This network is open, no password needed.";
     $("save-password-field").hidden = !net.secure;
+    $("save-show-field").hidden = !net.secure;
     $("save-password").value = "";
     $("save-password").type = "password";
     $("save-show").checked = false;

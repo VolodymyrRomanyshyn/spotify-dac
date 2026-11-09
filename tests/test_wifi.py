@@ -192,6 +192,14 @@ class WatcherTests(unittest.TestCase):
         self.assertEqual(watcher.tick(), "none")  # the 30 s count starts again
         self.assertFalse(backend.hotspot)
 
+    def test_forced_hotspot_stays_on_while_wifi_is_up(self):
+        backend, watcher, clock = self.make(current="Office")
+        backend.start_hotspot()
+        watcher.forced = True
+        clock["now"] += 10
+        self.assertEqual(watcher.tick(), "wifi")
+        self.assertTrue(backend.hotspot)
+
     def test_hotspot_retries_saved_networks_and_stops_on_success(self):
         backend, watcher, clock = self.make(saved={"Office": "office-pass"})
         clock["now"] += 60

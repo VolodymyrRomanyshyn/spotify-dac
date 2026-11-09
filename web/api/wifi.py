@@ -388,6 +388,7 @@ class Watcher:
         self.clock = clock
         self.offline_since = None
         self.last_retry = None
+        self.forced = False  # True when the reset button asked for the hotspot: it stays on until a network is saved
 
     def tick(self):
         backend = self.service.backend
@@ -402,12 +403,14 @@ class Watcher:
         if mode == "hotspot" and not backend.hotspot:
             backend.start_hotspot()
             self.last_retry = now
-        elif mode in ("ethernet", "wifi") and backend.hotspot:
+        elif mode in ("ethernet", "wifi") and backend.hotspot and not self.forced:
             backend.stop_hotspot()
             self.last_retry = None
         elif backend.hotspot and self.last_retry is not None and now - self.last_retry >= RETRY_SECONDS:
             self.last_retry = now
             self.retry_saved()
+        if not backend.hotspot:
+            self.forced = False
         return mode
 
     def retry_saved(self):

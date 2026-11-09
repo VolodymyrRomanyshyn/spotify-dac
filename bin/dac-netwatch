@@ -47,7 +47,8 @@ def main():
     while True:
         try:
             if hotspot_requested() and not service.backend.hotspot:
-                service.backend.start_hotspot()  # the watcher keeps it on until a network connects
+                service.backend.start_hotspot()
+                watcher.forced = True  # stays on until a network is saved on the Wi-Fi page
             watcher.tick()
             # port 80 (the setup page) is open only while the hotspot is on; it retries until the address is up
             if service.backend.hotspot:

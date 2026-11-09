@@ -154,5 +154,53 @@ class ForgetAndStateTests(unittest.TestCase):
         self.assertFalse(marks["Home-WiFi"])
 
 
+class WatcherTests(unittest.TestCase):
+    def make(self, **kwargs):
+        clock = {"now": 1000.0}
+        backend = wifi.FakeWifi(nearby=NEARBY, **kwargs)
+        service = wifi.WifiService(backend)
+        watcher = wifi.Watcher(service, fallback_seconds=60, clock=lambda: clock["now"])
+        watcher.tick()  # the first tick starts the offline timer
+        return backend, watcher, clock
+
+    def test_hotspot_starts_only_after_the_fallback_time(self):
+        backend, watcher, clock = self.make()
+        clock["now"] += 59
+        self.assertEqual(watcher.tick(), "none")
+        self.assertFalse(backend.hotspot)
+        clock["now"] += 1
+        self.assertEqual(watcher.tick(), "hotspot")
+        self.assertTrue(backend.hotspot)
+
+    def test_hotspot_stops_when_ethernet_comes_back(self):
+        backend, watcher, clock = self.make()
+        clock["now"] += 60
+        watcher.tick()
+        backend.ethernet = True
+        self.assertEqual(watcher.tick(), "ethernet")
+        self.assertFalse(backend.hotspot)
+
+    def test_a_connection_resets_the_offline_timer(self):
+        backend, watcher, clock = self.make()
+        watcher.tick()
+        clock["now"] += 50
+        backend.current = "Office"
+        watcher.tick()
+        backend.current = None
+        clock["now"] += 30
+        self.assertEqual(watcher.tick(), "none")  # the 30 s count starts again
+        self.assertFalse(backend.hotspot)
+
+    def test_hotspot_retries_saved_networks_and_stops_on_success(self):
+        backend, watcher, clock = self.make(saved={"Office": "office-pass"})
+        clock["now"] += 60
+        watcher.tick()
+        self.assertTrue(backend.hotspot)
+        clock["now"] += wifi.RETRY_SECONDS
+        watcher.tick()
+        self.assertFalse(backend.hotspot)
+        self.assertEqual(backend.current, "Office")
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -9,6 +9,7 @@ fails) live here, so they are tested with FakeWifi and do not need a Pi.
 """
 import re
 import subprocess
+import time
 
 from .common import ApiError
 
@@ -227,6 +228,51 @@ class WifiService:
             raise ApiError(404, "That network is not saved")
         self.backend.forget(name)
         return {"forgotten": name}
+
+
+RETRY_SECONDS = 300  # while in hotspot mode, try the saved networks this often
+
+
+class Watcher:
+    """Called every few seconds: starts the hotspot after the fallback time without a network,
+    stops it when a network or cable comes back, and retries the saved networks while it runs."""
+
+    def __init__(self, service, fallback_seconds=FALLBACK_DEFAULT, clock=time.monotonic):
+        self.service = service
+        self.fallback_seconds = fallback_seconds
+        self.clock = clock
+        self.offline_since = None
+        self.last_retry = None
+
+    def tick(self):
+        backend = self.service.backend
+        now = self.clock()
+        online = backend.ethernet or backend.current is not None
+        if online:
+            self.offline_since = None
+        elif self.offline_since is None:
+            self.offline_since = now
+        offline = 0 if online else now - self.offline_since
+        mode = next_mode(backend.ethernet, backend.current is not None, offline, self.fallback_seconds)
+        if mode == "hotspot" and not backend.hotspot:
+            backend.start_hotspot()
+            self.last_retry = now
+        elif mode in ("ethernet", "wifi") and backend.hotspot:
+            backend.stop_hotspot()
+            self.last_retry = None
+        elif backend.hotspot and self.last_retry is not None and now - self.last_retry >= RETRY_SECONDS:
+            self.last_retry = now
+            self.retry_saved()
+        return mode
+
+    def retry_saved(self):
+        """Tries each saved network once. The first one that accepts its password ends the hotspot."""
+        backend = self.service.backend
+        for name, password in list(backend.saved.items()):
+            if backend.connect(name, password):
+                backend.stop_hotspot()
+                return name
+        return None
 
 
 # the service used by the web server; tests create their own with FakeWifi

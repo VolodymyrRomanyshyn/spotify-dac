@@ -11,6 +11,7 @@ import traceback
 WEB_DIR = os.environ.get("SPOTIFY_DAC_WEB", "/opt/spotify-dac/web")
 CONFIG = os.environ.get("SPOTIFY_DAC_CONFIG", "/etc/spotify-dac/config")
 TICK_SECONDS = 5
+HOTSPOT_REQUEST_FILE = "/run/spotify-dac-hotspot-request"  # written by nespi-power on a 5-second reset hold
 
 sys.path.insert(0, WEB_DIR)
 from api import captive, wifi  # noqa: E402
@@ -30,6 +31,14 @@ def fallback_seconds():
     return wifi.FALLBACK_DEFAULT
 
 
+def hotspot_requested():
+    """True once, when the reset button asked for the hotspot. The request file is removed."""
+    if os.path.exists(HOTSPOT_REQUEST_FILE):
+        os.remove(HOTSPOT_REQUEST_FILE)
+        return True
+    return False
+
+
 def main():
     service = wifi.WifiService(wifi.NmcliWifi(), fallback_seconds())
     watcher = wifi.Watcher(service, fallback_seconds=fallback_seconds())
@@ -37,6 +46,8 @@ def main():
     last_error = None
     while True:
         try:
+            if hotspot_requested() and not service.backend.hotspot:
+                service.backend.start_hotspot()  # the watcher keeps it on until a network connects
             watcher.tick()
             # port 80 (the setup page) is open only while the hotspot is on; it retries until the address is up
             if service.backend.hotspot:

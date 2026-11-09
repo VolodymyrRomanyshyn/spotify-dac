@@ -277,6 +277,15 @@
     }
   }
 
+  // a message with an OK button; the text may have several lines
+  function showInfo(title, lines) {
+    $("info-title").textContent = title;
+    const box = $("info-text");
+    box.replaceChildren();
+    lines.forEach(function (line) { box.append(el("p", "", line)); });
+    $("info-dialog").showModal();
+  }
+
   async function toggleHotspot() {
     const turnOn = !state.hotspot.on;
     const sure = await confirmAction(
@@ -288,7 +297,14 @@
     if (!sure) return;
     try {
       await api("/api/network/hotspot", { body: { on: turnOn } });
-      hotspotMessage(turnOn ? "Starting the hotspot. Give it about 10 seconds, then join \"" + state.hotspot.name + "\"." : "Hotspot off.", false);
+      hotspotMessage(turnOn ? "Starting the hotspot." : "Hotspot off.", false);
+      if (turnOn) {
+        showInfo("Hotspot is starting", [
+          "Wait about 10 seconds, then on your phone join the Wi-Fi network \"" + state.hotspot.name + "\".",
+          "Use the hotspot password you set on this page.",
+          "Then open http://10.42.0.1 (or https://" + location.hostname + ":8443) to reach this page.",
+        ]);
+      }
       setTimeout(load, turnOn ? 8000 : 0);
     } catch (err) {
       hotspotMessage(err.message, true);

@@ -44,19 +44,55 @@ def log(message: str) -> None:
 
 
 def stop_playback() -> None:
-    """Stops every source at once, so the music stops when the switch goes off, not after the update."""
-    log("Power switch off: stopping playback before anything else")
-    run_cmd(SOLOIST_CTL + ["pause"], timeout=5)  # Spotify
-    try:  # internet radio: the mpv process started by the web interface
-        with open(RADIO_STATE, encoding="utf-8") as handle:
-            os.kill(json.load(handle)["pid"], signal.SIGTERM)
-    except (OSError, KeyError, ValueError):
-        pass
+    """Stops only the source that is playing: Spotify, the internet radio or AirPlay."""
+    stopped = []
+    if spotify_playing():
+        run_cmd(SOLOIST_CTL + ["pause"], timeout=5)
+        stopped.append("Spotify")
+    radio_pid = radio_playing_pid()
+    if radio_pid:
+        try:
+            os.kill(radio_pid, signal.SIGTERM)
+        except OSError:
+            pass
+        stopped.append("radio")
     try:
         os.remove(RADIO_STATE)
     except OSError:
         pass
-    run_cmd(["systemctl", "stop", "spotify-dac-airplay.service"], timeout=20)  # AirPlay
+    if airplay_active():
+        run_cmd(["systemctl", "stop", "spotify-dac-airplay.service"], timeout=20)
+        stopped.append("AirPlay")
+    log("Playback stopped: " + (", ".join(stopped) if stopped else "nothing was playing"))
+
+
+def spotify_playing() -> bool:
+    """True while Soloist reports playback. Asks Soloist; no answer means not playing."""
+    try:
+        done = subprocess.run(SOLOIST_CTL + ["now", "--json"], capture_output=True, text=True, timeout=5, check=False)
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return done.returncode == 0 and '"status":"playing"' in done.stdout.replace(" ", "")
+
+
+def radio_playing_pid():
+    """The mpv process of the radio, when it is running; None otherwise."""
+    try:
+        with open(RADIO_STATE, encoding="utf-8") as handle:
+            pid = int(json.load(handle)["pid"])
+        os.kill(pid, 0)
+        return pid
+    except (OSError, KeyError, ValueError):
+        return None
+
+
+def airplay_active() -> bool:
+    try:
+        done = subprocess.run(["systemctl", "is-active", "spotify-dac-airplay.service"],
+                              capture_output=True, text=True, timeout=5, check=False)
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return done.stdout.strip() == "active"
 
 
 def run_cmd(cmd: list[str], timeout: int | None = None) -> None:

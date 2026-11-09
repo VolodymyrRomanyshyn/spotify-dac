@@ -10,7 +10,9 @@ Reset button      -> quick press (released before 5s): LED blinks, then reboot.
                      Hold for 5s: LED goes solid and the device hotspot is requested
                      (dac-netwatch starts it when it sees HOTSPOT_REQUEST_FILE).
 """
+import json
 import os
+import signal
 import subprocess
 import sys
 import threading
@@ -22,6 +24,8 @@ from gpiod.line import Bias, Direction, Edge, Value
 
 LOG_PREFIX = "[nespi-power]"
 UPDATER = "/usr/local/sbin/dac-update"
+SOLOIST_CTL = ["soloist", "ctl", "-w", "127.0.0.1:9090"]
+RADIO_STATE = "/run/spotify-dac-radio.json"
 
 
 def env_int(name: str, default: int) -> int:
@@ -37,6 +41,58 @@ def env_str(name: str, default: str) -> str:
 
 def log(message: str) -> None:
     print(f"{LOG_PREFIX} {message}", flush=True)
+
+
+def stop_playback() -> None:
+    """Stops only the source that is playing: Spotify, the internet radio or AirPlay."""
+    stopped = []
+    if spotify_playing():
+        run_cmd(SOLOIST_CTL + ["pause"], timeout=5)
+        stopped.append("Spotify")
+    radio_pid = radio_playing_pid()
+    if radio_pid:
+        try:
+            os.kill(radio_pid, signal.SIGTERM)
+        except OSError:
+            pass
+        stopped.append("radio")
+    try:
+        os.remove(RADIO_STATE)
+    except OSError:
+        pass
+    if airplay_active():
+        run_cmd(["systemctl", "stop", "spotify-dac-airplay.service"], timeout=20)
+        stopped.append("AirPlay")
+    log("Playback stopped: " + (", ".join(stopped) if stopped else "nothing was playing"))
+
+
+def spotify_playing() -> bool:
+    """True while Soloist reports playback. Asks Soloist; no answer means not playing."""
+    try:
+        done = subprocess.run(SOLOIST_CTL + ["now", "--json"], capture_output=True, text=True, timeout=5, check=False)
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return done.returncode == 0 and '"status":"playing"' in done.stdout.replace(" ", "")
+
+
+def radio_playing_pid():
+    """The mpv process of the radio, when it is running; None otherwise."""
+    try:
+        with open(RADIO_STATE, encoding="utf-8") as handle:
+            pid = int(json.load(handle)["pid"])
+        os.kill(pid, 0)
+        return pid
+    except (OSError, KeyError, ValueError):
+        return None
+
+
+def airplay_active() -> bool:
+    try:
+        done = subprocess.run(["systemctl", "is-active", "spotify-dac-airplay.service"],
+                              capture_output=True, text=True, timeout=5, check=False)
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return done.stdout.strip() == "active"
 
 
 def run_cmd(cmd: list[str], timeout: int | None = None) -> None:
@@ -143,6 +199,7 @@ class Controller:
 
     def power_off(self) -> None:
         self.led.blink(0.5)
+        stop_playback()  # only once the switch has been held long enough to mean a real power off
         if self.update_on_poweroff:
             log("Running updates before power off")
             run_cmd([UPDATER, "--trigger", "poweroff"], timeout=self.update_timeout)

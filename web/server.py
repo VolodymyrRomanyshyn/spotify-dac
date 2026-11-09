@@ -22,13 +22,14 @@ from urllib.parse import parse_qs, urlsplit
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
-from api import airplay, auth, config, hardware, radio, spotify, status, update, volume  # noqa: E402
+from api import airplay, auth, config, hardware, radio, spotify, status, update, volume, wifi  # noqa: E402
 from api.common import MAX_BODY, ApiError, Request, feature_on  # noqa: E402
 
 STATIC = HERE / "static"
 mimetypes.add_type("application/manifest+json", ".webmanifest")
 
 ROUTES = {
+    **wifi.ROUTES,
     ("POST", "/api/login"): auth.login,
     ("POST", "/api/logout"): auth.logout,
     ("GET", "/api/status"): status.get_status,

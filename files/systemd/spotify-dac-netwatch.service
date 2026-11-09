@@ -1,0 +1,15 @@
+[Unit]
+Description=Spotify DAC: network watcher (device hotspot when there is no network)
+After=NetworkManager.service
+Wants=NetworkManager.service
+
+[Service]
+Type=simple
+User=root
+EnvironmentFile=-/etc/spotify-dac/config
+ExecStart=/usr/local/sbin/dac-netwatch
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

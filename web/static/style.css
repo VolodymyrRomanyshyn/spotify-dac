@@ -83,7 +83,7 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
   fill: none; stroke: var(--muted); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
   pointer-events: none;
 }
-.settings { display: grid; gap: 16px; max-width: 1100px; margin: 0 auto; padding: 16px; }
+.settings { display: grid; gap: 0; max-width: 1100px; margin: 0 auto; padding: 16px; }
 .settings h3 { margin: 20px 0 4px; font-size: 16px; }
 .toggle { display: flex; align-items: center; gap: 10px; }
 .toggle input { width: auto; margin: 0; }
@@ -308,6 +308,13 @@ dialog.modal h2 { margin-top: 0; }
 }
 .row-toggle { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 6px 0; }
 .row-toggle > span { font-weight: 600; }
+/* a checkbox with its label, left-aligned, for small options such as "Show password" */
+.check { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; color: var(--muted); }
+.check input { appearance: none; -webkit-appearance: none; width: 18px; height: 18px; margin: 0; flex-shrink: 0;
+  border: 2px solid var(--muted); border-radius: 4px; background: var(--bg); cursor: pointer; display: grid; place-content: center; }
+.check input:checked { background: var(--accent-light); border-color: var(--accent-light); }
+.check input:checked::after { content: ""; width: 5px; height: 9px; border: solid #ffffff; border-width: 0 2px 2px 0; transform: rotate(45deg); margin-top: -2px; }
+.form label.check { flex-direction: row; justify-self: start; align-items: center; }
 .status { font-weight: 600; font-size: 13px; }
 .status.ok { color: #3ddc84; }
 .status.warn { color: #f5b041; }
@@ -324,3 +331,23 @@ dialog.modal h2 { margin-top: 0; }
 .ctl.main.power.on { background: var(--accent); border-color: var(--accent); color: #3ddc84; }
 .ctl.main.power.off { background: var(--accent); border-color: var(--accent); color: #ff7b7b; }
 .ctl.ghost { visibility: hidden; }
+
+/* Wi-Fi page: nearby networks, one row per network in aligned columns */
+.nearby-row { display: grid; grid-template-columns: minmax(0, 1fr) 72px 56px 72px; align-items: center; gap: 8px;
+  list-style: none; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; }
+.nearby-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nearby-muted { color: var(--muted); font-size: 13px; }
+.nearby-action { justify-self: end; }
+.signal { display: inline-flex; align-items: flex-end; gap: 2px; height: 14px; justify-self: end; }
+.signal i { display: block; width: 4px; border-radius: 1px; background: var(--line); }
+.signal i:nth-child(1) { height: 4px; }
+.signal i:nth-child(2) { height: 7px; }
+.signal i:nth-child(3) { height: 10px; }
+.signal i:nth-child(4) { height: 14px; }
+.signal i.on { background: var(--text); }
+
+/* Wi-Fi page: saved networks with priority order */
+.saved-row { display: flex; align-items: center; gap: 8px; list-style: none; padding: 6px 0; flex-wrap: wrap; }
+.saved-order { color: var(--muted); font-size: 13px; width: 18px; }
+.saved-name { font-weight: 600; flex: 1; min-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.saved-actions { display: flex; gap: 6px; flex-wrap: wrap; }

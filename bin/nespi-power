@@ -6,7 +6,9 @@ Power switch OFF  -> LED blinks, run dac-update (when UPDATE_TRIGGER=poweroff), 
                           filesystems read-only, then drive POWER_EN low -> case cuts power.
   POWEROFF_MODE=graceful (no longer offered by the installer): systemctl poweroff; the kernel
                           gpio-poweroff overlay drives POWER_EN low at the very end of shutdown.
-Reset button      -> LED blinks fast for 5s, then reboot.
+Reset button      -> quick press (released before 5s): LED blinks, then reboot.
+                     Hold for 5s: LED goes solid and the device hotspot is requested
+                     (dac-netwatch starts it when it sees HOTSPOT_REQUEST_FILE).
 """
 import os
 import subprocess
@@ -44,6 +46,16 @@ def run_cmd(cmd: list[str], timeout: int | None = None) -> None:
         log(f"Command {' '.join(cmd)} timed out after {timeout}s")
     except OSError as exc:
         log(f"Command {' '.join(cmd)} failed: {exc}")
+
+
+HOTSPOT_HOLD_SECONDS = 5.0  # keep in step with web/api/resetbutton.py
+HOTSPOT_REQUEST_FILE = "/run/spotify-dac-hotspot-request"
+
+
+def request_hotspot() -> None:
+    """Asks dac-netwatch to start the device hotspot. The file is removed when the request is taken."""
+    with open(HOTSPOT_REQUEST_FILE, "w", encoding="utf-8") as handle:
+        handle.write("1\n")
 
 
 def sysrq(key: str) -> None:
@@ -159,10 +171,23 @@ class Controller:
         # read-only now, so the only sane way forward is a reboot.
         sysrq("b")
 
-    def reboot(self) -> None:
-        log("Reset pressed -> blinking 5s then rebooting")
+    def reset_press(self) -> None:
+        """Called while the reset button is down. Under 5 seconds on release: reboot. 5 seconds held: hotspot."""
+        started = time.monotonic()
         self.led.blink(0.2)
-        time.sleep(5)
+        while self.pressed(self.reset_pin):
+            if time.monotonic() - started >= HOTSPOT_HOLD_SECONDS:
+                self.led.on()
+                log("Reset held 5s -> requesting the device hotspot")
+                request_hotspot()
+                while self.pressed(self.reset_pin):
+                    time.sleep(0.05)
+                self.led.on()
+                return
+            time.sleep(0.05)
+        log("Reset pressed -> rebooting")
+        self.led.blink(0.2)
+        time.sleep(1)
         self.led.on()
         run_cmd(["systemctl", "reboot"])
         time.sleep(30)
@@ -176,7 +201,7 @@ class Controller:
                 self.buttons.read_edge_events()
 
             if self.enable_reset and self.pressed(self.reset_pin):
-                self.reboot()
+                self.reset_press()
                 continue
 
             if self.pressed(self.power_pin):

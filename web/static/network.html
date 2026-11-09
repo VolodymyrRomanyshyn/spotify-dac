@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Spotify DAC - Wi-Fi</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#15171c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="DAC">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><svg class="home-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg><span class="device">DAC</span></a>
+    <div class="menu">
+      <button id="burger" class="theme" type="button" aria-label="Menu" aria-expanded="false" aria-controls="menu">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <nav id="menu" class="menu-list" hidden>
+        <a href="/">Home</a>
+        <a data-feature="radio" href="/radio.html">Radio</a>
+        <a href="/status.html">Status</a>
+        <a href="/settings.html">Settings</a>
+        <a href="/network.html" class="active">Wi-Fi</a>
+      </nav>
+    </div>
+    <button id="theme" class="theme" type="button" aria-label="Switch dark or light mode">Theme</button>
+  </header>
+
+  <main class="settings">
+
+    <!-- ===== Current connection ===== -->
+    <section class="card">
+      <h2>Connection</h2>
+      <div class="row-toggle">
+        <span>Now connected to <strong id="current-name">-</strong></span>
+        <span id="current-type" class="status"></span>
+      </div>
+      <p id="current-note" class="muted"></p>
+    </section>
+
+    <!-- ===== Hotspot ===== -->
+    <section class="card" id="hotspot-card">
+      <h2>Hotspot</h2>
+      <div class="row-toggle">
+        <span>Hotspot functionality</span>
+        <button id="hotspot-allowed" class="toggle-btn" type="button" aria-pressed="false"><span class="led" aria-hidden="true"></span><span class="state">Off</span></button>
+      </div>
+      <p id="hotspot-status" class="muted"></p>
+      <div id="hotspot-controls" class="actions" hidden>
+        <button id="hotspot-toggle" class="ctl" type="button">Turn on hotspot</button>
+        <button id="hotspot-password-open" class="ctl" type="button">Change password</button>
+      </div>
+      <p id="hotspot-message" class="muted" role="status"></p>
+    </section>
+
+    <!-- ===== Wi-Fi priority ===== -->
+    <section class="card">
+      <h2>Wi-Fi priority</h2>
+      <p class="muted">The box joins the first network in this list that it can see.</p>
+      <ul id="priority" class="commits"></ul>
+    </section>
+
+    <!-- ===== Wi-Fi management ===== -->
+    <section class="card">
+      <h2>Wi-Fi management</h2>
+      <ul id="saved" class="commits"></ul>
+    </section>
+    <!-- ===== Nearby networks ===== -->
+    <section class="card">
+      <h2>Nearby networks</h2>
+      <div class="actions">
+        <button id="scan" class="ctl" type="button">Scan again</button>
+        <span id="scan-status" class="muted" role="status"></span>
+      </div>
+      <ul id="nearby" class="commits"></ul>
+    </section>
+  </main>
+
+
+  <!-- Confirm: used before an action that can cut off the page -->
+  <dialog id="confirm-dialog" class="modal" aria-labelledby="confirm-title">
+    <h2 id="confirm-title"></h2>
+    <p id="confirm-text" class="muted"></p>
+    <form method="dialog" class="actions">
+      <button value="cancel" class="ctl">Cancel</button>
+      <button id="confirm-ok" value="ok" class="ctl main">Continue</button>
+    </form>
+  </dialog>
+
+  <!-- Shown after the hotspot is started: how to reach the box -->
+  <dialog id="info-dialog" class="modal" aria-labelledby="info-title">
+    <h2 id="info-title"></h2>
+    <div id="info-text" class="muted"></div>
+    <form method="dialog" class="actions">
+      <button value="ok" class="ctl main">OK</button>
+    </form>
+  </dialog>
+
+  <!-- Change the hotspot password: type it twice -->
+  <dialog id="password-dialog" class="modal" aria-labelledby="password-title">
+    <h2 id="password-title">Change hotspot password</h2>
+    <form id="password-form" class="form" method="dialog">
+      <label class="field">
+        <span>New password</span>
+        <input id="password-new" type="password" minlength="8" maxlength="63" autocomplete="new-password" required>
+      </label>
+      <label class="field">
+        <span>Repeat the new password</span>
+        <input id="password-repeat" type="password" minlength="8" maxlength="63" autocomplete="new-password" required>
+      </label>
+      <label class="check">
+        <input id="password-show" type="checkbox">
+        <span>Show passwords</span>
+      </label>
+      <p class="muted">8 to 63 characters. It is used the next time the hotspot starts.</p>
+      <p id="password-error" class="status bad" role="status"></p>
+      <div class="actions">
+        <button id="password-cancel" value="cancel" class="ctl" type="button">Cancel</button>
+        <button id="password-submit" class="ctl main" type="submit">Change password</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Save a nearby network: asks for the password when it is secured -->
+  <dialog id="save-dialog" class="modal" aria-labelledby="save-title">
+    <h2 id="save-title">Save network</h2>
+    <form id="save-form" class="form" method="dialog">
+      <p id="save-name" class="muted"></p>
+      <label id="save-password-field" class="field">
+        <span>Password</span>
+        <input id="save-password" type="password" minlength="8" maxlength="63" autocomplete="off">
+        <small class="muted">8 to 63 characters.</small>
+      </label>
+      <label id="save-show-field" class="check">
+        <input id="save-show" type="checkbox">
+        <span>Show password</span>
+      </label>
+      <p id="save-error" class="status bad" role="status"></p>
+      <div class="actions">
+        <button id="save-cancel" type="button">Cancel</button>
+        <button id="save-submit" class="ctl main" type="submit">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="common.js"></script>
+  <script src="network.js"></script>
+</body>
+</html>

@@ -10,6 +10,11 @@ RADIO_ENABLED="yes"
 # AirPlay receiver (shairport-sync). Off by default; the Home page starts and stops it, never at boot.
 AIRPLAY_ENABLED="no"
 
+# Wi-Fi hotspot "volodymyr-pi-dac-2" (the device name): starts when there is no network, or by holding reset 5 s.
+# Off by default. The password is set in the installer or on the Wi-Fi page (never stored here).
+HOTSPOT_ENABLED="no"
+HOTSPOT_FALLBACK_SECONDS="60"        # 60-300: seconds without any network before the hotspot starts
+
 # Sound card: usb = USB DAC (Topping E30 ...), hat = I2S/S-PDIF HAT (set the overlay)
 AUDIO_OUTPUT="usb"
 AUDIO_HAT_OVERLAY=""                # iqaudio-dacplus | hifiberry-dacplus (also PiFi DAC+) | hifiberry-dac | hifiberry-digi (PiFi Digi+)

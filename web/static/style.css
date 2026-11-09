@@ -311,6 +311,7 @@ dialog.modal h2 { margin-top: 0; }
 /* a checkbox with its label, left-aligned, for small options such as "Show password" */
 .check { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; color: var(--muted); }
 .check input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent-light); }
+.form label.check { flex-direction: row; justify-self: start; align-items: center; }
 .status { font-weight: 600; font-size: 13px; }
 .status.ok { color: #3ddc84; }
 .status.warn { color: #f5b041; }

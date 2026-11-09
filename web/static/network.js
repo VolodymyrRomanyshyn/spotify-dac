@@ -23,19 +23,22 @@
     return box;
   }
 
-  // hotspot card: allowed or not, on or off, and the password
+  // hotspot card: the switch decides everything else. Disabled shows only the switch.
   function drawHotspot() {
     const h = state.hotspot;
-    $("hotspot-allowed").checked = !!h.allowed;
-    let text;
-    if (!h.allowed) text = "Disabled. Tick \"Allow the hotspot\" to use it.";
-    else if (h.on) text = "On: join \"" + h.name + "\" on your phone.";
-    else text = "Off. It starts by itself when there is no network, or with the button.";
-    $("hotspot-status").textContent = text;
+    const allowed = !!h.allowed;
+    const toggle = $("hotspot-allowed");
+    toggle.setAttribute("aria-pressed", String(allowed));
+    toggle.querySelector(".state").textContent = allowed ? "On" : "Off";
+    $("hotspot-controls").hidden = !allowed;
+    if (!allowed) {
+      $("hotspot-status").textContent = "Turn it on to let the box start a hotspot when there is no network, or with the button.";
+      return;
+    }
+    $("hotspot-status").textContent = h.on
+      ? "Running now: join \"" + h.name + "\" on your phone."
+      : "Ready. It starts by itself when there is no network, or with the button below.";
     $("hotspot-toggle").textContent = h.on ? "Turn off hotspot" : "Turn on hotspot";
-    $("hotspot-toggle").disabled = !h.allowed;
-    $("hotspot-password").disabled = !h.allowed;
-    $("hotspot-password-save").disabled = !h.allowed;
   }
 
   function drawCurrent() {
@@ -337,7 +340,9 @@
   $("save-cancel").addEventListener("click", closeSave);
   $("save-form").addEventListener("submit", submitSave);
   $("scan").addEventListener("click", scan);
-  $("hotspot-allowed").addEventListener("change", function () { setAllowed(this.checked); });
+  $("hotspot-allowed").addEventListener("click", function () {
+    setAllowed(this.getAttribute("aria-pressed") !== "true");
+  });
   $("hotspot-toggle").addEventListener("click", toggleHotspot);
   $("hotspot-password-save").addEventListener("click", changeHotspotPassword);
 

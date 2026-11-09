@@ -279,11 +279,15 @@ class NmcliWifi:
         if rc != 0:
             return {}
         found = []
+        own_name = hotspot_name()
         for connection in saved_wifi_names(out):
+            ssid = self._ssid(connection)
+            if ssid == own_name:
+                continue  # the box's own hotspot is not a network to join
             rc, psk = self._run(["-s", "-g", "802-11-wireless-security.psk", "connection", "show", connection])
             rc2, prio = self._run(["-g", "connection.autoconnect-priority", "connection", "show", connection])
             priority = int(prio) if rc2 == 0 and prio.lstrip("-").isdigit() else 0
-            found.append((-priority, self._ssid(connection), psk if rc == 0 and psk else None))
+            found.append((-priority, ssid, psk if rc == 0 and psk else None))
         found.sort(key=lambda item: item[0])
         return {ssid: psk for _, ssid, psk in found}
 

@@ -75,10 +75,6 @@ class FakeWifi:
         self.saved.setdefault(name, password)
         return True
 
-    def disconnect(self):
-        self.calls.append("disconnect")
-        self.current = None
-
     def move(self, name, delta):
         """Moves a saved network up (delta -1) or down (delta 1) in the priority order."""
         self.calls.append(("move", name, delta))
@@ -219,9 +215,6 @@ class NmcliWifi:
             args += ["password", password]
         rc, _ = self._run(args, timeout=CONNECT_TIMEOUT)
         return rc == 0
-
-    def disconnect(self):
-        self._run(["device", "disconnect", "wlan0"])
 
     def forget(self, name):
         connection = self._connection_for(name)

@@ -7,13 +7,6 @@
 
   const $ = (id) => document.getElementById(id);
 
-  function el(tag, className, text) {
-    const node = document.createElement(tag);
-    if (className) node.className = className;
-    if (text !== undefined && text !== null) node.textContent = text;
-    return node;
-  }
-
   // signal strength as four bars (filled up to the level)
   function signalBars(signal) {
     const level = signal >= 70 ? 4 : signal >= 50 ? 3 : signal >= 30 ? 2 : 1;
@@ -42,8 +35,6 @@
   }
 
   function drawCurrent() {
-    $("hotspot-banner").hidden = !state.hotspot.on;
-    $("hotspot-name").textContent = state.hotspot.name || "device";
     if (state.mode === "hotspot") {
       $("current-name").textContent = "nothing (hotspot on)";
       $("current-type").textContent = "";

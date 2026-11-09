@@ -198,7 +198,9 @@ class NmcliWifi:
         self._run(["device", "disconnect", "wlan0"])
 
     def forget(self, name):
-        self._run(["connection", "delete", name])
+        connection = self._connection_for(name)
+        if connection:
+            self._run(["connection", "delete", connection])
 
     def start_hotspot(self):
         password = read_hotspot_password()
@@ -216,10 +218,26 @@ class NmcliWifi:
         rc, out = self._run(["-t", "-f", "DEVICE,TYPE,STATE", "device"])
         return rc == 0 and ethernet_connected(out)
 
+    def _ssid(self, connection):
+        """The Wi-Fi name (SSID) of a NetworkManager connection; the connection name is only internal."""
+        rc, out = self._run(["-s", "-g", "802-11-wireless.ssid", "connection", "show", connection])
+        return out.strip() if rc == 0 and out.strip() else connection
+
+    def _connection_for(self, ssid):
+        """The NetworkManager connection that holds this Wi-Fi name, or None."""
+        rc, out = self._run(["-t", "-f", "NAME,TYPE", "connection", "show"])
+        if rc != 0:
+            return None
+        for connection in saved_wifi_names(out):
+            if self._ssid(connection) == ssid:
+                return connection
+        return None
+
     @property
     def current(self):
         rc, out = self._run(["-t", "-f", "NAME,TYPE,DEVICE", "connection", "show", "--active"])
-        return active_wifi_name(out) if rc == 0 else None
+        connection = active_wifi_name(out) if rc == 0 else None
+        return self._ssid(connection) if connection else None
 
     @property
     def hotspot(self):
@@ -233,9 +251,9 @@ class NmcliWifi:
         if rc != 0:
             return {}
         result = {}
-        for name in saved_wifi_names(out):
-            rc, psk = self._run(["-s", "-g", "802-11-wireless-security.psk", "connection", "show", name])
-            result[name] = psk if rc == 0 and psk else None
+        for connection in saved_wifi_names(out):
+            rc, psk = self._run(["-s", "-g", "802-11-wireless-security.psk", "connection", "show", connection])
+            result[self._ssid(connection)] = psk if rc == 0 and psk else None
         return result
 
 

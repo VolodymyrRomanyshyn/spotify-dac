@@ -52,24 +52,13 @@
     <section class="card" id="hotspot-card">
       <h2>Hotspot</h2>
       <div class="row-toggle">
-        <span>Allow the hotspot</span>
+        <span>Hotspot functionality</span>
         <button id="hotspot-allowed" class="toggle-btn" type="button" aria-pressed="false"><span class="led" aria-hidden="true"></span><span class="state">Off</span></button>
       </div>
       <p id="hotspot-status" class="muted"></p>
-      <div id="hotspot-controls" hidden>
-        <div class="actions">
-          <button id="hotspot-toggle" class="ctl" type="button">Turn on hotspot</button>
-        </div>
-        <form id="hotspot-password-form" class="form">
-          <label class="field">
-            <span>New hotspot password</span>
-            <input id="hotspot-password" type="password" minlength="8" maxlength="63" autocomplete="off">
-            <small class="muted">8 to 63 characters. It is used the next time the hotspot starts.</small>
-          </label>
-          <div class="actions">
-            <button id="hotspot-password-save" class="ctl" type="button">Change password</button>
-          </div>
-        </form>
+      <div id="hotspot-controls" class="actions" hidden>
+        <button id="hotspot-toggle" class="ctl" type="button">Turn on hotspot</button>
+        <button id="hotspot-password-open" class="ctl" type="button">Change password</button>
       </div>
       <p id="hotspot-message" class="muted" role="status"></p>
     </section>
@@ -96,6 +85,42 @@
       <ul id="nearby" class="commits"></ul>
     </section>
   </main>
+
+
+  <!-- Confirm: used before an action that can cut off the page -->
+  <dialog id="confirm-dialog" class="modal" aria-labelledby="confirm-title">
+    <h2 id="confirm-title"></h2>
+    <p id="confirm-text" class="muted"></p>
+    <form method="dialog" class="actions">
+      <button value="cancel" class="ctl">Cancel</button>
+      <button id="confirm-ok" value="ok" class="ctl main">Continue</button>
+    </form>
+  </dialog>
+
+  <!-- Change the hotspot password: type it twice -->
+  <dialog id="password-dialog" class="modal" aria-labelledby="password-title">
+    <h2 id="password-title">Change hotspot password</h2>
+    <form id="password-form" class="form" method="dialog">
+      <label class="field">
+        <span>New password</span>
+        <input id="password-new" type="password" minlength="8" maxlength="63" autocomplete="new-password" required>
+      </label>
+      <label class="field">
+        <span>Repeat the new password</span>
+        <input id="password-repeat" type="password" minlength="8" maxlength="63" autocomplete="new-password" required>
+      </label>
+      <label class="check">
+        <input id="password-show" type="checkbox">
+        <span>Show passwords</span>
+      </label>
+      <p class="muted">8 to 63 characters. It is used the next time the hotspot starts.</p>
+      <p id="password-error" class="status bad" role="status"></p>
+      <div class="actions">
+        <button id="password-cancel" value="cancel" class="ctl" type="button">Cancel</button>
+        <button id="password-submit" class="ctl main" type="submit">Change password</button>
+      </div>
+    </form>
+  </dialog>
 
   <!-- Save a nearby network: asks for the password when it is secured -->
   <dialog id="save-dialog" class="modal" aria-labelledby="save-title">

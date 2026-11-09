@@ -23,7 +23,7 @@
     return box;
   }
 
-  // hotspot card: the switch decides everything else. Disabled shows only the switch.
+  // hotspot card: the switch decides; the controls show only when it is on
   function drawHotspot() {
     const h = state.hotspot;
     const allowed = !!h.allowed;
@@ -32,12 +32,12 @@
     toggle.querySelector(".state").textContent = allowed ? "On" : "Off";
     $("hotspot-controls").hidden = !allowed;
     if (!allowed) {
-      $("hotspot-status").textContent = "Turn it on to let the box start a hotspot when there is no network, or with the button.";
+      $("hotspot-status").textContent = "Off. The box will not start a hotspot, even with no network or the reset button.";
       return;
     }
     $("hotspot-status").textContent = h.on
-      ? "Running now: join \"" + h.name + "\" on your phone."
-      : "Ready. It starts by itself when there is no network, or with the button below.";
+      ? "Running now. Join \"" + h.name + "\" on your phone to reach this page."
+      : "On. It starts by itself when there is no network, or with the button below.";
     $("hotspot-toggle").textContent = h.on ? "Turn off hotspot" : "Turn on hotspot";
   }
 
@@ -243,11 +243,33 @@
     $("hotspot-message").textContent = text;
   }
 
+  // a yes/no question in a dialog; resolves true when the user continues
+  function confirmAction(title, text, okLabel) {
+    return new Promise(function (resolve) {
+      const dialog = $("confirm-dialog");
+      $("confirm-title").textContent = title;
+      $("confirm-text").textContent = text;
+      $("confirm-ok").textContent = okLabel;
+      dialog.addEventListener("close", function onClose() {
+        dialog.removeEventListener("close", onClose);
+        resolve(dialog.returnValue === "ok");
+      });
+      dialog.showModal();
+    });
+  }
+
   async function setAllowed(allowed) {
+    if (!allowed) {
+      const sure = await confirmAction(
+        "Turn off hotspot functionality?",
+        "The hotspot will stop, and the box will not start one by itself or with the reset button. If the box has no network, you will reach it only by its home address.",
+        "Turn off");
+      if (!sure) { await load(); return; }
+    }
     try {
       const data = await api("/api/network/hotspot-allowed", { body: { allowed: allowed } });
       state.hotspot = data;
-      hotspotMessage(allowed ? "Hotspot allowed." : "Hotspot disabled. It is off and will not start.", false);
+      hotspotMessage(allowed ? "Hotspot functionality is on." : "Hotspot functionality is off.", false);
       draw();
     } catch (err) {
       hotspotMessage(err.message, true);
@@ -257,29 +279,52 @@
 
   async function toggleHotspot() {
     const turnOn = !state.hotspot.on;
+    const sure = await confirmAction(
+      turnOn ? "Turn on the hotspot?" : "Turn off the hotspot?",
+      turnOn
+        ? "This box will leave your home Wi-Fi and start the hotspot \"" + state.hotspot.name + "\". Your phone must join that network to reach this page. Continue?"
+        : "This box will stop the hotspot. If it has no home Wi-Fi or cable, it cannot be reached until one is connected. Continue?",
+      turnOn ? "Turn on" : "Turn off");
+    if (!sure) return;
     try {
       await api("/api/network/hotspot", { body: { on: turnOn } });
-      hotspotMessage(turnOn ? "Starting the hotspot. Give it about 10 seconds." : "Hotspot off.", false);
+      hotspotMessage(turnOn ? "Starting the hotspot. Give it about 10 seconds, then join \"" + state.hotspot.name + "\"." : "Hotspot off.", false);
       setTimeout(load, turnOn ? 8000 : 0);
     } catch (err) {
       hotspotMessage(err.message, true);
     }
   }
 
-  async function changeHotspotPassword() {
-    const password = $("hotspot-password").value;
-    if (password.length < 8 || password.length > 63) {
-      hotspotMessage("Password must be 8 to 63 characters.", true);
-      return;
-    }
+  // change the password: type it twice, then confirm
+  function openPassword() {
+    $("password-new").value = "";
+    $("password-repeat").value = "";
+    $("password-show").checked = false;
+    $("password-new").type = "password";
+    $("password-repeat").type = "password";
+    $("password-error").textContent = "";
+    $("password-dialog").showModal();
+    $("password-new").focus();
+  }
+
+  async function submitPassword(event) {
+    event.preventDefault();
+    const first = $("password-new").value;
+    const second = $("password-repeat").value;
+    const error = $("password-error");
+    if (first.length < 8 || first.length > 63) { error.textContent = "The password must be 8 to 63 characters."; return; }
+    if (first !== second) { error.textContent = "The two passwords do not match."; return; }
+    $("password-submit").disabled = true;
     try {
-      const data = await api("/api/network/hotspot-password", { body: { password: password } });
-      $("hotspot-password").value = "";
+      const data = await api("/api/network/hotspot-password", { body: { password: first } });
       state.hotspot = data;
-      hotspotMessage("Password changed. It is used the next time the hotspot starts.", false);
+      $("password-dialog").close();
+      hotspotMessage("Hotspot password changed. It is used the next time the hotspot starts.", false);
       draw();
     } catch (err) {
-      hotspotMessage(err.message, true);
+      error.textContent = err.message;
+    } finally {
+      $("password-submit").disabled = false;
     }
   }
 
@@ -344,7 +389,14 @@
     setAllowed(this.getAttribute("aria-pressed") !== "true");
   });
   $("hotspot-toggle").addEventListener("click", toggleHotspot);
-  $("hotspot-password-save").addEventListener("click", changeHotspotPassword);
+  $("hotspot-password-open").addEventListener("click", openPassword);
+  $("password-form").addEventListener("submit", submitPassword);
+  $("password-cancel").addEventListener("click", function () { $("password-dialog").close(); });
+  $("password-show").addEventListener("change", function () {
+    const type = this.checked ? "text" : "password";
+    $("password-new").type = type;
+    $("password-repeat").type = type;
+  });
 
   // the saved list is shown right away; the nearby list needs a scan
   load().then(scan);

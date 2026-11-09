@@ -29,6 +29,7 @@ STATIC = HERE / "static"
 mimetypes.add_type("application/manifest+json", ".webmanifest")
 
 ROUTES = {
+    **wifi.ROUTES,
     ("POST", "/api/login"): auth.login,
     ("POST", "/api/logout"): auth.logout,
     ("GET", "/api/status"): status.get_status,
@@ -46,15 +47,6 @@ ROUTES = {
     ("GET", "/api/volume"): volume.get_volume,
     ("POST", "/api/volume"): volume.post_volume,
     ("GET", "/api/device"): config.get_device,
-    ("GET", "/api/network"): wifi.get_network,
-    ("POST", "/api/network/scan"): wifi.post_scan,
-    ("POST", "/api/network/save"): wifi.post_save,
-    ("POST", "/api/network/forget"): wifi.post_forget,
-    ("POST", "/api/network/move"): wifi.post_move,
-    ("POST", "/api/network/switch"): wifi.post_switch,
-    ("POST", "/api/network/hotspot"): wifi.post_hotspot,
-    ("POST", "/api/network/hotspot-allowed"): wifi.post_hotspot_allowed,
-    ("POST", "/api/network/hotspot-password"): wifi.post_hotspot_password,
     ("GET", "/api/features"): config.get_features,
     ("GET", "/api/airplay"): airplay.get_airplay,
     ("POST", "/api/airplay"): airplay.post_airplay,

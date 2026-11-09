@@ -20,14 +20,7 @@ STATIC = HERE.parent / "static"
 HOTSPOT_ADDRESS = "10.42.0.1"
 SETUP_PAGE = "/network.html"
 SETUP_FILES = {"/network.html", "/network.js", "/style.css", "/common.js"}
-API_ROUTES = {
-    ("GET", "/api/network"): wifi.get_network,
-    ("POST", "/api/network/scan"): wifi.post_scan,
-    ("POST", "/api/network/save"): wifi.post_save,
-    ("POST", "/api/network/move"): wifi.post_move,
-    ("POST", "/api/network/switch"): wifi.post_switch,
-    ("POST", "/api/network/forget"): wifi.post_forget,
-}
+API_ROUTES = wifi.ROUTES
 
 
 def decide(method, path):

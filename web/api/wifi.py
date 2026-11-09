@@ -535,6 +535,20 @@ class Watcher:
         return None
 
 
+# every Wi-Fi API route; the main server and the hotspot's port-80 server both use this list
+ROUTES = {
+    ("GET", "/api/network"): get_network,
+    ("POST", "/api/network/scan"): post_scan,
+    ("POST", "/api/network/save"): post_save,
+    ("POST", "/api/network/forget"): post_forget,
+    ("POST", "/api/network/move"): post_move,
+    ("POST", "/api/network/switch"): post_switch,
+    ("POST", "/api/network/hotspot"): post_hotspot,
+    ("POST", "/api/network/hotspot-allowed"): post_hotspot_allowed,
+    ("POST", "/api/network/hotspot-password"): post_hotspot_password,
+}
+
+
 # the service used by the web server; tests create their own with FakeWifi
 _service = WifiService(NmcliWifi(), store=FileStore())
 

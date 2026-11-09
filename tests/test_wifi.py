@@ -366,6 +366,12 @@ class CaptiveRoutingTests(unittest.TestCase):
     def test_wifi_api_is_served(self):
         self.assertEqual(self.captive.decide("POST", "/api/network/save"), ("api", None))
         self.assertEqual(self.captive.decide("GET", "/api/network"), ("api", None))
+        self.assertEqual(self.captive.decide("POST", "/api/network/hotspot"), ("api", None))
+        self.assertEqual(self.captive.decide("POST", "/api/network/hotspot-password"), ("api", None))
+
+    def test_port_80_and_port_8443_serve_the_same_wi_fi_routes(self):
+        from api import wifi
+        self.assertIs(self.captive.API_ROUTES, wifi.ROUTES)
 
     def test_anything_else_redirects_to_the_setup_page(self):
         self.assertEqual(self.captive.decide("GET", "/settings.html"), ("redirect", "http://10.42.0.1/network.html"))

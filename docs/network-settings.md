@@ -32,9 +32,18 @@ It stops when Ethernet or Wi-Fi comes back. While it runs, saved networks are re
 - **Nearby networks:** signal bars, secured or open, and a Save button. Save asks for the password on secured networks, checks it by connecting, and keeps the network if it is accepted. A refused password leaves the Pi where it was.
 - Passwords are 8 to 63 characters (WPA2 minimum is 8). Open networks need no password.
 
+## Hotspot card (Wi-Fi page)
+
+- **Hotspot functionality** switch: on or off, saved in the config (`HOTSPOT_ENABLED`). Turning it off asks for confirmation, stops the hotspot, and stops the watcher from starting it.
+- While the functionality is off, only the switch is shown.
+- While it is on: **Turn on hotspot / Turn off hotspot** (both ask for confirmation first, because the phone can lose the page), and **Change password**.
+- **Turn on** starts the hotspot within a few seconds and shows a popup with how to join it: the hotspot name, the password you set, and the addresses `http://10.42.0.1` or `https://<device>:8443`.
+- **Change password** opens a dialog that asks for the new password twice. The password applies the next time the hotspot starts; if it is running, it restarts with the new one.
+- The hotspot name is the device name (`DEVICE_NAME`).
+
 ## Setup page on port 80 (hotspot only)
 
-- Serves the Wi-Fi page and its four API routes (`/api/network`, `/api/network/scan`, `/api/network/save`, `/api/network/forget`), plus `move` and `switch`, without a login. The hotspot password protects the link.
+- Serves the Wi-Fi page and every Wi-Fi API route (the same list as on the main web server, `web/api/wifi.py` ROUTES), without a login. The hotspot password protects the link.
 - Every other address redirects to `http://10.42.0.1/network.html`, so a phone that joins the hotspot opens the page by itself.
 - The port-80 server runs only while the hotspot is on.
 

@@ -120,6 +120,12 @@ self-signed certificate once. With `WEB_USE_PASSWORD=yes` (default) the installe
 stored as a salted hash. Pages: **Home** (sources, volume, AirPlay on/off, radio), **Radio**
 (station list), **Status** (services, CPU, temperature, last update) and **Settings**.
 
+## Wi-Fi and hotspot
+
+The Wi-Fi page (menu: Wi-Fi) lists the saved networks in priority order, lets you connect to any of them, and saves new ones after checking the password.
+
+If the box has no network for the fallback time (60 seconds by default), or you hold the reset button for 5 seconds, it starts a hotspot named after the device. Join it with the hotspot password, and the Wi-Fi page opens by itself. Hotspot functionality is off unless you turn it on in the installer or on the Wi-Fi page. Details: [docs/network-settings.md](docs/network-settings.md).
+
 ## AirPlay
 
 With `AIRPLAY_ENABLED=yes` the installer adds an AirPlay receiver (shairport-sync, discovered

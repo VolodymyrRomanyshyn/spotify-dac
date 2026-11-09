@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Spotify DAC - Wi-Fi</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#15171c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="DAC">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><svg class="home-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg><span class="device">DAC</span></a>
+    <div class="menu">
+      <button id="burger" class="theme" type="button" aria-label="Menu" aria-expanded="false" aria-controls="menu">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <nav id="menu" class="menu-list" hidden>
+        <a href="/">Home</a>
+        <a data-feature="radio" href="/radio.html">Radio</a>
+        <a href="/status.html">Status</a>
+        <a href="/settings.html">Settings</a>
+        <a href="/network.html" class="active">Wi-Fi</a>
+      </nav>
+    </div>
+    <button id="theme" class="theme" type="button" aria-label="Switch dark or light mode">Theme</button>
+  </header>
+
+  <main class="settings">
+    <!-- prototype: shows the mock data only; the real page reads the Pi -->
+    <p id="prototype-note" class="muted">Prototype: sample data, nothing is changed on a Pi.</p>
+
+    <div id="hotspot-banner" class="card" hidden>
+      <strong>Hotspot is on: <span id="hotspot-name">device</span></strong>
+      <p class="muted">Join this network on your phone, then open <code>http://10.42.0.1</code>.</p>
+    </div>
+
+    <!-- ===== Current connection ===== -->
+    <section class="card">
+      <h2>Connection</h2>
+      <div class="row-toggle">
+        <span>Now connected to <strong id="current-name">-</strong></span>
+        <span id="current-type" class="status"></span>
+      </div>
+      <p id="current-note" class="muted"></p>
+    </section>
+
+    <!-- ===== Add a network ===== -->
+    <section class="card">
+      <h2>Add a network</h2>
+      <form id="add-form" class="form">
+        <label class="field">
+          <span>Network name</span>
+          <input id="ssid" type="text" maxlength="32" autocomplete="off" placeholder="Choose from the list below or type">
+        </label>
+        <label class="field">
+          <span>Password</span>
+          <input id="password" type="password" minlength="8" maxlength="63" autocomplete="off">
+          <small class="muted">8 to 63 characters. Leave empty for an open network.</small>
+        </label>
+        <label class="row-toggle">
+          <span>Show password</span>
+          <input id="show-password" type="checkbox">
+        </label>
+      </form>
+      <div class="actions">
+        <button id="connect" class="ctl main" type="button">Connect</button>
+        <span id="connect-status" class="muted" role="status"></span>
+      </div>
+    </section>
+
+    <!-- ===== Nearby networks ===== -->
+    <section class="card">
+      <h2>Nearby networks</h2>
+      <div class="actions">
+        <button id="scan" class="ctl" type="button">Scan again</button>
+        <span id="scan-status" class="muted" role="status"></span>
+      </div>
+      <ul id="nearby" class="commits"></ul>
+    </section>
+
+    <!-- ===== Saved networks ===== -->
+    <section class="card">
+      <h2>Saved networks</h2>
+      <ul id="saved" class="commits"></ul>
+    </section>
+  </main>
+
+  <script src="common.js"></script>
+  <script src="network.js"></script>
+</body>
+</html>

@@ -1,21 +1,8 @@
-// Wi-Fi page (prototype): the screens and actions, with sample data in place of the Pi.
-// Open with ?state=wifi (default), ?state=ethernet, ?state=hotspot or ?state=none to see each mode.
+// Wi-Fi page: shows the Pi's network state and lets you save a Wi-Fi network.
+// Reads and changes go through the /api/network routes (web/api/wifi.py).
 (function () {
-  const params = new URLSearchParams(window.location.search);
-
-  // sample data
-  const state = {
-    mode: params.get("state") || "wifi",          // wifi | ethernet | hotspot | none
-    current: params.get("state") === "ethernet" ? "" : "Home-WiFi",
-    saved: ["Home-WiFi", "Office"],
-    nearby: [
-      { name: "Home-WiFi", signal: 82, secure: true },
-      { name: "Neighbour 5G", signal: 55, secure: true },
-      { name: "Cafe Free", signal: 40, secure: false },
-      { name: "Office", signal: 30, secure: true },
-    ],
-  };
-
+  // what the Pi reported last
+  const state = { mode: "none", current: null, ethernet: false, hotspot: { on: false, name: "device" }, saved: [], nearby: [] };
   let pending = null;  // the nearby network whose Save dialog is open
 
   const $ = (id) => document.getElementById(id);
@@ -37,7 +24,8 @@
   }
 
   function drawCurrent() {
-    $("hotspot-banner").hidden = state.mode !== "hotspot";
+    $("hotspot-banner").hidden = !state.hotspot.on;
+    $("hotspot-name").textContent = state.hotspot.name || "device";
     if (state.mode === "hotspot") {
       $("current-name").textContent = "nothing (hotspot on)";
       $("current-type").textContent = "";
@@ -58,7 +46,7 @@
       $("current-note").textContent = "The hotspot starts after the fallback time.";
       return;
     }
-    $("current-name").textContent = state.current;
+    $("current-name").textContent = state.current || "Wi-Fi";
     $("current-type").textContent = "Wi-Fi";
     $("current-type").className = "status ok";
     $("current-note").textContent = "You can switch to another network below.";
@@ -68,12 +56,16 @@
   function drawNearby() {
     const list = $("nearby");
     list.replaceChildren();
+    if (state.nearby.length === 0) {
+      list.append(el("li", "muted", "No networks found. Press Scan again."));
+      return;
+    }
     state.nearby.forEach(function (net) {
       const row = el("li", "nearby-row");
       row.append(el("span", "nearby-name", net.name));
       row.append(el("span", "nearby-muted", net.secure ? "secured" : "open"));
       row.append(signalBars(net.signal));
-      if (state.saved.indexOf(net.name) !== -1) {
+      if (net.saved) {
         row.append(el("span", "nearby-muted nearby-action", "saved"));
       } else {
         const save = el("button", "ctl small nearby-action", "Save");
@@ -97,10 +89,7 @@
       row.append(el("span", "", name));
       const forget = el("button", "ctl small", "Forget");
       forget.type = "button";
-      forget.addEventListener("click", function () {
-        state.saved = state.saved.filter(function (n) { return n !== name; });
-        draw();
-      });
+      forget.addEventListener("click", function () { forgetNetwork(name); });
       row.append(forget);
       list.append(row);
     });
@@ -110,6 +99,52 @@
     drawCurrent();
     drawNearby();
     drawSaved();
+  }
+
+  // ---- talking to the Pi ----
+  function apply(data) {
+    state.mode = data.mode;
+    state.current = data.current;
+    state.ethernet = data.ethernet;
+    state.hotspot = data.hotspot;
+    state.saved = data.saved || [];
+    state.nearby = data.nearby || state.nearby;
+    draw();
+  }
+
+  async function load() {
+    try {
+      apply(await api("/api/network"));
+    } catch (err) {
+      $("scan-status").textContent = "Cannot read the Wi-Fi state: " + err.message;
+    }
+  }
+
+  async function scan() {
+    $("scan").disabled = true;
+    $("scan-status").className = "muted";
+    $("scan-status").textContent = "Scanning...";
+    try {
+      const data = await api("/api/network/scan", { method: "POST" });
+      state.nearby = data.nearby || [];
+      drawNearby();
+      $("scan-status").textContent = "Found " + state.nearby.length + " networks.";
+    } catch (err) {
+      $("scan-status").className = "status bad";
+      $("scan-status").textContent = err.message;
+    } finally {
+      $("scan").disabled = false;
+    }
+  }
+
+  async function forgetNetwork(name) {
+    try {
+      await api("/api/network/forget", { body: { name: name } });
+      await load();
+    } catch (err) {
+      $("scan-status").className = "status bad";
+      $("scan-status").textContent = err.message;
+    }
   }
 
   // ---- Save dialog ----
@@ -133,34 +168,34 @@
     pending = null;
   }
 
-  // Save: check the password, "test" it (sample: "wrong-password" fails), then save the network.
-  function submitSave(event) {
+  // Save: the Pi tries the password on the network. If it is accepted, the network is saved and joined.
+  async function submitSave(event) {
     event.preventDefault();
     if (!pending) return;
-    const password = pending.secure ? $("save-password").value : "";
+    const net = pending;
+    const password = net.secure ? $("save-password").value : null;
     const error = $("save-error");
     error.className = "status bad";
-    if (pending.secure && (password.length < 8 || password.length > 63)) {
+    if (net.secure && (password.length < 8 || password.length > 63)) {
       error.textContent = "Password must be 8 to 63 characters.";
       return;
     }
     $("save-submit").disabled = true;
     error.className = "muted";
-    error.textContent = "Testing the password...";
-    const net = pending;
-    setTimeout(function () {
-      $("save-submit").disabled = false;
-      if (password === "wrong-password") {
-        error.className = "status bad";
-        error.textContent = "Password not accepted. Try again.";
-        return;
-      }
-      if (state.saved.indexOf(net.name) === -1) state.saved.push(net.name);
-      state.current = net.name;
-      state.mode = "wifi";
+    error.textContent = "Connecting, this can take up to 30 seconds...";
+    try {
+      const result = await api("/api/network/save", { body: { name: net.name, password: password } });
       closeSave();
-      draw();
-    }, 1500);
+      $("scan-status").className = "status ok";
+      $("scan-status").textContent = result.hotspot ? "Saved." : "Connected to " + net.name + ".";
+      await load();
+      await scan();
+    } catch (err) {
+      error.className = "status bad";
+      error.textContent = err.message;
+    } finally {
+      $("save-submit").disabled = false;
+    }
   }
 
   $("save-show").addEventListener("change", function () {
@@ -168,9 +203,8 @@
   });
   $("save-cancel").addEventListener("click", closeSave);
   $("save-form").addEventListener("submit", submitSave);
-  $("scan").addEventListener("click", function () {
-    $("scan-status").textContent = "Sample list, nothing scanned.";
-  });
+  $("scan").addEventListener("click", scan);
 
-  draw();
+  // the saved list is shown right away; the nearby list needs a scan
+  load().then(scan);
 })();

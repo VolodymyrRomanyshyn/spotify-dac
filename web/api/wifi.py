@@ -7,13 +7,15 @@ The network work is done by a backend object. Two backends exist:
 The decisions (which mode to be in, whether a password is valid, what to do when a connection
 fails) live here, so they are tested with FakeWifi and do not need a Pi.
 """
+import os
 import re
 import subprocess
 import time
 
 from .common import ApiError
 
-HOTSPOT_NAME = "device"
+HOTSPOT_NAME_FALLBACK = "device"  # used when DEVICE_NAME is not set in the config
+CONFIG_FILE = os.environ.get("SPOTIFY_DAC_CONFIG", "/etc/spotify-dac/config")
 CONNECT_TIMEOUT = 30          # seconds to wait for a network to accept the password
 FALLBACK_MIN, FALLBACK_MAX, FALLBACK_DEFAULT = 60, 300, 60
 SSID_MAX = 32
@@ -172,10 +174,24 @@ def saved_wifi_names(text):
     return names
 
 
-def hotspot_command(password):
-    """The nmcli command that starts the device hotspot. NetworkManager runs the DHCP and DNS for it."""
+def hotspot_name(path=None):
+    """The hotspot's Wi-Fi name: the device name from the config (DEVICE_NAME), e.g. volodymyr-pi-dac-2."""
+    try:
+        with open(path or CONFIG_FILE, encoding="utf-8") as handle:
+            for line in handle:
+                if line.startswith("DEVICE_NAME="):
+                    value = line.split("=", 1)[1].strip().strip('"')
+                    if valid_name(value):
+                        return value
+    except OSError:
+        pass
+    return HOTSPOT_NAME_FALLBACK
+
+
+def hotspot_command(password, name):
+    """The nmcli command that starts the hotspot. NetworkManager runs the DHCP and DNS for it."""
     return ["device", "wifi", "hotspot", "ifname", "wlan0", "con-name", HOTSPOT_CON,
-            "ssid", HOTSPOT_NAME, "password", password]
+            "ssid", name, "password", password]
 
 
 def captive_dns_conf():
@@ -216,7 +232,9 @@ class NmcliWifi:
         password = read_hotspot_password()
         if not password:
             return False
-        rc, _ = self._run(hotspot_command(password))
+        # an old hotspot connection keeps its old name, so it is removed first
+        self._run(["connection", "delete", HOTSPOT_CON])
+        rc, _ = self._run(hotspot_command(password, hotspot_name()))
         return rc == 0
 
     def stop_hotspot(self):
@@ -305,7 +323,7 @@ class WifiService:
             "mode": mode,
             "current": self.backend.current,
             "ethernet": self.backend.ethernet,
-            "hotspot": {"on": self.backend.hotspot, "name": HOTSPOT_NAME},
+            "hotspot": {"on": self.backend.hotspot, "name": hotspot_name()},
             "saved": sorted(self.backend.saved),
         }
 

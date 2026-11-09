@@ -65,5 +65,5 @@ It stops when Ethernet or Wi-Fi comes back. While it runs, saved networks are re
 
 ## Open decisions
 
-- Confirm the hotspot name `device`.
+- Hotspot name is the device name (`DEVICE_NAME`, for example `volodymyr-pi-dac-2`). Decided.
 - Power script wiring for the reset button and the LED patterns: tested only on hardware.

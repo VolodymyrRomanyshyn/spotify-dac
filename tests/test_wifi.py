@@ -227,9 +227,9 @@ class NmcliOutputTests(unittest.TestCase):
         text = "Home-WiFi:802-11-wireless\ndevice-hotspot:802-11-wireless\nwired:802-3-ethernet\n"
         self.assertEqual(wifi.saved_wifi_names(text), ["Home-WiFi"])
 
-    def test_hotspot_command_uses_the_device_name_and_no_shell(self):
-        argv = wifi.hotspot_command("right-password")
-        self.assertIn("device", argv)
+    def test_hotspot_command_uses_the_given_name_and_no_shell(self):
+        argv = wifi.hotspot_command("right-password", "volodymyr-pi-dac-2")
+        self.assertEqual(argv[argv.index("ssid") + 1], "volodymyr-pi-dac-2")
         self.assertEqual(argv[argv.index("password") + 1], "right-password")
         self.assertTrue(all(isinstance(part, str) for part in argv))
 
@@ -329,6 +329,23 @@ class PriorityAndSwitchTests(unittest.TestCase):
         svc = self.service()
         with self.assertRaises(ApiError):
             svc.switch("Cafe Free")
+
+
+class HotspotNameTests(unittest.TestCase):
+    def test_name_is_the_device_name_from_the_config(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "config"
+            path.write_text('DEVICE_NAME="volodymyr-pi-dac-2"\nCASE="nespi"\n', encoding="utf-8")
+            self.assertEqual(wifi.hotspot_name(str(path)), "volodymyr-pi-dac-2")
+
+    def test_falls_back_to_device_when_missing(self):
+        self.assertEqual(wifi.hotspot_name("/nonexistent/config"), "device")
+
+    def test_bad_device_name_falls_back(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "config"
+            path.write_text('DEVICE_NAME="%s"\n' % ("x" * 40), encoding="utf-8")
+            self.assertEqual(wifi.hotspot_name(str(path)), "device")
 
 
 if __name__ == "__main__":

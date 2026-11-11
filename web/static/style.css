@@ -362,8 +362,9 @@ dialog.modal h2 { margin-top: 0; }
   .nearby-row { grid-template-columns: auto auto minmax(0, 1fr); row-gap: 6px; }
   .nearby-row .nearby-name { grid-column: 1 / -1; white-space: normal; overflow-wrap: anywhere; }
   .nearby-row .nearby-action { justify-self: end; }
-  .saved-row { gap: 6px; }
-  .saved-name { min-width: 0; flex-basis: 100%; white-space: normal; overflow-wrap: anywhere; }
+  .saved-row { gap: 8px; }
+  .saved-name { min-width: 0; flex: 1; white-space: normal; overflow-wrap: anywhere; }
+  .saved-actions { flex-basis: 100%; padding-left: 26px; }
 }
 
 /* Wi-Fi page: while loading, only the loading line shows; the cards appear once the Pi has answered */

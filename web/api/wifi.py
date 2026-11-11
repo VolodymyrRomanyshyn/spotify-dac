@@ -184,6 +184,19 @@ def hotspot_name(path=None):
     return HOTSPOT_NAME_FALLBACK
 
 
+def parse_connections(text):
+    """Wi-Fi connections from `nmcli -s -t -f NAME,TYPE,802-11-wireless.ssid,802-11-wireless-security.psk,connection.autoconnect-priority connection show`."""
+    result = []
+    for line in text.splitlines():
+        fields = _split_escaped(line)
+        if len(fields) < 5 or fields[1] != "802-11-wireless":
+            continue
+        name, _, ssid, psk, prio = fields[:5]
+        priority = int(prio) if prio.lstrip("-").isdigit() else 0
+        result.append({"name": name, "ssid": ssid or name, "psk": psk or None, "priority": priority})
+    return result
+
+
 def hotspot_command(password, name):
     """The nmcli command that starts the hotspot. NetworkManager runs the DHCP and DNS for it."""
     return ["device", "wifi", "hotspot", "ifname", "wlan0", "con-name", HOTSPOT_CON,
@@ -239,26 +252,28 @@ class NmcliWifi:
         rc, out = self._run(["-t", "-f", "DEVICE,TYPE,STATE", "device"])
         return rc == 0 and ethernet_connected(out)
 
-    def _ssid(self, connection):
-        """The Wi-Fi name (SSID) of a NetworkManager connection; the connection name is only internal."""
-        rc, out = self._run(["-s", "-g", "802-11-wireless.ssid", "connection", "show", connection])
-        return out.strip() if rc == 0 and out.strip() else connection
+    def _connections(self):
+        """Every saved Wi-Fi connection, in one nmcli call (the page waits for this, so it must be quick)."""
+        rc, out = self._run(["-s", "-t", "-f", "NAME,TYPE,802-11-wireless.ssid,802-11-wireless-security.psk,connection.autoconnect-priority", "connection", "show"])
+        return parse_connections(out) if rc == 0 else []
 
     def _connection_for(self, ssid):
         """The NetworkManager connection that holds this Wi-Fi name, or None."""
-        rc, out = self._run(["-t", "-f", "NAME,TYPE", "connection", "show"])
-        if rc != 0:
-            return None
-        for connection in saved_wifi_names(out):
-            if self._ssid(connection) == ssid:
-                return connection
+        for connection in self._connections():
+            if connection["ssid"] == ssid:
+                return connection["name"]
         return None
 
     @property
     def current(self):
         rc, out = self._run(["-t", "-f", "NAME,TYPE,DEVICE", "connection", "show", "--active"])
-        connection = active_wifi_name(out) if rc == 0 else None
-        return self._ssid(connection) if connection else None
+        name = active_wifi_name(out) if rc == 0 else None
+        if not name:
+            return None
+        for connection in self._connections():
+            if connection["name"] == name:
+                return connection["ssid"]
+        return name
 
     @property
     def hotspot(self):
@@ -268,21 +283,10 @@ class NmcliWifi:
     @property
     def saved(self):
         """Saved Wi-Fi networks with their passwords, highest priority first. Read as root."""
-        rc, out = self._run(["-t", "-f", "NAME,TYPE", "connection", "show"])
-        if rc != 0:
-            return {}
-        found = []
         own_name = hotspot_name()
-        for connection in saved_wifi_names(out):
-            ssid = self._ssid(connection)
-            if ssid == own_name:
-                continue  # the box's own hotspot is not a network to join
-            rc, psk = self._run(["-s", "-g", "802-11-wireless-security.psk", "connection", "show", connection])
-            rc2, prio = self._run(["-g", "connection.autoconnect-priority", "connection", "show", connection])
-            priority = int(prio) if rc2 == 0 and prio.lstrip("-").isdigit() else 0
-            found.append((-priority, ssid, psk if rc == 0 and psk else None))
-        found.sort(key=lambda item: item[0])
-        return {ssid: psk for _, ssid, psk in found}
+        found = [c for c in self._connections() if c["ssid"] != own_name]  # the box's own hotspot is not a network to join
+        found.sort(key=lambda c: -c["priority"])
+        return {c["ssid"]: c["psk"] for c in found}
 
     def move(self, name, delta):
         """Swaps the priority of a saved network with its neighbour, and writes the new priorities to NetworkManager."""

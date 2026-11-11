@@ -60,7 +60,7 @@ class FakeWifi:
         self.hotspot = False
         self.calls = []
 
-    def scan(self):
+    def scan(self, rescan=True):
         self.calls.append("scan")
         return list(self.nearby)
 
@@ -218,8 +218,12 @@ class NmcliWifi:
             return 1, "timed out"
         return done.returncode, (done.stdout + done.stderr).strip()
 
-    def scan(self):
-        rc, out = self._run(["-t", "-f", "SSID,SIGNAL,SECURITY", "device", "wifi", "list", "--rescan", "yes"])
+    def scan(self, rescan=True):
+        """Nearby networks. rescan=False uses the last scan, which is quick; a rescan can take several seconds."""
+        args = ["-t", "-f", "SSID,SIGNAL,SECURITY", "device", "wifi", "list"]
+        if rescan:
+            args += ["--rescan", "yes"]
+        rc, out = self._run(args)
         return parse_scan(out) if rc == 0 else []
 
     def connect(self, name, password):
@@ -412,9 +416,9 @@ class WifiService:
             "saved": sorted(self.backend.saved),
         }
 
-    def nearby(self):
+    def nearby(self, rescan=True):
         saved = set(self.backend.saved)
-        return [dict(n, saved=n["name"] in saved) for n in self.backend.scan()]
+        return [dict(n, saved=n["name"] in saved) for n in self.backend.scan(rescan=rescan)]
 
     def save(self, name, password):
         """Test the password by connecting. Success: keep the network and stop the hotspot.
@@ -537,7 +541,8 @@ _service = WifiService(NmcliWifi(), store=FileStore())
 
 
 def get_network(req):
-    return 200, dict(_service.state(), nearby=_service.nearby())
+    # the page's first load uses the last scan; "Scan again" rescans
+    return 200, dict(_service.state(), nearby=_service.nearby(rescan=False))
 
 
 def post_scan(req):

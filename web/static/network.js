@@ -406,5 +406,7 @@
   });
 
   // the saved list is shown right away; the nearby list needs a scan
+  $("saved").replaceChildren(el("li", "muted", "Loading…"));
+  $("nearby").replaceChildren(el("li", "muted", "Loading…"));
   load().then(scan);
 })();

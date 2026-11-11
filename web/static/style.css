@@ -351,3 +351,17 @@ dialog.modal h2 { margin-top: 0; }
 .saved-order { color: var(--muted); font-size: 13px; width: 18px; }
 .saved-name { font-weight: 600; flex: 1; min-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .saved-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* Wi-Fi page: connection row, and the networks on narrow screens */
+.connection-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 4px 0; }
+.connection-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.connection-name { font-size: 18px; overflow-wrap: anywhere; }
+.connection-status { white-space: nowrap; flex-shrink: 0; }
+@media (max-width: 600px) {
+  /* the name gets a full line; security, signal and the button share the line below */
+  .nearby-row { grid-template-columns: auto auto minmax(0, 1fr); row-gap: 6px; }
+  .nearby-row .nearby-name { grid-column: 1 / -1; white-space: normal; overflow-wrap: anywhere; }
+  .nearby-row .nearby-action { justify-self: end; }
+  .saved-row { gap: 6px; }
+  .saved-name { min-width: 0; flex-basis: 100%; white-space: normal; overflow-wrap: anywhere; }
+}

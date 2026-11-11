@@ -36,9 +36,12 @@
     <!-- ===== Current connection ===== -->
     <section class="card">
       <h2>Connection</h2>
-      <div class="row-toggle">
-        <span>Now connected to <strong id="current-name">-</strong></span>
-        <span id="current-type" class="status"></span>
+      <div class="connection-row">
+        <div class="connection-text">
+          <span class="muted">Now connected to</span>
+          <strong id="current-name" class="connection-name">Loading…</strong>
+        </div>
+        <span id="current-type" class="status connection-status"></span>
       </div>
       <p id="current-note" class="muted"></p>
     </section>

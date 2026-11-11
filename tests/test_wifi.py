@@ -444,18 +444,15 @@ class HotspotNameTests(unittest.TestCase):
 
 
 class ConnectionListTests(unittest.TestCase):
-    def test_parses_wifi_connections_with_ssid_password_and_priority(self):
-        text = "Home:802-11-wireless:Home-WiFi:secret123:10\nwired:802-3-ethernet:::0\nOffice:802-11-wireless:Office::-5\n"
-        connections = wifi.parse_connections(text)
-        self.assertEqual([c["name"] for c in connections], ["Home", "Office"])
-        self.assertEqual(connections[0]["ssid"], "Home-WiFi")
-        self.assertEqual(connections[0]["psk"], "secret123")
-        self.assertIsNone(connections[1]["psk"])
-        self.assertEqual(connections[1]["priority"], -5)
+    def test_keeps_only_wifi_connections_with_their_priority(self):
+        text = "Home:802-11-wireless:10\nwired:802-3-ethernet:0\nOffice:802-11-wireless:-5\n"
+        names = wifi.parse_wifi_names(text)
+        self.assertEqual([n["name"] for n in names], ["Home", "Office"])
+        self.assertEqual(names[0]["priority"], 10)
+        self.assertEqual(names[1]["priority"], -5)
 
-    def test_password_with_a_colon_is_kept(self):
-        connections = wifi.parse_connections("Home:802-11-wireless:Home:pass\\:word1:0\n")
-        self.assertEqual(connections[0]["psk"], "pass:word1")
+    def test_name_with_a_colon_is_kept(self):
+        self.assertEqual(wifi.parse_wifi_names("Cafe\\:Net:802-11-wireless:0\n")[0]["name"], "Cafe:Net")
 
 
 if __name__ == "__main__":

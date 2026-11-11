@@ -184,16 +184,15 @@ def hotspot_name(path=None):
     return HOTSPOT_NAME_FALLBACK
 
 
-def parse_connections(text):
-    """Wi-Fi connections from `nmcli -s -t -f NAME,TYPE,802-11-wireless.ssid,802-11-wireless-security.psk,connection.autoconnect-priority connection show`."""
+def parse_wifi_names(text):
+    """Wi-Fi connection names and priorities from `nmcli -t -f NAME,TYPE,AUTOCONNECT-PRIORITY connection show`."""
     result = []
     for line in text.splitlines():
         fields = _split_escaped(line)
-        if len(fields) < 5 or fields[1] != "802-11-wireless":
+        if len(fields) < 3 or fields[1] != "802-11-wireless":
             continue
-        name, _, ssid, psk, prio = fields[:5]
-        priority = int(prio) if prio.lstrip("-").isdigit() else 0
-        result.append({"name": name, "ssid": ssid or name, "psk": psk or None, "priority": priority})
+        priority = int(fields[2]) if fields[2].lstrip("-").isdigit() else 0
+        result.append({"name": fields[0], "priority": priority})
     return result
 
 
@@ -257,9 +256,18 @@ class NmcliWifi:
         return rc == 0 and ethernet_connected(out)
 
     def _connections(self):
-        """Every saved Wi-Fi connection, in one nmcli call (the page waits for this, so it must be quick)."""
-        rc, out = self._run(["-s", "-t", "-f", "NAME,TYPE,802-11-wireless.ssid,802-11-wireless-security.psk,connection.autoconnect-priority", "connection", "show"])
-        return parse_connections(out) if rc == 0 else []
+        """Every saved Wi-Fi connection: one list call, then one small call per network for its Wi-Fi name and password."""
+        rc, out = self._run(["-t", "-f", "NAME,TYPE,AUTOCONNECT-PRIORITY", "connection", "show"])
+        if rc != 0:
+            return []
+        result = []
+        for item in parse_wifi_names(out):
+            rc, detail = self._run(["-s", "-g", "802-11-wireless.ssid,802-11-wireless-security.psk", "connection", "show", item["name"]])
+            lines = detail.splitlines() if rc == 0 else []
+            ssid = lines[0].strip() if lines and lines[0].strip() else item["name"]
+            psk = lines[1].strip() if len(lines) > 1 and lines[1].strip() else None
+            result.append({"name": item["name"], "ssid": ssid, "psk": psk, "priority": item["priority"]})
+        return result
 
     def _connection_for(self, ssid):
         """The NetworkManager connection that holds this Wi-Fi name, or None."""

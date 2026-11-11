@@ -406,9 +406,10 @@
   });
 
   // the saved list is shown right away; the nearby list needs a scan
-  // the cards stay hidden, with one loading line, until the Pi has answered
-  load().then(scan).finally(function () {
+  // the cards appear as soon as the saved state has loaded; the scan runs after, and shows its own status
+  function showPage() {
     $("page-loading").remove();
     document.querySelector("main").classList.remove("is-loading");
-  });
+  }
+  load().finally(showPage).then(scan);
 })();

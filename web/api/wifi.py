@@ -61,7 +61,7 @@ class FakeWifi:
         self.calls = []
 
     def scan(self, rescan=True):
-        self.calls.append("scan")
+        self.calls.append("rescan" if rescan else "cached")
         return list(self.nearby)
 
     def connect(self, name, password):

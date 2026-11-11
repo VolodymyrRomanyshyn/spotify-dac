@@ -455,5 +455,15 @@ class ConnectionListTests(unittest.TestCase):
         self.assertEqual(wifi.parse_wifi_names("Cafe\\:Net:802-11-wireless:0\n")[0]["name"], "Cafe:Net")
 
 
+class ScanModeTests(unittest.TestCase):
+    def test_first_load_uses_the_cached_scan_and_scan_again_rescans(self):
+        backend = wifi.FakeWifi(nearby=NEARBY)
+        service = wifi.WifiService(backend)
+        service.nearby(rescan=False)
+        self.assertEqual(backend.calls, ["cached"])
+        service.nearby()
+        self.assertEqual(backend.calls, ["cached", "rescan"])
+
+
 if __name__ == "__main__":
     unittest.main()

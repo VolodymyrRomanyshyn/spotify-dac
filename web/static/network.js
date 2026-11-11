@@ -158,11 +158,17 @@
     draw();
   }
 
+  // returns true when the state has loaded; otherwise the loading block says so
   async function load() {
     try {
       apply(await api("/api/network"));
+      return true;
     } catch (err) {
-      $("scan-status").textContent = "Cannot read the Wi-Fi state: " + err.message;
+      const note = $("page-loading");
+      note.replaceChildren();
+      note.className = "status bad page-loading";
+      note.textContent = "Cannot reach the Pi (" + err.message + "). Check that it is on, then reload this page.";
+      return false;
     }
   }
 
@@ -405,11 +411,13 @@
     $("password-repeat").type = type;
   });
 
-  // the saved list is shown right away; the nearby list needs a scan
   // the cards appear as soon as the saved state has loaded; the scan runs after, and shows its own status
-  function showPage() {
+  async function start() {
+    const loaded = await load();
+    if (!loaded) return;  // the loading block shows the error and the cards stay hidden
     $("page-loading").remove();
     document.querySelector("main").classList.remove("is-loading");
+    await scan();
   }
-  load().finally(showPage).then(scan);
+  start();
 })();

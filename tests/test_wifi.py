@@ -443,5 +443,27 @@ class HotspotNameTests(unittest.TestCase):
             self.assertEqual(wifi.hotspot_name(str(path)), "device")
 
 
+class ConnectionListTests(unittest.TestCase):
+    def test_keeps_only_wifi_connections_with_their_priority(self):
+        text = "Home:802-11-wireless:10\nwired:802-3-ethernet:0\nOffice:802-11-wireless:-5\n"
+        names = wifi.parse_wifi_names(text)
+        self.assertEqual([n["name"] for n in names], ["Home", "Office"])
+        self.assertEqual(names[0]["priority"], 10)
+        self.assertEqual(names[1]["priority"], -5)
+
+    def test_name_with_a_colon_is_kept(self):
+        self.assertEqual(wifi.parse_wifi_names("Cafe\\:Net:802-11-wireless:0\n")[0]["name"], "Cafe:Net")
+
+
+class ScanModeTests(unittest.TestCase):
+    def test_first_load_uses_the_cached_scan_and_scan_again_rescans(self):
+        backend = wifi.FakeWifi(nearby=NEARBY)
+        service = wifi.WifiService(backend)
+        service.nearby(rescan=False)
+        self.assertEqual(backend.calls, ["cached"])
+        service.nearby()
+        self.assertEqual(backend.calls, ["cached", "rescan"])
+
+
 if __name__ == "__main__":
     unittest.main()

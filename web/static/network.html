@@ -31,14 +31,23 @@
     <button id="theme" class="theme" type="button" aria-label="Switch dark or light mode">Theme</button>
   </header>
 
-  <main class="settings">
+  <main class="settings is-loading">
+    <section id="page-loading" class="overall page-loading" role="status">
+      <span class="dot" aria-hidden="true"></span>
+      <div>
+        <p class="muted">Reading the Wi-Fi state…</p>
+      </div>
+    </section>
 
     <!-- ===== Current connection ===== -->
     <section class="card">
       <h2>Connection</h2>
-      <div class="row-toggle">
-        <span>Now connected to <strong id="current-name">-</strong></span>
-        <span id="current-type" class="status"></span>
+      <div class="connection-row">
+        <div class="connection-text">
+          <span class="muted">Now connected to</span>
+          <strong id="current-name" class="connection-name"></strong>
+        </div>
+        <span id="current-type" class="status connection-status"></span>
       </div>
       <p id="current-note" class="muted"></p>
     </section>

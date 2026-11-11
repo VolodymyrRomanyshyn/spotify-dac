@@ -60,8 +60,8 @@ class FakeWifi:
         self.hotspot = False
         self.calls = []
 
-    def scan(self):
-        self.calls.append("scan")
+    def scan(self, rescan=True):
+        self.calls.append("rescan" if rescan else "cached")
         return list(self.nearby)
 
     def connect(self, name, password):
@@ -184,6 +184,18 @@ def hotspot_name(path=None):
     return HOTSPOT_NAME_FALLBACK
 
 
+def parse_wifi_names(text):
+    """Wi-Fi connection names and priorities from `nmcli -t -f NAME,TYPE,AUTOCONNECT-PRIORITY connection show`."""
+    result = []
+    for line in text.splitlines():
+        fields = _split_escaped(line)
+        if len(fields) < 3 or fields[1] != "802-11-wireless":
+            continue
+        priority = int(fields[2]) if fields[2].lstrip("-").isdigit() else 0
+        result.append({"name": fields[0], "priority": priority})
+    return result
+
+
 def hotspot_command(password, name):
     """The nmcli command that starts the hotspot. NetworkManager runs the DHCP and DNS for it."""
     return ["device", "wifi", "hotspot", "ifname", "wlan0", "con-name", HOTSPOT_CON,
@@ -205,8 +217,12 @@ class NmcliWifi:
             return 1, "timed out"
         return done.returncode, (done.stdout + done.stderr).strip()
 
-    def scan(self):
-        rc, out = self._run(["-t", "-f", "SSID,SIGNAL,SECURITY", "device", "wifi", "list", "--rescan", "yes"])
+    def scan(self, rescan=True):
+        """Nearby networks. rescan=False uses the last scan, which is quick; a rescan can take several seconds."""
+        args = ["-t", "-f", "SSID,SIGNAL,SECURITY", "device", "wifi", "list"]
+        if rescan:
+            args += ["--rescan", "yes"]
+        rc, out = self._run(args)
         return parse_scan(out) if rc == 0 else []
 
     def connect(self, name, password):
@@ -239,26 +255,37 @@ class NmcliWifi:
         rc, out = self._run(["-t", "-f", "DEVICE,TYPE,STATE", "device"])
         return rc == 0 and ethernet_connected(out)
 
-    def _ssid(self, connection):
-        """The Wi-Fi name (SSID) of a NetworkManager connection; the connection name is only internal."""
-        rc, out = self._run(["-s", "-g", "802-11-wireless.ssid", "connection", "show", connection])
-        return out.strip() if rc == 0 and out.strip() else connection
+    def _connections(self):
+        """Every saved Wi-Fi connection: one list call, then one small call per network for its Wi-Fi name and password."""
+        rc, out = self._run(["-t", "-f", "NAME,TYPE,AUTOCONNECT-PRIORITY", "connection", "show"])
+        if rc != 0:
+            return []
+        result = []
+        for item in parse_wifi_names(out):
+            rc, detail = self._run(["-s", "-g", "802-11-wireless.ssid,802-11-wireless-security.psk", "connection", "show", item["name"]])
+            lines = detail.splitlines() if rc == 0 else []
+            ssid = lines[0].strip() if lines and lines[0].strip() else item["name"]
+            psk = lines[1].strip() if len(lines) > 1 and lines[1].strip() else None
+            result.append({"name": item["name"], "ssid": ssid, "psk": psk, "priority": item["priority"]})
+        return result
 
     def _connection_for(self, ssid):
         """The NetworkManager connection that holds this Wi-Fi name, or None."""
-        rc, out = self._run(["-t", "-f", "NAME,TYPE", "connection", "show"])
-        if rc != 0:
-            return None
-        for connection in saved_wifi_names(out):
-            if self._ssid(connection) == ssid:
-                return connection
+        for connection in self._connections():
+            if connection["ssid"] == ssid:
+                return connection["name"]
         return None
 
     @property
     def current(self):
         rc, out = self._run(["-t", "-f", "NAME,TYPE,DEVICE", "connection", "show", "--active"])
-        connection = active_wifi_name(out) if rc == 0 else None
-        return self._ssid(connection) if connection else None
+        name = active_wifi_name(out) if rc == 0 else None
+        if not name:
+            return None
+        for connection in self._connections():
+            if connection["name"] == name:
+                return connection["ssid"]
+        return name
 
     @property
     def hotspot(self):
@@ -268,21 +295,10 @@ class NmcliWifi:
     @property
     def saved(self):
         """Saved Wi-Fi networks with their passwords, highest priority first. Read as root."""
-        rc, out = self._run(["-t", "-f", "NAME,TYPE", "connection", "show"])
-        if rc != 0:
-            return {}
-        found = []
         own_name = hotspot_name()
-        for connection in saved_wifi_names(out):
-            ssid = self._ssid(connection)
-            if ssid == own_name:
-                continue  # the box's own hotspot is not a network to join
-            rc, psk = self._run(["-s", "-g", "802-11-wireless-security.psk", "connection", "show", connection])
-            rc2, prio = self._run(["-g", "connection.autoconnect-priority", "connection", "show", connection])
-            priority = int(prio) if rc2 == 0 and prio.lstrip("-").isdigit() else 0
-            found.append((-priority, ssid, psk if rc == 0 and psk else None))
-        found.sort(key=lambda item: item[0])
-        return {ssid: psk for _, ssid, psk in found}
+        found = [c for c in self._connections() if c["ssid"] != own_name]  # the box's own hotspot is not a network to join
+        found.sort(key=lambda c: -c["priority"])
+        return {c["ssid"]: c["psk"] for c in found}
 
     def move(self, name, delta):
         """Swaps the priority of a saved network with its neighbour, and writes the new priorities to NetworkManager."""
@@ -408,9 +424,9 @@ class WifiService:
             "saved": sorted(self.backend.saved),
         }
 
-    def nearby(self):
+    def nearby(self, rescan=True):
         saved = set(self.backend.saved)
-        return [dict(n, saved=n["name"] in saved) for n in self.backend.scan()]
+        return [dict(n, saved=n["name"] in saved) for n in self.backend.scan(rescan=rescan)]
 
     def save(self, name, password):
         """Test the password by connecting. Success: keep the network and stop the hotspot.
@@ -533,7 +549,8 @@ _service = WifiService(NmcliWifi(), store=FileStore())
 
 
 def get_network(req):
-    return 200, dict(_service.state(), nearby=_service.nearby())
+    # the page's first load uses the last scan; "Scan again" rescans
+    return 200, dict(_service.state(), nearby=_service.nearby(rescan=False))
 
 
 def post_scan(req):

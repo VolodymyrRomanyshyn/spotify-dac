@@ -368,4 +368,5 @@ dialog.modal h2 { margin-top: 0; }
 
 /* Wi-Fi page: while loading, only the loading line shows; the cards appear once the Pi has answered */
 main.is-loading > section.card { display: none; }
-.page-loading { margin: 8px 4px 0; font-size: 14px; }
+.page-loading .dot { animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }

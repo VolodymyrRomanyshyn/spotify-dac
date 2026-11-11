@@ -32,7 +32,13 @@
   </header>
 
   <main class="settings is-loading">
-    <p id="page-loading" class="muted page-loading">Checking the Pi…</p>
+    <section id="page-loading" class="overall page-loading" role="status">
+      <span class="dot" aria-hidden="true"></span>
+      <div>
+        <h1>Checking the Pi</h1>
+        <p class="muted">Reading the Wi-Fi state…</p>
+      </div>
+    </section>
 
     <!-- ===== Current connection ===== -->
     <section class="card">

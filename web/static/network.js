@@ -406,7 +406,6 @@
   });
 
   // the saved list is shown right away; the nearby list needs a scan
-  $("saved").replaceChildren(el("li", "muted", "Loading…"));
-  $("nearby").replaceChildren(el("li", "muted", "Loading…"));
-  load().then(scan);
+  // one loading line at the top, gone once the Pi has answered
+  load().then(scan).finally(function () { $("page-loading").remove(); });
 })();

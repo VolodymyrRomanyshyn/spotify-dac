@@ -406,6 +406,9 @@
   });
 
   // the saved list is shown right away; the nearby list needs a scan
-  // one loading line at the top, gone once the Pi has answered
-  load().then(scan).finally(function () { $("page-loading").remove(); });
+  // the cards stay hidden, with one loading line, until the Pi has answered
+  load().then(scan).finally(function () {
+    $("page-loading").remove();
+    document.querySelector("main").classList.remove("is-loading");
+  });
 })();

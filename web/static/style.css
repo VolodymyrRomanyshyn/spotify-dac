@@ -365,3 +365,7 @@ dialog.modal h2 { margin-top: 0; }
   .saved-row { gap: 6px; }
   .saved-name { min-width: 0; flex-basis: 100%; white-space: normal; overflow-wrap: anywhere; }
 }
+
+/* Wi-Fi page: while loading, only the loading line shows; the cards appear once the Pi has answered */
+main.is-loading > section.card { display: none; }
+.page-loading { text-align: center; padding: 48px 0; }

@@ -379,3 +379,9 @@ main.is-loading > section.card { display: none; }
 #sources-card > .row-toggle, #sources-card > div { padding: 12px 0; border-top: 1px solid var(--line); }
 #sources-card > .muted { margin: 0; }
 #sources-card > .row-toggle:first-of-type, #sources-card > div:first-of-type { border-top: 0; }
+
+/* dialogs: the buttons are centred under the text, and the dialog is centred on the screen */
+dialog.modal { margin: auto; text-align: center; }
+dialog.modal .actions { justify-content: center; }
+dialog.modal .form { text-align: left; }
+dialog.modal .field { text-align: left; }

@@ -22,7 +22,7 @@ from urllib.parse import parse_qs, urlsplit
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
-from api import airplay, auth, config, hardware, radio, spotify, status, update, volume, wifi  # noqa: E402
+from api import airplay, auth, bluetooth, config, hardware, radio, spotify, status, update, volume, wifi  # noqa: E402
 from api.common import MAX_BODY, ApiError, Request, feature_on  # noqa: E402
 
 STATIC = HERE / "static"
@@ -47,6 +47,12 @@ ROUTES = {
     ("GET", "/api/volume"): volume.get_volume,
     ("POST", "/api/volume"): volume.post_volume,
     ("GET", "/api/device"): config.get_device,
+    ("GET", "/api/bluetooth"): lambda req: (200, dict(bluetooth.adapter_state(), pin_set=bluetooth.read_pin() is not None,
+                                                    player=bluetooth.player_state())),
+    ("POST", "/api/bluetooth/power"): lambda req: (200, bluetooth.set_power(bool(req.json().get("on")))),
+    ("POST", "/api/bluetooth/pair"): lambda req: (200, bluetooth.start_pairing()),
+    ("POST", "/api/bluetooth/pin"): lambda req: (200, bluetooth.set_pin(req.json().get("pin", "")) or {"saved": True}),
+    ("POST", "/api/bluetooth/transport"): lambda req: (200, bluetooth.transport(req.json().get("action", ""))),
     ("GET", "/api/features"): config.get_features,
     ("GET", "/api/airplay"): airplay.get_airplay,
     ("POST", "/api/airplay"): airplay.post_airplay,

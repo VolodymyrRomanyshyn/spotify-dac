@@ -465,5 +465,57 @@ class ScanModeTests(unittest.TestCase):
         self.assertEqual(backend.calls, ["cached", "rescan"])
 
 
+class BluetoothParsingTests(unittest.TestCase):
+    def setUp(self):
+        from api import bluetooth
+        self.bt = bluetooth
+
+    def test_adapter_state_from_show(self):
+        text = "Controller B8:27:EB:16:0B:32 (public)\n\tName: pi\n\tAlias: volodymyr-pi-dac-2\n\tPowered: yes\n\tDiscoverable: no\n\tPairable: yes\n"
+        state = self.bt.parse_show(text)
+        self.assertTrue(state["powered"])
+        self.assertFalse(state["discoverable"])
+        self.assertTrue(state["pairable"])
+        self.assertEqual(state["name"], "volodymyr-pi-dac-2")
+
+    def test_paired_devices(self):
+        devices = self.bt.parse_devices("Device 11:22:33:44:55:66 Anna's iPhone\nDevice AA:BB:CC:DD:EE:FF Pixel\n")
+        self.assertEqual(devices[0], {"address": "11:22:33:44:55:66", "name": "Anna's iPhone"})
+        self.assertEqual(len(devices), 2)
+
+    def test_finds_the_phone_player_and_its_track(self):
+        managed = {
+            "/org/bluez/hci0": {"org.bluez.Adapter1": {}},
+            "/org/bluez/hci0/dev_11/player0": {
+                "org.bluez.MediaPlayer1": {
+                    "Status": {"type": "s", "data": "playing"},
+                    "Track": {"type": "a{sv}", "data": {
+                        "Title": {"type": "s", "data": "Something's Got A Hold On Me"},
+                        "Artist": {"type": "s", "data": "Etta James"}}},
+                }},
+        }
+        player = self.bt.find_player(managed)
+        self.assertEqual(player["path"], "/org/bluez/hci0/dev_11/player0")
+        self.assertEqual(player["status"], "playing")
+        self.assertEqual(player["title"], "Something's Got A Hold On Me")
+        self.assertEqual(player["artist"], "Etta James")
+
+    def test_no_player_when_no_phone_is_playing(self):
+        self.assertIsNone(self.bt.find_player({"/org/bluez/hci0": {"org.bluez.Adapter1": {}}}))
+
+    def test_pin_rules(self):
+        self.assertTrue(self.bt.valid_pin("1234"))
+        self.assertTrue(self.bt.valid_pin("12345678"))
+        self.assertFalse(self.bt.valid_pin("123"))
+        self.assertFalse(self.bt.valid_pin("123456789"))
+        self.assertFalse(self.bt.valid_pin("12a4"))
+
+    def test_only_known_transport_actions(self):
+        self.assertEqual(self.bt.transport_method("next"), "Next")
+        self.assertEqual(self.bt.transport_method("previous"), "Previous")
+        with self.assertRaises(ApiError):
+            self.bt.transport_method("reboot")
+
+
 if __name__ == "__main__":
     unittest.main()

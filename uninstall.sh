@@ -13,7 +13,7 @@ PURGE=no
 [ "${1:-}" = "--purge" ] && PURGE=yes
 require_root "$@"
 
-UNITS=(soloist spotify-dac-web spotify-dac-volume spotify-dac-boot-update spotify-dac-boot-apt spotify-dac-airplay spotify-dac-netwatch nespi-power nespi-fan)
+UNITS=(soloist spotify-dac-web spotify-dac-volume spotify-dac-boot-update spotify-dac-boot-apt spotify-dac-airplay spotify-dac-bluetooth-agent spotify-dac-netwatch nespi-power nespi-fan)
 for u in "${UNITS[@]}"; do
   systemctl disable --now "$u.service" 2>/dev/null || true
   rm -f "$UNIT_DIR/$u.service"
@@ -21,7 +21,7 @@ done
 systemctl daemon-reload
 
 nmcli connection delete device-hotspot 2>/dev/null || true
-rm -f "$SBIN_DIR/dac-netwatch" "$CONF_DIR/hotspot.env"
+rm -f "$SBIN_DIR/dac-netwatch" "$CONF_DIR/hotspot.env" "$CONF_DIR/bluetooth.pin"
 rm -rf "$WEB_DIR" "$(dirname "$WEB_DIR")/radio" "$(dirname "$WEB_DIR")/radio.new" "$(dirname "$WEB_DIR")/radio.old"
 rm -f "$SOLOIST_BIN" "$SOLOIST_BIN.prev" \
       "$SBIN_DIR/dac-update" "$SBIN_DIR/dac-status" "$SBIN_DIR/dac-sink-volume" "$SBIN_DIR/nespi-power" "$SBIN_DIR/nespi-fan" \

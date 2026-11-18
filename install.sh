@@ -44,6 +44,8 @@ DEVICE_NAME="$(hostname)"
 SPOTIFY_ENABLED="yes"              # yes: Soloist (Spotify Connect) | no: radio only
 RADIO_ENABLED="yes"                # yes: internet radio on the web page | no: Spotify only
 AIRPLAY_ENABLED="no"               # yes: AirPlay receiver (shairport-sync) playing into the DAC
+BLUETOOTH_ENABLED="no"             # yes: phones stream to the DAC over Bluetooth (BlueZ, A2DP)
+BLUETOOTH_PIN=""                   # 4-8 digits; the PIN a phone enters to pair
 ACCENT_COLOR="blue"                # colour of the web interface buttons (set on the Settings page)
 AUDIO_OUTPUT="usb"                 # usb | hat
 AUDIO_HAT_OVERLAY=""               # e.g. iqaudio-dacplus (only for AUDIO_OUTPUT=hat)
@@ -137,6 +139,12 @@ ask_questions() {
   SPOTIFY_ENABLED="$(ask_yesno "Play from the Spotify app (Spotify Connect, needs a Soloist API key)?" "$SPOTIFY_ENABLED")"
   RADIO_ENABLED="$(ask_yesno "Play internet radio (station list in the web interface)?" "$RADIO_ENABLED")"
   AIRPLAY_ENABLED="$(ask_yesno "Play AirPlay from iPhone, iPad and Mac (the box appears as an AirPlay speaker)?" "$AIRPLAY_ENABLED")"
+  BLUETOOTH_ENABLED="$(ask_yesno "Play music from a phone over Bluetooth (the box appears as a Bluetooth speaker)?" "$BLUETOOTH_ENABLED")"
+  if [ "$BLUETOOTH_ENABLED" = yes ]; then
+    local btpin
+    btpin="$(ask_password "Bluetooth PIN (4 to 8 digits). A phone enters it when it pairs.\n\nLeave empty to keep the stored one.")"
+    if [ -n "$btpin" ]; then BLUETOOTH_PIN="$btpin"; fi
+  fi
   if [ "$SPOTIFY_ENABLED" = yes ]; then
     DEVICE_NAME="$(ask_input "Name shown in the Spotify app (Spotify Connect device):" "$DEVICE_NAME")"
   else
@@ -256,6 +264,10 @@ validate() {
   case "$SPOTIFY_ENABLED" in yes|no) ;; *) die "SPOTIFY_ENABLED must be yes or no" ;; esac
   case "$RADIO_ENABLED" in yes|no) ;; *) die "RADIO_ENABLED must be yes or no" ;; esac
   case "$AIRPLAY_ENABLED" in yes|no) ;; *) die "AIRPLAY_ENABLED must be yes or no" ;; esac
+  case "$BLUETOOTH_ENABLED" in yes|no) ;; *) die "BLUETOOTH_ENABLED must be yes or no" ;; esac
+  if [ "$BLUETOOTH_ENABLED" = yes ]; then
+    [[ "$BLUETOOTH_PIN" =~ ^[0-9]{4,8}$ ]] || die "The Bluetooth PIN must be 4 to 8 digits"
+  fi
   [ "$SPOTIFY_ENABLED" = yes ] || [ "$RADIO_ENABLED" = yes ] || [ "$AIRPLAY_ENABLED" = yes ] || die "Turn on Spotify, radio, AirPlay or several of them"
   [ "$RADIO_ENABLED" = yes ] && [ "$WEB_UI" != yes ] && die "Internet radio needs the web interface (WEB_UI=yes)"
   [[ "$WEB_PORT" =~ ^[0-9]+$ ]] && [ "$WEB_PORT" -ge 1024 ] && [ "$WEB_PORT" -le 65535 ] || die "WEB_PORT must be 1024-65535"
@@ -317,6 +329,7 @@ install_packages() {
   [ "$RADIO_ENABLED" = yes ] && pkgs+=(mpv)
   [ "$WEB_UI" = yes ] && pkgs+=(python3)
   [ "$AIRPLAY_ENABLED" = yes ] && pkgs+=(shairport-sync avahi-daemon)
+  [ "$BLUETOOTH_ENABLED" = yes ] && pkgs+=(bluez bluez-tools)
   [ "$CASE" = nespi ] && pkgs+=(python3-libgpiod)
   apt-get update -q
   DEBIAN_FRONTEND=noninteractive apt-get install -y -q "${pkgs[@]}"
@@ -332,6 +345,7 @@ DEVICE_NAME="$DEVICE_NAME"
 SPOTIFY_ENABLED="$SPOTIFY_ENABLED"
 RADIO_ENABLED="$RADIO_ENABLED"
 AIRPLAY_ENABLED="$AIRPLAY_ENABLED"
+BLUETOOTH_ENABLED="$BLUETOOTH_ENABLED"
 ACCENT_COLOR="$ACCENT_COLOR"
 SOURCE_DIR="$REPO_DIR"
 AUDIO_OUTPUT="$AUDIO_OUTPUT"
@@ -412,6 +426,18 @@ install_files() {
   sed "s/@UID@/$SOLOIST_UID/g" "$REPO_DIR/files/systemd/spotify-dac-volume.service" > "$UNIT_DIR/spotify-dac-volume.service"
   local u
   install -m 644 "$REPO_DIR/files/systemd/spotify-dac-airplay.service" "$UNIT_DIR/"
+  install -m 644 "$REPO_DIR/files/systemd/spotify-dac-bluetooth-agent.service" "$UNIT_DIR/"
+  if [ "$BLUETOOTH_ENABLED" = yes ]; then
+    if [ -n "$BLUETOOTH_PIN" ] || [ ! -f "$CONF_DIR/bluetooth.pin" ]; then
+      [ -n "$BLUETOOTH_PIN" ] || die "Bluetooth needs a PIN: answer the question"
+      umask 077
+      printf '* %s\n' "$BLUETOOTH_PIN" > "$CONF_DIR/bluetooth.pin"
+      umask 022
+    fi
+  else
+    rm -f "$CONF_DIR/bluetooth.pin"
+  fi
+  BLUETOOTH_PIN=""
   sed -i "s/@UID@/$SOLOIST_UID/g" "$UNIT_DIR/spotify-dac-airplay.service"
   for u in spotify-dac-boot-update spotify-dac-boot-apt nespi-power nespi-fan; do
     install -m 644 "$REPO_DIR/files/systemd/$u.service" "$UNIT_DIR/"
@@ -569,6 +595,9 @@ configure_units() {
 
   # the package starts its own receiver; ours (spotify-dac-airplay) runs as the soloist user
   systemctl disable --now shairport-sync.service 2>/dev/null || true
+  # Bluetooth: the agent answers pairing with the PIN; the box is only discoverable when the Pair button opens it
+  if [ "$BLUETOOTH_ENABLED" = yes ]; then rfkill unblock bluetooth 2>/dev/null || true; systemctl enable --now spotify-dac-bluetooth-agent.service
+  else systemctl disable --now spotify-dac-bluetooth-agent.service 2>/dev/null || true; fi
   # AirPlay is started from the Home page, never at boot
   systemctl disable --now spotify-dac-airplay.service 2>/dev/null || true
 

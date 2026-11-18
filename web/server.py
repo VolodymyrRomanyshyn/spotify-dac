@@ -51,7 +51,8 @@ ROUTES = {
                                                     pending=bluetooth.pending_pairing())),
     ("POST", "/api/bluetooth/decision"): lambda req: (200, bluetooth.decide(bool(req.json().get("match")))),
     ("POST", "/api/bluetooth/power"): lambda req: (200, bluetooth.set_power(bool(req.json().get("on")))),
-    ("POST", "/api/bluetooth/pair"): lambda req: (200, bluetooth.start_pairing()),
+    ("POST", "/api/bluetooth/pair"): lambda req: (200, bluetooth.start_pairing() if req.json().get("on", True)
+                                                 else bluetooth.stop_pairing()),
     ("POST", "/api/bluetooth/transport"): lambda req: (200, bluetooth.transport(req.json().get("action", ""))),
     ("POST", "/api/bluetooth/forget"): lambda req: (200, bluetooth.forget(req.json().get("address", ""))),
     ("GET", "/api/features"): config.get_features,

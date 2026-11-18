@@ -138,6 +138,15 @@ def start_pairing():
     return adapter_state()
 
 
+def stop_pairing():
+    """Closes the pairing window now."""
+    _bt(["pairable", "off"])
+    _bt(["discoverable", "off"])
+    run(["systemctl", "stop", PAIRING_TIMER + ".timer"], timeout=10)
+    run(["systemctl", "stop", PAIRING_TIMER + ".service"], timeout=10)
+    return adapter_state()
+
+
 def player_state():
     """The phone's track and play state, or None when no phone is playing through the box."""
     rc, out, _ = run(["busctl", "--json=short", "call", "org.bluez", "/", "org.freedesktop.DBus.ObjectManager",

@@ -301,6 +301,8 @@
   function drawBluetooth(state) {
     if (!state.pending) shownCode = null;  // the pairing is over: the next code will show again
     showMatch(state.pending);
+    $("bt-pair").textContent = state.pairable ? "Stop pairing" : "Pair a phone";
+    $("bt-pair").setAttribute("data-open", String(!!state.pairable));
     setOn($("toggle-bluetooth"), !!state.powered);
     $("bt-details").hidden = !state.powered;  // nothing else is shown while Bluetooth is off
     $("bt-status").textContent = state.powered ? "on" : "off";
@@ -363,11 +365,14 @@
     }
   }
 
+  // the Pair button starts the pairing window, and stops it again while it is open
   async function pairPhone() {
+    const open = $("bt-pair").getAttribute("data-open") === "true";
     $("bt-pair").disabled = true;
     try {
-      drawBluetooth(await api("/api/bluetooth/pair", { method: "POST" }));
-      $("bt-pair-note").textContent = "Open Bluetooth on the phone and choose this box. Compare the code on the phone with the code shown here. The window closes in 2 minutes.";
+      drawBluetooth(await api("/api/bluetooth/pair", { method: "POST", body: { on: !open } }));
+      $("bt-pair-note").textContent = open ? "Pairing stopped."
+        : "Open Bluetooth on the phone and choose this box. Compare the code on the phone with the code shown here. The window closes in 2 minutes.";
     } catch (err) {
       btMessage(err.message, true);
     } finally {

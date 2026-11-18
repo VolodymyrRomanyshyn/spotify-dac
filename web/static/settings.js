@@ -345,7 +345,7 @@
   let shownCode = null;
   function showMatch(pending) {
     if (!pending) return;
-    if (shownCode === pending.code && $("match-dialog").open) return;
+    if (shownCode === pending.code) return;  // this code was already shown or answered
     shownCode = pending.code;
     $("match-code").textContent = pending.code.slice(0, 3) + " " + pending.code.slice(3);
     $("match-error").textContent = "";

@@ -115,7 +115,7 @@ function stationThumb(s) {
 }
 
 // A question in the styled dialog (#ask-dialog, on pages that have one). Resolves true for OK.
-function askUser(title, text, okLabel) {
+function askUser(title, text, okLabel, danger) {
   return new Promise(function (resolve) {
     const dialog = document.getElementById("ask-dialog");
     if (!dialog) { resolve(window.confirm(title + "\n" + text)); return; }
@@ -124,6 +124,7 @@ function askUser(title, text, okLabel) {
     const ok = document.getElementById("ask-ok");
     const cancel = document.getElementById("ask-cancel");
     ok.textContent = okLabel || "OK";
+    ok.className = danger ? "ctl danger" : "ctl main";
     function done(answer) {
       ok.removeEventListener("click", onOk);
       cancel.removeEventListener("click", onCancel);

@@ -371,3 +371,6 @@ dialog.modal h2 { margin-top: 0; }
 main.is-loading > section.card { display: none; }
 .page-loading .dot { animation: pulse 1.2s ease-in-out infinite; }
 @keyframes pulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+
+/* a destructive action in a dialog: red, so it is not taken by mistake */
+.ctl.danger { color: #ffffff; background: var(--error); border-color: var(--error); }

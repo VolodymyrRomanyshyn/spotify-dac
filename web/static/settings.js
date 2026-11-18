@@ -358,7 +358,7 @@
     try {
       await api("/api/bluetooth/decision", { body: { match: match } });
       $("match-dialog").close();  // shownCode stays set, so the poll does not reopen this code
-      btMessage(match ? "Pairing confirmed." : "Pairing refused.", !match);
+      btMessage(match ? "Phone connected for pairing." : "Pairing refused.", !match);
       loadBluetooth();
     } catch (err) {
       $("match-error").textContent = err.message;

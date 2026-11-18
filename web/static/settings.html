@@ -191,12 +191,12 @@
 
   <!-- A phone is pairing: the same 6-digit code is shown on the phone; confirm it here -->
   <dialog id="match-dialog" class="modal" aria-labelledby="match-title">
-    <h2 id="match-title">Confirm the pairing code</h2>
-    <p class="muted">The phone shows this code. Press "Matches" only if the phone shows the same code.</p>
+    <h2 id="match-title">A phone wants to pair</h2>
+    <p>The same code is shown on the phone. If the phone shows this code, press <strong>Connect</strong>. If not, press <strong>Refuse</strong>.</p>
     <p id="match-code" class="match-code" aria-live="polite"></p>
     <div class="actions">
-      <button id="match-no" class="ctl" type="button">No match</button>
-      <button id="match-yes" class="ctl main" type="button">Matches</button>
+      <button id="match-no" class="ctl" type="button">Refuse</button>
+      <button id="match-yes" class="ctl main" type="button">Connect</button>
     </div>
     <p id="match-error" class="status bad" role="status"></p>
   </dialog>

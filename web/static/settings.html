@@ -88,6 +88,36 @@
       </div>
     </section>
 
+    <!-- ===== Bluetooth ===== -->
+    <section class="card" id="bluetooth-card">
+      <h2>Bluetooth</h2>
+      <div class="row-toggle">
+        <span>Bluetooth speaker <span id="bt-status" class="status"></span></span>
+        <button id="toggle-bluetooth" class="toggle-btn" type="button" aria-pressed="false"><span class="led" aria-hidden="true"></span><span class="state">Off</span></button>
+      </div>
+      <p id="bt-name" class="muted"></p>
+
+      <form id="bt-pin-form" class="form">
+        <label class="field">
+          <span>Pairing PIN (4 to 8 digits)</span>
+          <input id="bt-pin" type="password" inputmode="numeric" maxlength="8" autocomplete="new-password">
+        </label>
+        <div class="actions">
+          <button id="bt-pin-save" class="ctl" type="button">Save PIN</button>
+          <span id="bt-pin-state" class="status"></span>
+        </div>
+      </form>
+
+      <div class="actions">
+        <button id="bt-pair" class="ctl main" type="button">Pair a phone</button>
+        <span id="bt-pair-note" class="muted" role="status"></span>
+      </div>
+
+      <h3>Paired phones</h3>
+      <ul id="bt-devices" class="commits"></ul>
+      <p id="bt-message" class="muted" role="status"></p>
+    </section>
+
     <!-- ===== GPIO ===== -->
     <section class="card">
       <h2>GPIO</h2>

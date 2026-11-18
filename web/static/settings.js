@@ -292,6 +292,93 @@
   $("check").addEventListener("click", checkCode);
   $("update").addEventListener("click", updateCode);
 
+  // ---- Bluetooth: on/off, PIN, pairing window, paired phones ----
+  function btMessage(text, bad) {
+    $("bt-message").className = bad ? "status bad" : "muted";
+    $("bt-message").textContent = text;
+  }
+
+  function drawBluetooth(state) {
+    setOn($("toggle-bluetooth"), !!state.powered);
+    $("bt-status").textContent = state.powered ? "on" : "off";
+    $("bt-status").className = "status " + (state.powered ? "ok" : "off");
+    $("bt-name").textContent = state.name ? "Shown to phones as \"" + state.name + "\"." : "";
+    $("bt-pin-state").textContent = state.pin_set ? "PIN saved" : "no PIN yet";
+    $("bt-pin-state").className = "status " + (state.pin_set ? "ok" : "bad");
+    const list = $("bt-devices");
+    list.replaceChildren();
+    if (!state.devices || state.devices.length === 0) {
+      list.append(el("li", "muted", "No phones paired yet."));
+      return;
+    }
+    state.devices.forEach(function (device) {
+      const row = el("li", "row-toggle");
+      row.append(el("span", "", device.name + "  " + device.address));
+      const forget = el("button", "ctl small", "Forget");
+      forget.type = "button";
+      forget.addEventListener("click", function () { forgetPhone(device.address, device.name); });
+      row.append(forget);
+      list.append(row);
+    });
+  }
+
+  async function loadBluetooth() {
+    try {
+      drawBluetooth(await api("/api/bluetooth"));
+    } catch (err) {
+      btMessage("Cannot read Bluetooth: " + err.message, true);
+    }
+  }
+
+  async function setBluetooth(on) {
+    try {
+      drawBluetooth(await api("/api/bluetooth/power", { body: { on: on } }));
+      btMessage(on ? "Bluetooth is on. Playing it stops Spotify, radio and AirPlay." : "Bluetooth is off.", false);
+    } catch (err) {
+      btMessage(err.message, true);
+      loadBluetooth();
+    }
+  }
+
+  async function saveBluetoothPin() {
+    const pin = $("bt-pin").value;
+    try {
+      await api("/api/bluetooth/pin", { body: { pin: pin } });
+      $("bt-pin").value = "";
+      btMessage("PIN saved. Phones must use it when they pair.", false);
+      loadBluetooth();
+    } catch (err) {
+      btMessage(err.message, true);
+    }
+  }
+
+  async function pairPhone() {
+    $("bt-pair").disabled = true;
+    try {
+      drawBluetooth(await api("/api/bluetooth/pair", { method: "POST" }));
+      $("bt-pair-note").textContent = "Open Bluetooth on the phone and choose this box. Enter the PIN. The window closes in 2 minutes.";
+    } catch (err) {
+      btMessage(err.message, true);
+    } finally {
+      $("bt-pair").disabled = false;
+    }
+  }
+
+  async function forgetPhone(address, name) {
+    if (!window.confirm("Forget " + name + "? It must pair again to play.")) return;
+    try {
+      drawBluetooth(await api("/api/bluetooth/forget", { body: { address: address } }));
+      btMessage(name + " was forgotten.", false);
+    } catch (err) {
+      btMessage(err.message, true);
+    }
+  }
+
+  $("toggle-bluetooth").addEventListener("click", function () { setBluetooth(!isOn(this)); });
+  $("bt-pin-save").addEventListener("click", saveBluetoothPin);
+  $("bt-pair").addEventListener("click", pairPhone);
+  loadBluetooth();
+
   loadConfig().catch(function (err) { showError($("general-status"), err); });
   loadHardware().catch(function (err) { showError($("gpio-status"), err); });
   setInterval(refreshSpotifyStatus, 15000);

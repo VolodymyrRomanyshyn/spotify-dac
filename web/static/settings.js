@@ -292,20 +292,19 @@
   $("check").addEventListener("click", checkCode);
   $("update").addEventListener("click", updateCode);
 
-  // ---- Bluetooth: on/off, PIN, pairing window, paired phones ----
+  // ---- Bluetooth: on/off, pairing window with the code check, paired phones ----
   function btMessage(text, bad) {
     $("bt-message").className = bad ? "status bad" : "muted";
     $("bt-message").textContent = text;
   }
 
   function drawBluetooth(state) {
+    showMatch(state.pending);
     setOn($("toggle-bluetooth"), !!state.powered);
     $("bt-details").hidden = !state.powered;  // nothing else is shown while Bluetooth is off
     $("bt-status").textContent = state.powered ? "on" : "off";
     $("bt-status").className = "status " + (state.powered ? "ok" : "off");
     $("bt-name").textContent = state.name ? "Shown to phones as \"" + state.name + "\"." : "";
-    $("bt-pin-state").textContent = state.pin_set ? "PIN saved" : "no PIN yet";
-    $("bt-pin-state").className = "status " + (state.pin_set ? "ok" : "bad");
     const list = $("bt-devices");
     list.replaceChildren();
     if (!state.devices || state.devices.length === 0) {
@@ -341,24 +340,26 @@
     }
   }
 
-  // the PIN is set in a popup
-  function openBluetoothPin() {
-    $("pin-input").value = "";
-    $("pin-error").textContent = "";
-    $("pin-dialog").showModal();
-    $("pin-input").focus();
+  // a phone is pairing: its code is shown here, and the user says whether it matches
+  let shownCode = null;
+  function showMatch(pending) {
+    if (!pending) return;
+    if (shownCode === pending.code && $("match-dialog").open) return;
+    shownCode = pending.code;
+    $("match-code").textContent = pending.code.slice(0, 3) + " " + pending.code.slice(3);
+    $("match-error").textContent = "";
+    if (!$("match-dialog").open) $("match-dialog").showModal();
   }
 
-  async function saveBluetoothPin(event) {
-    event.preventDefault();
-    const pin = $("pin-input").value;
+  async function answerMatch(match) {
     try {
-      await api("/api/bluetooth/pin", { body: { pin: pin } });
-      $("pin-dialog").close();
-      btMessage("PIN saved. Phones must enter it when they pair.", false);
+      await api("/api/bluetooth/decision", { body: { match: match } });
+      $("match-dialog").close();
+      shownCode = null;
+      btMessage(match ? "Pairing confirmed." : "Pairing refused.", !match);
       loadBluetooth();
     } catch (err) {
-      $("pin-error").textContent = err.message;
+      $("match-error").textContent = err.message;
     }
   }
 
@@ -366,7 +367,7 @@
     $("bt-pair").disabled = true;
     try {
       drawBluetooth(await api("/api/bluetooth/pair", { method: "POST" }));
-      $("bt-pair-note").textContent = "Open Bluetooth on the phone and choose this box. Enter the PIN. The window closes in 2 minutes.";
+      $("bt-pair-note").textContent = "Open Bluetooth on the phone and choose this box. Compare the code on the phone with the code shown here. The window closes in 2 minutes.";
     } catch (err) {
       btMessage(err.message, true);
     } finally {
@@ -385,11 +386,11 @@
   }
 
   $("toggle-bluetooth").addEventListener("click", function () { setBluetooth(!isOn(this)); });
-  $("bt-pin-open").addEventListener("click", openBluetoothPin);
-  $("pin-form").addEventListener("submit", saveBluetoothPin);
-  $("pin-cancel").addEventListener("click", function () { $("pin-dialog").close(); });
+  $("match-yes").addEventListener("click", function () { answerMatch(true); });
+  $("match-no").addEventListener("click", function () { answerMatch(false); });
   $("bt-pair").addEventListener("click", pairPhone);
   loadBluetooth();
+  setInterval(loadBluetooth, 2000);  // shows a pairing code as soon as a phone asks for it
 
   loadConfig().catch(function (err) { showError($("general-status"), err); });
   loadHardware().catch(function (err) { showError($("gpio-status"), err); });

@@ -503,12 +503,18 @@ class BluetoothParsingTests(unittest.TestCase):
     def test_no_player_when_no_phone_is_playing(self):
         self.assertIsNone(self.bt.find_player({"/org/bluez/hci0": {"org.bluez.Adapter1": {}}}))
 
-    def test_pin_rules(self):
-        self.assertTrue(self.bt.valid_pin("1234"))
-        self.assertTrue(self.bt.valid_pin("12345678"))
-        self.assertFalse(self.bt.valid_pin("123"))
-        self.assertFalse(self.bt.valid_pin("123456789"))
-        self.assertFalse(self.bt.valid_pin("12a4"))
+    def test_decision_needs_a_waiting_pairing(self):
+        from api import bluetooth as bt
+        original = bt.PENDING_FILE
+        with tempfile.TemporaryDirectory() as tmp:
+            bt.PENDING_FILE = str(Path(tmp) / "pending.json")
+            try:
+                with self.assertRaises(ApiError):
+                    bt.decide(True)
+                Path(bt.PENDING_FILE).write_text('{"code": "123456", "device": "/org/bluez/hci0/dev_11"}', encoding="utf-8")
+                self.assertEqual(bt.pending_pairing()["code"], "123456")
+            finally:
+                bt.PENDING_FILE = original
 
     def test_forget_only_takes_a_bluetooth_address(self):
         self.assertTrue(self.bt.valid_address("11:22:33:44:55:66"))

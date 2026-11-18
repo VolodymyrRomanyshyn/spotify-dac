@@ -1,11 +1,11 @@
 [Unit]
-Description=Spotify DAC: Bluetooth pairing agent (answers pairing with the PIN from the installer)
+Description=Spotify DAC: Bluetooth pairing agent (shows the 6-digit code; confirmed on the Settings page)
 After=bluetooth.service
 Requires=bluetooth.service
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/bt-agent -c DisplayOnly -p /etc/spotify-dac/bluetooth.pin
+ExecStart=/usr/bin/python3 /usr/local/sbin/dac-bt-agent
 Restart=always
 RestartSec=10
 

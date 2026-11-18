@@ -1,0 +1,91 @@
+#!/usr/bin/env python3
+"""Bluetooth pairing agent: shows the 6-digit code to the Settings page and waits for the answer.
+
+When a phone pairs, the phone and the box show the same 6-digit code. The code is written to
+PENDING_FILE, and the Settings page shows it. You press "Matches" or "No match" there; the answer is
+written to DECISION_FILE, and this agent accepts or rejects the pairing. Pairing waits up to
+DECISION_SECONDS, then rejects it.
+"""
+import asyncio
+import json
+import os
+import sys
+
+from dbus_next import BusType, DBusError
+from dbus_next.aio import MessageBus
+from dbus_next.service import ServiceInterface, method
+
+PENDING_FILE = "/run/spotify-dac-bt-pairing.json"
+DECISION_FILE = "/run/spotify-dac-bt-decision"
+AGENT_PATH = "/org/spotify_dac/agent"
+DECISION_SECONDS = 60
+
+
+def remove(path):
+    try:
+        os.remove(path)
+    except OSError:
+        pass
+
+
+class Agent(ServiceInterface):
+    def __init__(self):
+        super().__init__("org.bluez.Agent1")
+
+    @method()
+    def Release(self):
+        pass
+
+    @method()
+    def Cancel(self):
+        remove(PENDING_FILE)
+
+    @method()
+    async def RequestConfirmation(self, device: "o", passkey: "u"):
+        """The phone shows a code; the box asks the user to confirm it on the Settings page."""
+        code = "%06d" % passkey
+        remove(DECISION_FILE)
+        with open(PENDING_FILE, "w", encoding="utf-8") as handle:
+            json.dump({"code": code, "device": device}, handle)
+        try:
+            for _ in range(DECISION_SECONDS * 2):
+                await asyncio.sleep(0.5)
+                if os.path.exists(DECISION_FILE):
+                    with open(DECISION_FILE, encoding="utf-8") as handle:
+                        answer = handle.read().strip()
+                    if answer == "yes":
+                        return
+                    raise DBusError("org.bluez.Error.Rejected", "The user said the codes do not match")
+            raise DBusError("org.bluez.Error.Rejected", "No answer on the Settings page")
+        finally:
+            remove(PENDING_FILE)
+            remove(DECISION_FILE)
+
+    @method()
+    def RequestAuthorization(self, device: "o"):
+        """Pairing was confirmed above; the phone may now connect."""
+        return
+
+    @method()
+    def AuthorizeService(self, device: "o", uuid: "s"):
+        """Audio (A2DP) and remote control (AVRCP) are allowed for a paired phone."""
+        return
+
+
+async def main():
+    bus = await MessageBus(bus_type=BusType.SYSTEM).connect()
+    bus.export(AGENT_PATH, Agent())
+    introspection = await bus.introspect("org.bluez", "/org/bluez")
+    proxy = bus.get_proxy_object("org.bluez", "/org/bluez", introspection)
+    manager = proxy.get_interface("org.bluez.AgentManager1")
+    await manager.call_register_agent(AGENT_PATH, "DisplayYesNo")
+    await manager.call_request_default_agent(AGENT_PATH)
+    print("bluetooth agent ready", flush=True)
+    await asyncio.Event().wait()
+
+
+if __name__ == "__main__":
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        sys.exit(0)

@@ -99,10 +99,6 @@
       <div id="bt-details" hidden>
         <p id="bt-name" class="muted"></p>
         <div class="actions">
-          <button id="bt-pin-open" class="ctl" type="button">Set PIN</button>
-          <span id="bt-pin-state" class="status"></span>
-        </div>
-        <div class="actions">
           <button id="bt-pair" class="ctl main" type="button">Pair a phone</button>
           <span id="bt-pair-note" class="muted" role="status"></span>
         </div>
@@ -188,20 +184,16 @@
     </section>
   </main>
 
-  <dialog id="pin-dialog" class="modal" aria-labelledby="pin-title">
-    <h2 id="pin-title">Bluetooth PIN</h2>
-    <p class="muted">A phone asks for this PIN when it pairs. 4 to 8 digits.</p>
-    <form id="pin-form" class="form" method="dialog">
-      <label class="field">
-        <span>PIN</span>
-        <input id="pin-input" type="password" inputmode="numeric" maxlength="8" autocomplete="new-password" required>
-      </label>
-      <p id="pin-error" class="status bad" role="status"></p>
-      <div class="actions">
-        <button value="cancel" class="ctl" type="button" id="pin-cancel">Cancel</button>
-        <button type="submit" class="ctl main">Save PIN</button>
-      </div>
-    </form>
+  <!-- A phone is pairing: the same 6-digit code is shown on the phone; confirm it here -->
+  <dialog id="match-dialog" class="modal" aria-labelledby="match-title">
+    <h2 id="match-title">Confirm the pairing code</h2>
+    <p class="muted">The phone shows this code. Press "Matches" only if the phone shows the same code.</p>
+    <p id="match-code" class="match-code" aria-live="polite"></p>
+    <div class="actions">
+      <button id="match-no" class="ctl" type="button">No match</button>
+      <button id="match-yes" class="ctl main" type="button">Matches</button>
+    </div>
+    <p id="match-error" class="status bad" role="status"></p>
   </dialog>
 
   <dialog id="key-dialog" class="modal" aria-labelledby="key-title">

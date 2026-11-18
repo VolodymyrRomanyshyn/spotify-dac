@@ -10,11 +10,11 @@ import subprocess
 
 from .common import ApiError, read_config, run
 
-PIN_FILE = "/etc/spotify-dac/bluetooth.pin"
+PENDING_FILE = "/run/spotify-dac-bt-pairing.json"  # the code the phone shows, written by the agent
+DECISION_FILE = "/run/spotify-dac-bt-decision"    # the user's answer: "yes" or "no"
 AGENT_UNIT = "spotify-dac-bluetooth-agent.service"
 PAIRING_SECONDS = 120
 PAIRING_TIMER = "spotify-dac-bluetooth-pairing-off"
-PIN = re.compile(r"[0-9]{4,8}")
 TRANSPORT = {"play": "Play", "pause": "Pause", "next": "Next", "previous": "Previous"}
 PLAYER_IFACE = "org.bluez.MediaPlayer1"
 
@@ -91,10 +91,6 @@ def forget(address):
     return adapter_state()
 
 
-def valid_pin(pin):
-    return isinstance(pin, str) and PIN.fullmatch(pin) is not None
-
-
 def transport_method(action):
     if action not in TRANSPORT:
         raise ApiError(400, "action must be play, pause, next or previous")
@@ -166,24 +162,23 @@ def transport(action):
     return player_state()
 
 
-def read_pin():
+def pending_pairing():
+    """The code a phone is waiting to be confirmed with, or None."""
     try:
-        with open(PIN_FILE, encoding="utf-8") as handle:
-            line = handle.readline().split()
-            return line[1] if len(line) == 2 else None
-    except OSError:
+        with open(PENDING_FILE, encoding="utf-8") as handle:
+            data = json.load(handle)
+        return {"code": data["code"], "device": data.get("device", "")}
+    except (OSError, ValueError, KeyError):
         return None
 
 
-def set_pin(pin):
-    if not valid_pin(pin):
-        raise ApiError(400, "PIN must be 4 to 8 digits")
-    import os
-    os.makedirs(os.path.dirname(PIN_FILE), exist_ok=True)
-    fd = os.open(PIN_FILE, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-    with os.fdopen(fd, "w", encoding="utf-8") as handle:
-        handle.write("* %s\n" % pin)
-    run(["systemctl", "restart", AGENT_UNIT], timeout=30)
+def decide(match):
+    """The user's answer on the Settings page: the codes match (yes) or do not (no)."""
+    if pending_pairing() is None:
+        raise ApiError(409, "No phone is waiting to be confirmed")
+    with open(DECISION_FILE, "w", encoding="utf-8") as handle:
+        handle.write("yes" if match else "no")
+    return pending_pairing()
 
 
 def configured():

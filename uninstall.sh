@@ -21,7 +21,7 @@ done
 systemctl daemon-reload
 
 nmcli connection delete device-hotspot 2>/dev/null || true
-rm -f "$SBIN_DIR/dac-netwatch" "$CONF_DIR/hotspot.env" "$CONF_DIR/bluetooth.pin"
+rm -f "$SBIN_DIR/dac-netwatch" "$CONF_DIR/hotspot.env" "$SBIN_DIR/dac-bt-agent"
 rm -rf "$WEB_DIR" "$(dirname "$WEB_DIR")/radio" "$(dirname "$WEB_DIR")/radio.new" "$(dirname "$WEB_DIR")/radio.old"
 rm -f "$SOLOIST_BIN" "$SOLOIST_BIN.prev" \
       "$SBIN_DIR/dac-update" "$SBIN_DIR/dac-status" "$SBIN_DIR/dac-sink-volume" "$SBIN_DIR/nespi-power" "$SBIN_DIR/nespi-fan" \

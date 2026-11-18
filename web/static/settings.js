@@ -300,6 +300,7 @@
 
   function drawBluetooth(state) {
     setOn($("toggle-bluetooth"), !!state.powered);
+    $("bt-details").hidden = !state.powered;  // nothing else is shown while Bluetooth is off
     $("bt-status").textContent = state.powered ? "on" : "off";
     $("bt-status").className = "status " + (state.powered ? "ok" : "off");
     $("bt-name").textContent = state.name ? "Shown to phones as \"" + state.name + "\"." : "";
@@ -340,15 +341,24 @@
     }
   }
 
-  async function saveBluetoothPin() {
-    const pin = $("bt-pin").value;
+  // the PIN is set in a popup
+  function openBluetoothPin() {
+    $("pin-input").value = "";
+    $("pin-error").textContent = "";
+    $("pin-dialog").showModal();
+    $("pin-input").focus();
+  }
+
+  async function saveBluetoothPin(event) {
+    event.preventDefault();
+    const pin = $("pin-input").value;
     try {
       await api("/api/bluetooth/pin", { body: { pin: pin } });
-      $("bt-pin").value = "";
-      btMessage("PIN saved. Phones must use it when they pair.", false);
+      $("pin-dialog").close();
+      btMessage("PIN saved. Phones must enter it when they pair.", false);
       loadBluetooth();
     } catch (err) {
-      btMessage(err.message, true);
+      $("pin-error").textContent = err.message;
     }
   }
 
@@ -375,7 +385,9 @@
   }
 
   $("toggle-bluetooth").addEventListener("click", function () { setBluetooth(!isOn(this)); });
-  $("bt-pin-save").addEventListener("click", saveBluetoothPin);
+  $("bt-pin-open").addEventListener("click", openBluetoothPin);
+  $("pin-form").addEventListener("submit", saveBluetoothPin);
+  $("pin-cancel").addEventListener("click", function () { $("pin-dialog").close(); });
   $("bt-pair").addEventListener("click", pairPhone);
   loadBluetooth();
 

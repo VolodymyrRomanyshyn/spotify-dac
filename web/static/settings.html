@@ -95,27 +95,20 @@
         <span>Bluetooth speaker <span id="bt-status" class="status"></span></span>
         <button id="toggle-bluetooth" class="toggle-btn" type="button" aria-pressed="false"><span class="led" aria-hidden="true"></span><span class="state">Off</span></button>
       </div>
-      <p id="bt-name" class="muted"></p>
-
-      <form id="bt-pin-form" class="form">
-        <label class="field">
-          <span>Pairing PIN (4 to 8 digits)</span>
-          <input id="bt-pin" type="password" inputmode="numeric" maxlength="8" autocomplete="new-password">
-        </label>
+      <p id="bt-message" class="muted" role="status"></p>
+      <div id="bt-details" hidden>
+        <p id="bt-name" class="muted"></p>
         <div class="actions">
-          <button id="bt-pin-save" class="ctl" type="button">Save PIN</button>
+          <button id="bt-pin-open" class="ctl" type="button">Set PIN</button>
           <span id="bt-pin-state" class="status"></span>
         </div>
-      </form>
-
-      <div class="actions">
-        <button id="bt-pair" class="ctl main" type="button">Pair a phone</button>
-        <span id="bt-pair-note" class="muted" role="status"></span>
+        <div class="actions">
+          <button id="bt-pair" class="ctl main" type="button">Pair a phone</button>
+          <span id="bt-pair-note" class="muted" role="status"></span>
+        </div>
+        <h3>Paired phones</h3>
+        <ul id="bt-devices" class="commits"></ul>
       </div>
-
-      <h3>Paired phones</h3>
-      <ul id="bt-devices" class="commits"></ul>
-      <p id="bt-message" class="muted" role="status"></p>
     </section>
 
     <!-- ===== GPIO ===== -->
@@ -194,6 +187,22 @@
       <p class="muted">Updates the web interface and radio files and restarts the web service. Audio and boot changes still need <code>sudo bash install.sh</code>.</p>
     </section>
   </main>
+
+  <dialog id="pin-dialog" class="modal" aria-labelledby="pin-title">
+    <h2 id="pin-title">Bluetooth PIN</h2>
+    <p class="muted">A phone asks for this PIN when it pairs. 4 to 8 digits.</p>
+    <form id="pin-form" class="form" method="dialog">
+      <label class="field">
+        <span>PIN</span>
+        <input id="pin-input" type="password" inputmode="numeric" maxlength="8" autocomplete="new-password" required>
+      </label>
+      <p id="pin-error" class="status bad" role="status"></p>
+      <div class="actions">
+        <button value="cancel" class="ctl" type="button" id="pin-cancel">Cancel</button>
+        <button type="submit" class="ctl main">Save PIN</button>
+      </div>
+    </form>
+  </dialog>
 
   <dialog id="key-dialog" class="modal" aria-labelledby="key-title">
     <h2 id="key-title">Spotify API key</h2>

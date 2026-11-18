@@ -318,13 +318,17 @@
     cover.innerHTML = '<svg viewBox="0 0 24 24" width="72" height="72" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7l10 10-5 5V2l5 5L7 17"/></svg>';
     cover.classList.add("radio-icon");
     const playing = !!(player && player.status === "playing");
-    setControls("bluetooth:" + !!(player) + playing + !!(bt && bt.powered), player ? [
+    const powered = !!(bt && bt.powered);
+    setControls("bluetooth:" + !!player + playing + powered, player ? [
       transportButton(BT_ICONS.previous, "Previous track", "previous"),
       transportButton(playing ? BT_ICONS.pause : BT_ICONS.play, playing ? "Pause" : "Play", playing ? "pause" : "play"),
       transportButton(BT_ICONS.next, "Next track", "next"),
     ] : [
       ghost(),
-      ghost(),
+      powerButton(powered, powered ? "Turn off Bluetooth" : "Turn on Bluetooth", function () {
+        if (!powered && !window.confirm("Turn on Bluetooth? Spotify, radio and AirPlay will stop.")) return;
+        return api("/api/bluetooth/power", { body: { on: !powered } }).then(refreshFast).catch(fail);
+      }),
       ghost(),
     ]);
     progressCard.hidden = true;

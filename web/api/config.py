@@ -202,5 +202,6 @@ def get_features(req):
     """Which sources this device has: Spotify, internet radio and AirPlay (on and installed), and what is installed."""
     return 200, {
         "spotify": feature_on("spotify"), "radio": feature_on("radio"), "airplay": feature_on("airplay"),
-        "installed": {name: installed(name) for name in ("spotify", "radio", "airplay")},
+        "bluetooth": feature_on("bluetooth"),
+        "installed": {name: installed(name) for name in ("spotify", "radio", "airplay", "bluetooth")},
     }

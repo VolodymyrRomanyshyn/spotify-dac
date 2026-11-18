@@ -7,7 +7,7 @@ import threading
 import time
 from pathlib import Path
 
-from . import airplay
+from . import airplay, bluetooth
 from .common import SOLOIST_CTL, SOLOIST_USER, installed, read_config, run
 
 SERVICES = ["soloist", "nespi-power", "nespi-fan", "spotify-dac-volume", "spotify-dac-web"]
@@ -223,7 +223,21 @@ def get_status(req):
         "power": power,
         "system": _system(),
         "last_update": _last_update(),
+        "bluetooth": _bluetooth_status(),
         "airplay": {"installed": installed("airplay"), "enabled": read_config().get("AIRPLAY_ENABLED") == "yes",
                     "active": airplay.is_active(),
                     "playing": airplay.playing() if airplay.is_active() else False},
     }
+
+
+def _bluetooth_status():
+    """BlueZ for the status page: the version, the adapter, the paired phones and the pairing agent."""
+    if not installed("bluetooth"):
+        return {"installed": False}
+    from .common import run as _run
+    _, version, _ = _run(["bluetoothctl", "--version"], timeout=5)
+    state = bluetooth.adapter_state()
+    _, agent, _ = _run(["systemctl", "is-active", bluetooth.AGENT_UNIT], timeout=5)
+    return {"installed": True, "version": version.strip(), "powered": state["powered"],
+            "pairable": state["pairable"], "paired": len(state["devices"]),
+            "agent": agent.strip() == "active"}

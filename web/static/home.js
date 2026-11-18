@@ -3,11 +3,11 @@
   const FAST_MS = 2000;     // now playing and volume
   const SLOW_MS = 30000;    // DAC status line (it runs several commands on the Pi)
   const $ = (id) => document.getElementById(id);
-  const srcSpotify = $("src-spotify"), srcRadio = $("src-radio"), srcAirplay = $("src-airplay");
-  const SOURCES = ["spotify", "radio", "airplay"];
-  const sourceButtons = { spotify: srcSpotify, radio: srcRadio, airplay: srcAirplay };
+  const srcSpotify = $("src-spotify"), srcRadio = $("src-radio"), srcAirplay = $("src-airplay"), srcBluetooth = $("src-bluetooth");
+  const SOURCES = ["spotify", "radio", "airplay", "bluetooth"];
+  const sourceButtons = { spotify: srcSpotify, radio: srcRadio, airplay: srcAirplay, bluetooth: srcBluetooth };
   const switchGroup = document.querySelector(".switch");
-  let features = { spotify: true, radio: true, airplay: false };  // from /api/features (see common.js)
+  let features = { spotify: true, radio: true, airplay: false, bluetooth: false };  // from /api/features (see common.js)
   const title = $("title"), subtitle = $("subtitle"), cover = $("cover"), controls = $("controls");
   const progress = $("progress"), elapsedText = $("elapsed"), remainingText = $("remaining");
   const progressCard = $("progress-card");
@@ -96,6 +96,11 @@
   srcAirplay.addEventListener("click", function () {
     // shows the AirPlay state; nothing is started or stopped here
     setSource("airplay");
+    refreshFast();
+  });
+  srcBluetooth.addEventListener("click", function () {
+    // shows the Bluetooth state and its controls; the phone keeps playing until a control is pressed
+    setSource("bluetooth");
     refreshFast();
   });
   srcSpotify.addEventListener("click", function () {
@@ -284,6 +289,47 @@
     progressCard.hidden = true;
   }
 
+  // ---- Bluetooth: a phone streams to the DAC; the song name and the phone's controls are shown here ----
+  const BT_ICONS = {
+    previous: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="currentColor"><path d="M6 6h2v12H6zM20 6v12L9 12z"/></svg>',
+    next: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="currentColor"><path d="M16 6h2v12h-2zM4 6v12l11-6z"/></svg>',
+    play: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="currentColor"><path d="M7 5v14l12-7z"/></svg>',
+    pause: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>',
+  };
+  function transportButton(icon, label, action) {
+    const b = el("button", "ctl icon");
+    b.type = "button";
+    b.setAttribute("aria-label", label);
+    b.innerHTML = icon;
+    b.addEventListener("click", function () {
+      api("/api/bluetooth/transport", { body: { action: action } }).then(refreshFast).catch(fail);
+    });
+    return b;
+  }
+  function drawBluetooth(bt) {
+    const player = bt && bt.player;
+    title.textContent = player && player.title ? player.title : "Bluetooth";
+    subtitle.textContent = !bt ? "Not reachable"
+      : !bt.powered ? "Off: turn it on in Settings"
+      : player ? [player.artist, player.status === "playing" ? "playing" : "paused"].filter(Boolean).join(" - ")
+      : "On: pair a phone in Settings, then play from it";
+    cover.style.backgroundImage = "";
+    cover.classList.remove("initials", "empty");
+    cover.innerHTML = '<svg viewBox="0 0 24 24" width="72" height="72" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7l10 10-5 5V2l5 5L7 17"/></svg>';
+    cover.classList.add("radio-icon");
+    const playing = !!(player && player.status === "playing");
+    setControls("bluetooth:" + !!(player) + playing + !!(bt && bt.powered), player ? [
+      transportButton(BT_ICONS.previous, "Previous track", "previous"),
+      transportButton(playing ? BT_ICONS.pause : BT_ICONS.play, playing ? "Pause" : "Play", playing ? "pause" : "play"),
+      transportButton(BT_ICONS.next, "Next track", "next"),
+    ] : [
+      ghost(),
+      ghost(),
+      ghost(),
+    ]);
+    progressCard.hidden = true;
+  }
+
   // ---- volume: one level for both sources ----
   function drawVolume(percent) {
     volume.value = percent;
@@ -332,10 +378,14 @@
       srcRadio.classList.toggle("live", !!radio.playing);
       srcAirplay.classList.toggle("live", !!(air && air.active));
       if (now) { spotifyPosition = now.position_ms; spotifyAt = Date.now(); }
+      const bt = features.bluetooth ? await api("/api/bluetooth").catch(function () { return null; }) : null;
+      srcBluetooth.classList.toggle("live", !!(bt && bt.player && bt.player.status === "playing"));
       const spotifyPlaying = !!(now && now.status === "playing"), airplayPlaying = !!(air && air.playing);
       if (source === null) setSource(defaultSource(radio.playing, spotifyPlaying, airplayPlaying));  // first load only
       if (source === "airplay") {
         drawAirplay(air);
+      } else if (source === "bluetooth") {
+        drawBluetooth(bt);
       } else if (source === "radio") {
         drawRadio(radio, stations.find(function (x) { return x.id === (radio.playing || lastStation); }) || null);
       } else if (now) {

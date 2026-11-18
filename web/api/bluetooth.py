@@ -115,7 +115,17 @@ def adapter_state():
     return state
 
 
+def stop_other_sources():
+    """Bluetooth takes the DAC: Spotify pauses, radio and AirPlay stop."""
+    run(["soloist", "ctl", "-w", "127.0.0.1:9090", "pause"], timeout=5)
+    from .radio import stop_playback  # local import: radio imports nothing from here
+    stop_playback()
+    run(["systemctl", "stop", "spotify-dac-airplay.service"], timeout=20)
+
+
 def set_power(on):
+    if on:
+        stop_other_sources()
     _bt(["power", "on" if on else "off"])
     if on:
         run(["rfkill", "unblock", "bluetooth"], timeout=10)  # a soft block keeps the adapter off

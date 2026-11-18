@@ -123,6 +123,13 @@
         cpuUse > 90 ? "CPU busy at " + cpuUse + " %" : null,
         cpuUse > 80 && cpuUse <= 90 ? "CPU at " + cpuUse + " % (warning above 80 %)" : null,
       ].filter(Boolean)),
+      s.bluetooth && s.bluetooth.installed ? card("Bluetooth (BlueZ)", s.bluetooth.powered ? "ok" : "warning", [
+        row("Version", s.bluetooth.version || "-"),
+        row("Adapter", s.bluetooth.powered ? "on" : "off"),
+        row("Pairing window", s.bluetooth.pairable ? "open" : "closed"),
+        row("Paired phones", String(s.bluetooth.paired)),
+        row("PIN agent", s.bluetooth.agent ? "running" : "stopped"),
+      ]) : null,
       s.airplay.installed ? card("AirPlay", "ok", [
         row("Allowed in Settings", yesNo(s.airplay.enabled)),
         row("Receiver", s.airplay.active ? "on" : "off"),

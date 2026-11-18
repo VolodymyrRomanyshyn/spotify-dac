@@ -130,8 +130,8 @@ def systemctl(*args, timeout=60):
     return rc == 0, (err or out).strip() or f"exit code {rc}"
 
 
-FEATURE_KEYS = {"spotify": "SPOTIFY_ENABLED", "radio": "RADIO_ENABLED", "airplay": "AIRPLAY_ENABLED"}
-FEATURE_DEFAULTS = {"spotify": "yes", "radio": "yes", "airplay": "no"}  # AirPlay is only on when chosen
+FEATURE_KEYS = {"spotify": "SPOTIFY_ENABLED", "radio": "RADIO_ENABLED", "airplay": "AIRPLAY_ENABLED", "bluetooth": "BLUETOOTH_ENABLED"}
+FEATURE_DEFAULTS = {"spotify": "yes", "radio": "yes", "airplay": "no", "bluetooth": "no"}  # AirPlay is only on when chosen
 
 
 # A source is only offered when the installer put its parts on this device.
@@ -139,6 +139,7 @@ INSTALLED_CHECKS = {
     "spotify": lambda: Path("/usr/local/bin/soloist").exists() and Path("/etc/systemd/system/soloist.service").exists(),
     "radio": lambda: shutil.which("mpv") is not None and Path("/opt/spotify-dac/radio").is_dir(),
     "airplay": lambda: shutil.which("shairport-sync") is not None and Path("/etc/systemd/system/spotify-dac-airplay.service").exists(),
+    "bluetooth": lambda: shutil.which("bluetoothctl") is not None and shutil.which("bt-agent") is not None,
 }
 
 

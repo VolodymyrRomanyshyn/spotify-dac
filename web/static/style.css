@@ -385,3 +385,5 @@ dialog.modal { margin: auto; text-align: center; }
 dialog.modal .actions { justify-content: center; }
 dialog.modal .form { text-align: left; }
 dialog.modal .field { text-align: left; }
+/* dialog titles: plain blocks, so they centre like the text under them */
+dialog.modal h2 { display: block; text-align: center; }

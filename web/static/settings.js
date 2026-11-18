@@ -299,6 +299,7 @@
   }
 
   function drawBluetooth(state) {
+    if (!state.pending) shownCode = null;  // the pairing is over: the next code will show again
     showMatch(state.pending);
     setOn($("toggle-bluetooth"), !!state.powered);
     $("bt-details").hidden = !state.powered;  // nothing else is shown while Bluetooth is off
@@ -354,8 +355,7 @@
   async function answerMatch(match) {
     try {
       await api("/api/bluetooth/decision", { body: { match: match } });
-      $("match-dialog").close();
-      shownCode = null;
+      $("match-dialog").close();  // shownCode stays set, so the poll does not reopen this code
       btMessage(match ? "Pairing confirmed." : "Pairing refused.", !match);
       loadBluetooth();
     } catch (err) {

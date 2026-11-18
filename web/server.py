@@ -53,6 +53,7 @@ ROUTES = {
     ("POST", "/api/bluetooth/pair"): lambda req: (200, bluetooth.start_pairing()),
     ("POST", "/api/bluetooth/pin"): lambda req: (200, bluetooth.set_pin(req.json().get("pin", "")) or {"saved": True}),
     ("POST", "/api/bluetooth/transport"): lambda req: (200, bluetooth.transport(req.json().get("action", ""))),
+    ("POST", "/api/bluetooth/forget"): lambda req: (200, bluetooth.forget(req.json().get("address", ""))),
     ("GET", "/api/features"): config.get_features,
     ("GET", "/api/airplay"): airplay.get_airplay,
     ("POST", "/api/airplay"): airplay.post_airplay,

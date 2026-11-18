@@ -510,6 +510,14 @@ class BluetoothParsingTests(unittest.TestCase):
         self.assertFalse(self.bt.valid_pin("123456789"))
         self.assertFalse(self.bt.valid_pin("12a4"))
 
+    def test_forget_only_takes_a_bluetooth_address(self):
+        self.assertTrue(self.bt.valid_address("11:22:33:44:55:66"))
+        self.assertTrue(self.bt.valid_address("aa:bb:cc:dd:ee:ff"))
+        self.assertFalse(self.bt.valid_address("11:22:33"))
+        self.assertFalse(self.bt.valid_address("11:22:33:44:55:66; rm -rf /"))
+        with self.assertRaises(ApiError):
+            self.bt.forget("not-an-address")
+
     def test_only_known_transport_actions(self):
         self.assertEqual(self.bt.transport_method("next"), "Next")
         self.assertEqual(self.bt.transport_method("previous"), "Previous")

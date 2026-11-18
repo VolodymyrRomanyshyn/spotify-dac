@@ -74,6 +74,23 @@ def _variant(value):
     return value
 
 
+MAC = re.compile(r"[0-9A-F]{2}(:[0-9A-F]{2}){5}")
+
+
+def valid_address(address):
+    return isinstance(address, str) and MAC.fullmatch(address.upper()) is not None
+
+
+def forget(address):
+    """Removes a paired phone (its pairing is deleted, so it must pair again to play)."""
+    if not valid_address(address):
+        raise ApiError(400, "address must be a Bluetooth address like 11:22:33:44:55:66")
+    rc, out, err = _bt(["remove", address.upper()])
+    if rc != 0:
+        raise ApiError(502, "Could not forget the device: " + (err or out).strip())
+    return adapter_state()
+
+
 def valid_pin(pin):
     return isinstance(pin, str) and PIN.fullmatch(pin) is not None
 

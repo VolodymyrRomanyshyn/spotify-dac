@@ -33,9 +33,12 @@
 
   <main class="settings">
     <!-- ===== General ===== -->
-    <section class="card">
-      <h2>General</h2>
+    <!-- ===== Sources: what this box plays ===== -->
+    <section class="card" id="sources-card">
+      <h2>Sources</h2>
+      <p class="muted">Turn on what this box plays. Only one source plays at a time.</p>
 
+      <h3>Spotify</h3>
       <div class="row-toggle" data-installed="spotify">
         <span>Spotify <span id="spotify-status" class="status"></span></span>
         <button id="toggle-spotify" class="toggle-btn" type="button" aria-pressed="false"><span class="led" aria-hidden="true"></span><span class="state">Off</span></button>
@@ -52,16 +55,41 @@
         </div>
       </div>
 
+
+      <h3>Internet radio</h3>
       <div class="row-toggle" data-installed="radio">
         <span>Internet radio</span>
         <button id="toggle-radio" class="toggle-btn" type="button" aria-pressed="false"><span class="led" aria-hidden="true"></span><span class="state">Off</span></button>
       </div>
 
+
+      <h3>AirPlay</h3>
       <div class="row-toggle" data-installed="airplay">
         <span>AirPlay <span id="airplay-status" class="status"></span></span>
         <button id="toggle-airplay" class="toggle-btn" type="button" aria-pressed="false"><span class="led" aria-hidden="true"></span><span class="state">Off</span></button>
       </div>
 
+
+      <h3>Bluetooth</h3>
+      <div class="row-toggle">
+        <span>Bluetooth speaker <span id="bt-status" class="status"></span></span>
+        <button id="toggle-bluetooth" class="toggle-btn" type="button" aria-pressed="false"><span class="led" aria-hidden="true"></span><span class="state">Off</span></button>
+      </div>
+      <p id="bt-message" class="muted" role="status"></p>
+      <div id="bt-details" hidden>
+        <p id="bt-name" class="muted"></p>
+        <div class="actions">
+          <button id="bt-pair" class="ctl main" type="button">Pair a phone</button>
+          <span id="bt-pair-note" class="muted" role="status"></span>
+        </div>
+        <h3>Paired phones</h3>
+        <ul id="bt-devices" class="commits"></ul>
+      </div>
+    </section>
+
+    <!-- ===== Sound and appearance ===== -->
+    <section class="card" id="sound-card">
+      <h2>Sound and appearance</h2>
       <label class="field">
         <span>Default volume</span>
         <input id="DEFAULT_VOLUME" type="number" min="0" max="100" step="1">
@@ -85,25 +113,6 @@
       <div class="actions">
         <button id="save-general" class="ctl main" type="button">Save general</button>
         <span id="general-status" class="muted" role="status"></span>
-      </div>
-    </section>
-
-    <!-- ===== Bluetooth ===== -->
-    <section class="card" id="bluetooth-card">
-      <h2>Bluetooth</h2>
-      <div class="row-toggle">
-        <span>Bluetooth speaker <span id="bt-status" class="status"></span></span>
-        <button id="toggle-bluetooth" class="toggle-btn" type="button" aria-pressed="false"><span class="led" aria-hidden="true"></span><span class="state">Off</span></button>
-      </div>
-      <p id="bt-message" class="muted" role="status"></p>
-      <div id="bt-details" hidden>
-        <p id="bt-name" class="muted"></p>
-        <div class="actions">
-          <button id="bt-pair" class="ctl main" type="button">Pair a phone</button>
-          <span id="bt-pair-note" class="muted" role="status"></span>
-        </div>
-        <h3>Paired phones</h3>
-        <ul id="bt-devices" class="commits"></ul>
       </div>
     </section>
 

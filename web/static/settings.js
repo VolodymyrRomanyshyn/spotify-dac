@@ -396,7 +396,7 @@
   $("match-no").addEventListener("click", function () { answerMatch(false); });
   $("bt-pair").addEventListener("click", pairPhone);
   loadBluetooth();
-  setInterval(loadBluetooth, 2000);  // shows a pairing code as soon as a phone asks for it
+  setInterval(loadBluetooth, 5000);  // shows a pairing code as soon as a phone asks for it
 
   loadConfig().catch(function (err) { showError($("general-status"), err); });
   loadHardware().catch(function (err) { showError($("gpio-status"), err); });

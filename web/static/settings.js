@@ -376,7 +376,8 @@
   }
 
   async function forgetPhone(address, name) {
-    if (!window.confirm("Forget " + name + "? It must pair again to play.")) return;
+    const sure = await askUser("Forget " + name + "?", "It must pair again to play.", "Forget");
+    if (!sure) return;
     try {
       drawBluetooth(await api("/api/bluetooth/forget", { body: { address: address } }));
       btMessage(name + " was forgotten.", false);

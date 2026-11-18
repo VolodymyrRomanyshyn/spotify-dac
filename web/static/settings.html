@@ -212,6 +212,16 @@
     </form>
   </dialog>
 
+  <!-- a question with Cancel and an action: used for Forget and the Bluetooth switch -->
+  <dialog id="ask-dialog" class="modal" aria-labelledby="ask-title">
+    <h2 id="ask-title"></h2>
+    <p id="ask-text" class="muted"></p>
+    <div class="actions">
+      <button id="ask-cancel" class="ctl" type="button">Cancel</button>
+      <button id="ask-ok" class="ctl main" type="button">OK</button>
+    </div>
+  </dialog>
+
   <script src="common.js"></script>
   <script src="settings.js"></script>
 </body>

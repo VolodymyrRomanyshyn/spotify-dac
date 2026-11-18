@@ -326,8 +326,11 @@
     ] : [
       ghost(),
       powerButton(powered, powered ? "Turn off Bluetooth" : "Turn on Bluetooth", function () {
-        if (!powered && !window.confirm("Turn on Bluetooth? Spotify, radio and AirPlay will stop.")) return;
-        return api("/api/bluetooth/power", { body: { on: !powered } }).then(refreshFast).catch(fail);
+        const go = function () { return api("/api/bluetooth/power", { body: { on: !powered } }).then(refreshFast).catch(fail); };
+        if (powered) return go();
+        return askUser("Turn on Bluetooth?", "Spotify, radio and AirPlay will stop.", "Turn on").then(function (sure) {
+          if (sure) return go();
+        });
       }),
       ghost(),
     ]);

@@ -114,6 +114,31 @@ function stationThumb(s) {
   return thumb;
 }
 
+// A question in the styled dialog (#ask-dialog, on pages that have one). Resolves true for OK.
+function askUser(title, text, okLabel) {
+  return new Promise(function (resolve) {
+    const dialog = document.getElementById("ask-dialog");
+    if (!dialog) { resolve(window.confirm(title + "\n" + text)); return; }
+    document.getElementById("ask-title").textContent = title;
+    document.getElementById("ask-text").textContent = text;
+    const ok = document.getElementById("ask-ok");
+    const cancel = document.getElementById("ask-cancel");
+    ok.textContent = okLabel || "OK";
+    function done(answer) {
+      ok.removeEventListener("click", onOk);
+      cancel.removeEventListener("click", onCancel);
+      dialog.close();
+      resolve(answer);
+    }
+    function onOk() { done(true); }
+    function onCancel() { done(false); }
+    ok.addEventListener("click", onOk);
+    cancel.addEventListener("click", onCancel);
+    dialog.addEventListener("cancel", function () { done(false); }, { once: true });
+    dialog.showModal();
+  });
+}
+
 // Calls the JSON API. Resolves with the "data" part, rejects with a readable message.
 async function api(path, options) {
   const opts = Object.assign({ cache: "no-store", credentials: "same-origin" }, options || {});

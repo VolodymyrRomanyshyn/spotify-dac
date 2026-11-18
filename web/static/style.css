@@ -374,3 +374,8 @@ main.is-loading > section.card { display: none; }
 
 /* a destructive action in a dialog: red, so it is not taken by mistake */
 .ctl.danger { color: #ffffff; background: var(--error); border-color: var(--error); }
+
+/* Settings: the sources are separate blocks with a thin divider, without repeated headings */
+#sources-card > .row-toggle, #sources-card > div { padding: 12px 0; border-top: 1px solid var(--line); }
+#sources-card > .muted { margin: 0; }
+#sources-card > .row-toggle:first-of-type, #sources-card > div:first-of-type { border-top: 0; }

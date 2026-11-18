@@ -439,6 +439,7 @@ install_files() {
 
   install -D -m 644 "$REPO_DIR/files/pipewire/50-spotify-dac.conf" /etc/pipewire/pipewire.conf.d/50-spotify-dac.conf
   install -D -m 644 "$REPO_DIR/files/wireplumber/50-spotify-dac.conf" /etc/wireplumber/wireplumber.conf.d/50-spotify-dac.conf
+  install -D -m 644 "$REPO_DIR/files/wireplumber/51-spotify-dac-bluetooth.conf" /etc/wireplumber/wireplumber.conf.d/51-spotify-dac-bluetooth.conf
   if [ "$WIFI_POWERSAVE_OFF" = yes ] && [ -d /etc/NetworkManager/conf.d ]; then
     install -m 644 "$REPO_DIR/files/networkmanager/99-spotify-dac-wifi.conf" /etc/NetworkManager/conf.d/
   fi
